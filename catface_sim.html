@@ -1,0 +1,1178 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CatFace · 아이폰 15 Pro 시뮬레이션</title>
+<style>
+:root{
+  --paper:#F6F1EA; --ink:#2A2536; --ink-soft:#6B6478;
+  --mauve:#B96A8C; --violet:#7A5FB0; --apricot:#F0A860;
+  --sage:#6FAE93; --danger:#D9695E; --line:#E4DBD0;
+  --card:#FFFFFF; --shadow:0 10px 30px rgba(42,37,54,.10);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{margin:0;height:100%;}
+body{
+  background:radial-gradient(1200px 700px at 20% -10%,#efe6f5 0%,transparent 55%),
+             radial-gradient(1000px 600px at 100% 110%,#f6e6d8 0%,transparent 55%),#eae3ec;
+  font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  color:var(--ink);display:flex;align-items:center;justify-content:center;
+  min-height:100vh;padding:28px 12px;
+}
+.stage{display:flex;flex-direction:column;align-items:center;gap:14px;}
+.stage-cap{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#8a819a;font-weight:700;}
+
+/* ── iPhone 15 Pro 프레임 ── */
+.device{width:393px;height:852px;position:relative;flex:0 0 auto;
+  background:linear-gradient(145deg,#d9d2c6,#b9b1a6);border-radius:56px;padding:11px;
+  box-shadow:0 40px 80px rgba(30,25,45,.35),inset 0 0 0 2px rgba(255,255,255,.25);}
+.device::before{content:"";position:absolute;inset:3px;border-radius:53px;
+  box-shadow:inset 0 0 0 2px rgba(120,110,100,.55);pointer-events:none;}
+.screen{position:relative;width:100%;height:100%;background:var(--paper);border-radius:46px;overflow:hidden;display:flex;flex-direction:column;}
+.island{position:absolute;top:11px;left:50%;transform:translateX(-50%);width:126px;height:36px;background:#0c0b10;border-radius:20px;z-index:60;}
+.statusbar{height:54px;flex:0 0 auto;display:flex;align-items:flex-end;justify-content:space-between;
+  padding:0 30px 6px;font-size:14px;font-weight:700;color:var(--ink);z-index:40;}
+.home-indicator{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);
+  width:138px;height:5px;border-radius:3px;background:rgba(20,15,30,.28);z-index:60;}
+
+/* ── 앱 뷰 ── */
+.app{flex:1 1 auto;position:relative;overflow:hidden;}
+.view{position:absolute;inset:0;display:flex;flex-direction:column;
+  padding:6px 22px 78px;overflow-y:auto;overflow-x:hidden;
+  opacity:0;transform:translateY(8px);pointer-events:none;transition:opacity .28s,transform .28s;}
+.view.active{opacity:1;transform:none;pointer-events:auto;}
+.view::-webkit-scrollbar{width:0;}
+
+/* ── 공통 UI ── */
+h1{font-size:26px;line-height:1.15;margin:6px 0 2px;letter-spacing:-.02em;}
+h2{font-size:19px;margin:0 0 2px;letter-spacing:-.01em;}
+.sub{color:var(--ink-soft);font-size:13.5px;line-height:1.5;margin:0 0 14px;}
+.brand{display:flex;align-items:center;gap:9px;margin:10px 0 4px;}
+.brand .logo{width:34px;height:34px;border-radius:11px;
+  background:linear-gradient(140deg,var(--violet),var(--mauve));position:relative;flex:0 0 auto;box-shadow:var(--shadow);}
+.brand .logo::before,.brand .logo::after{content:"";position:absolute;top:-5px;width:0;height:0;
+  border-left:7px solid transparent;border-right:7px solid transparent;border-bottom:11px solid var(--violet);}
+.brand .logo::before{left:4px;transform:rotate(-16deg);}
+.brand .logo::after{right:4px;transform:rotate(16deg);}
+.brand b{font-size:17px;letter-spacing:-.01em;}
+.brand span{font-size:11px;color:#9a90a8;letter-spacing:.12em;text-transform:uppercase;font-weight:700;}
+label.fld{display:block;font-size:12.5px;font-weight:700;color:var(--ink-soft);margin:12px 2px 6px;}
+input[type=text],input[type=number],select{
+  width:100%;border:1.5px solid var(--line);background:var(--card);border-radius:14px;
+  padding:13px 14px;font-size:15px;color:var(--ink);font-family:inherit;outline:none;transition:border-color .18s;}
+input:focus,select:focus{border-color:var(--violet);}
+.row2{display:flex;gap:10px;}.row2>div{flex:1;}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;}
+.chip{border:1.5px solid var(--line);background:var(--card);border-radius:999px;
+  padding:9px 14px;font-size:13.5px;font-weight:600;cursor:pointer;color:var(--ink-soft);transition:all .15s;}
+.chip.on{background:var(--violet);border-color:var(--violet);color:#fff;box-shadow:0 6px 14px rgba(122,95,176,.32);}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;
+  border:none;border-radius:16px;padding:15px;font-size:15.5px;font-weight:800;font-family:inherit;cursor:pointer;letter-spacing:-.01em;}
+.btn.primary{background:var(--ink);color:#fff;box-shadow:0 12px 24px rgba(42,37,54,.28);}
+.btn.accent{background:linear-gradient(135deg,var(--mauve),var(--violet));color:#fff;box-shadow:0 12px 24px rgba(122,95,176,.3);}
+.btn.ghost{background:transparent;color:var(--ink-soft);font-weight:700;}
+.btn:active{transform:translateY(1px);}
+.btn.sm{padding:11px;font-size:13px;border-radius:13px;width:auto;}
+.card{background:var(--card);border-radius:20px;padding:18px;box-shadow:var(--shadow);border:1px solid #f0ebe3;}
+
+/* ── 홈 고양이 카드 ── */
+.catcard{background:linear-gradient(150deg,#2f2842,#4a3a63);color:#fff;border-radius:24px;
+  padding:20px;position:relative;overflow:hidden;box-shadow:0 18px 36px rgba(47,40,66,.35);}
+.catcard::after{content:"";position:absolute;right:-30px;top:-30px;width:150px;height:150px;
+  border-radius:50%;background:radial-gradient(circle,rgba(240,168,96,.35),transparent 70%);}
+.catcard .nm{font-size:23px;font-weight:800;letter-spacing:-.02em;}
+.catcard .meta{font-size:13px;opacity:.82;margin-top:3px;}
+.catcard .pill{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.14);
+  border-radius:999px;padding:6px 12px;font-size:12px;font-weight:700;margin-top:14px;}
+.card-photo{width:56px;height:56px;border-radius:16px;overflow:hidden;background:rgba(255,255,255,.16);
+  display:flex;align-items:center;justify-content:center;font-size:28px;margin-bottom:10px;}
+.card-photo img{width:100%;height:100%;object-fit:cover;}
+.quick{display:flex;gap:10px;margin-top:16px;}
+.quick .q{flex:1;background:var(--card);border:1px solid #f0ebe3;border-radius:16px;
+  padding:14px;text-align:center;box-shadow:var(--shadow);cursor:pointer;}
+.quick .q .ic{font-size:22px;}
+.quick .q .t{font-size:12.5px;font-weight:700;margin-top:5px;color:var(--ink-soft);}
+
+/* ── 아바타 ── */
+.avatar-wrap{display:flex;flex-direction:column;align-items:center;gap:8px;margin:10px 0 4px;}
+.avatar{width:104px;height:104px;border-radius:50%;position:relative;cursor:pointer;
+  background:linear-gradient(150deg,#efe6f5,#f6e6d8);border:2px solid #e8dcf0;
+  display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow);overflow:hidden;}
+.avatar .avatar-ph{font-size:44px;}
+.avatar img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none;}
+.avatar.has img{display:block;}.avatar.has .avatar-ph{display:none;}
+.avatar-cam{position:absolute;right:2px;bottom:2px;width:30px;height:30px;border-radius:50%;
+  background:var(--violet);color:#fff;display:flex;align-items:center;justify-content:center;
+  font-size:14px;border:3px solid var(--paper);}
+.avatar-cap{font-size:12px;font-weight:700;color:var(--violet);}
+
+/* ── 품종 피커 ── */
+.picker{position:relative;height:176px;background:var(--card);border:1.5px solid var(--line);border-radius:16px;overflow:hidden;}
+.picker-band{position:absolute;left:8px;right:8px;top:50%;transform:translateY(-50%);height:40px;
+  border-radius:11px;background:rgba(122,95,176,.10);border:1px solid rgba(122,95,176,.22);pointer-events:none;z-index:2;}
+.picker-list{position:absolute;inset:0;overflow-y:auto;scroll-snap-type:y mandatory;
+  padding:68px 0;scrollbar-width:none;-webkit-overflow-scrolling:touch;}
+.picker-list::-webkit-scrollbar{width:0;}
+.picker-item{height:40px;display:flex;align-items:center;justify-content:center;scroll-snap-align:center;
+  font-size:15px;color:#b7ad9e;font-weight:600;transition:color .12s,transform .12s;cursor:pointer;padding:0 14px;text-align:center;}
+.picker-item.sel{color:var(--ink);font-weight:800;transform:scale(1.06);}
+.picker-empty{height:40px;display:flex;align-items:center;justify-content:center;color:#c3b9aa;font-size:13px;scroll-snap-align:center;}
+.picker-fade{position:absolute;left:0;right:0;height:56px;z-index:3;pointer-events:none;}
+.picker-fade.top{top:0;background:linear-gradient(#fff,transparent);}
+.picker-fade.bot{bottom:0;background:linear-gradient(transparent,#fff);}
+
+/* ── 분석 뷰 ── */
+.photobox{aspect-ratio:3/4;width:100%;border-radius:22px;overflow:hidden;position:relative;
+  background:#efe7dd;border:2px dashed #d8ccbe;display:flex;align-items:center;justify-content:center;margin-top:6px;}
+.photobox img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none;z-index:1;}
+.photobox.has img{display:block;}
+.photobox.has .ph{display:none;}
+.photobox .ph{text-align:center;color:#a89a8a;padding:24px;position:relative;z-index:0;}
+.photobox .ph .ic{font-size:40px;}
+/* 캔버스 오버레이 */
+.photobox canvas{position:absolute;inset:0;width:100%;height:100%;z-index:2;pointer-events:none;}
+.reticle{position:absolute;inset:0;display:none;align-items:center;justify-content:center;
+  background:rgba(20,15,30,.38);backdrop-filter:blur(2px);z-index:3;}
+.reticle.on{display:flex;}
+.eye{width:110px;height:110px;border-radius:50%;border:3px solid rgba(255,255,255,.85);
+  display:flex;align-items:center;justify-content:center;animation:pulse 1.1s ease-in-out infinite;}
+.pupil{width:22px;height:58px;border-radius:50%;background:#fff;animation:dilate 1.1s ease-in-out infinite;}
+@keyframes pulse{0%,100%{transform:scale(.92);}50%{transform:scale(1.06);}}
+@keyframes dilate{0%,100%{width:22px;}50%{width:48px;}}
+.scantxt{position:absolute;bottom:16px;left:0;right:0;text-align:center;color:#fff;font-weight:700;font-size:12.5px;letter-spacing:.02em;}
+
+/* ── GPU 상태 바 ── */
+.gpu-status-bar{display:flex;align-items:center;gap:8px;background:#f0ebfa;border:1px solid #d8ccf0;
+  border-radius:12px;padding:8px 12px;margin-top:10px;font-size:11.5px;}
+.gpu-dot{width:7px;height:7px;border-radius:50%;background:#ccc;flex:0 0 auto;transition:background .3s;}
+.gpu-dot.ready{background:var(--sage);animation:blink 1.4s ease-in-out infinite;}
+.gpu-dot.loading{background:var(--apricot);animation:blink .6s ease-in-out infinite;}
+.gpu-dot.error{background:var(--danger);}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:.2;}}
+.gpu-label{font-weight:800;color:var(--violet);}
+.gpu-sub{color:var(--ink-soft);margin-left:auto;font-size:10.5px;}
+
+/* ── 결과 뷰 ── */
+.emohead{display:flex;align-items:center;gap:14px;margin-top:4px;}
+.emohead .big{font-size:46px;line-height:1;}
+.emohead .lbl{font-size:22px;font-weight:800;letter-spacing:-.02em;}
+.emohead .conf{font-size:12.5px;color:var(--ink-soft);font-weight:700;margin-top:2px;}
+.bar{height:8px;border-radius:6px;background:#ece3d8;overflow:hidden;margin-top:8px;}
+.bar>i{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,var(--mauve),var(--violet));}
+.parts{display:flex;flex-direction:column;gap:9px;margin-top:14px;}
+.part{display:flex;align-items:center;gap:11px;font-size:13.5px;}
+.part .k{width:34px;height:34px;border-radius:10px;background:#f2ece4;
+  display:flex;align-items:center;justify-content:center;font-size:17px;flex:0 0 auto;}
+.part .k.miss{background:#f6e7e5;}
+.part b{font-weight:800;}.part .v{color:var(--ink-soft);}
+
+/* ── 말 카드 ── */
+.speech{background:linear-gradient(150deg,#fff,#fbf5ee);border:1.5px solid #efe4d6;
+  border-radius:20px;padding:17px 18px;margin-top:14px;position:relative;box-shadow:var(--shadow);}
+.speech-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.speech .who{font-size:11.5px;font-weight:800;color:var(--mauve);letter-spacing:.04em;text-transform:uppercase;}
+.gpu-badge{display:inline-flex;align-items:center;gap:5px;background:#f0ebfa;border:1px solid #d8ccf0;
+  border-radius:999px;padding:4px 10px;font-size:10.5px;font-weight:800;color:var(--violet);}
+/* 언어 탭 */
+.lang-tabs{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px;}
+.lang-tab{border:1.5px solid var(--line);background:#f8f3ee;border-radius:999px;
+  padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;color:var(--ink-soft);transition:all .15s;white-space:nowrap;}
+.lang-tab.on{background:var(--mauve);border-color:var(--mauve);color:#fff;box-shadow:0 4px 10px rgba(185,106,140,.28);}
+/* 말 본문 */
+.speech-txt{font-size:14.5px;line-height:1.8;font-weight:500;letter-spacing:-.01em;
+  min-height:80px;max-height:260px;overflow-y:auto;scrollbar-width:none;}
+.speech-txt::-webkit-scrollbar{width:0;}
+.char-count{font-size:10.5px;color:#b8afa3;margin-top:6px;text-align:right;}
+/* TTS 바 */
+.tts-bar{display:flex;align-items:center;gap:6px;margin-top:12px;flex-wrap:wrap;}
+.tts-btn{display:flex;align-items:center;gap:4px;border:none;border-radius:12px;padding:9px 13px;
+  font-size:12.5px;font-weight:800;font-family:inherit;cursor:pointer;transition:all .15s;white-space:nowrap;}
+.tts-btn.play{background:linear-gradient(135deg,var(--mauve),var(--violet));color:#fff;box-shadow:0 6px 14px rgba(122,95,176,.3);}
+.tts-btn.play.playing{background:#e8f5ee;color:var(--sage);border:1.5px solid var(--sage);}
+.tts-btn.sec{background:#f2ece4;color:var(--ink-soft);}
+
+/* ── 설정 ── */
+.seg{display:flex;background:#ece3d8;border-radius:12px;padding:3px;}
+.seg button{flex:1;border:none;background:transparent;padding:9px;border-radius:9px;
+  font-weight:700;font-size:13px;color:var(--ink-soft);font-family:inherit;cursor:pointer;}
+.seg button.on{background:#fff;color:var(--ink);box-shadow:0 2px 6px rgba(0,0,0,.08);}
+input[type=range]{width:100%;-webkit-appearance:none;height:6px;border-radius:6px;background:#e6dccf;margin-top:14px;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;border-radius:50%;
+  background:var(--violet);border:4px solid #fff;box-shadow:0 3px 8px rgba(122,95,176,.4);cursor:pointer;}
+.preview-note{font-size:11px;color:#a89a8a;margin-top:6px;line-height:1.5;}
+.slider-val{font-size:13px;font-weight:800;color:var(--violet);}
+
+/* ── 탭바 ── */
+.tabbar{position:absolute;left:12px;right:12px;bottom:14px;height:60px;z-index:50;
+  background:rgba(255,255,255,.86);backdrop-filter:blur(14px);
+  border:1px solid #ece3d8;border-radius:22px;display:flex;box-shadow:0 10px 26px rgba(42,37,54,.14);}
+.tabbar button{flex:1;border:none;background:transparent;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:3px;font-family:inherit;cursor:pointer;color:#a99e90;font-size:10.5px;font-weight:700;}
+.tabbar button .ic{font-size:19px;}
+.tabbar button.on{color:var(--violet);}
+.tabbar.hidden{display:none;}
+
+.demo-flag{display:inline-flex;align-items:center;gap:6px;background:#fbeede;color:#b07a2b;
+  font-size:10.5px;font-weight:800;padding:5px 10px;border-radius:999px;letter-spacing:.02em;}
+.tiny{font-size:11px;color:#a89a8a;line-height:1.5;margin-top:10px;}
+.set-title{font-weight:800;font-size:15px;margin-bottom:8px;}
+.set-sub{font-size:12.5px;color:var(--ink-soft);margin-top:3px;}
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="stage-cap">iPhone 15 Pro · 393 × 852 pt · CatFace 프로토타입</div>
+  <div class="device">
+    <div class="screen">
+      <div class="island"></div>
+      <div class="statusbar">
+        <div id="clock">9:41</div>
+        <div style="display:flex;gap:6px;font-size:12px">▶ WiFi 🔋</div>
+      </div>
+
+      <div class="app">
+
+        <!-- ══ ONBOARDING ══ -->
+        <section class="view active" id="v-onboard">
+          <div class="brand"><div class="logo"></div><div><b>CatFace</b><br><span>고양이 표정 번역기</span></div></div>
+          <h1>우리 고양이를<br>먼저 소개해줘</h1>
+          <p class="sub">입력한 정보는 앱이 기억해서 성격에 맞춰 말해줘요.</p>
+          <div class="avatar-wrap">
+            <div class="avatar" id="avatar" onclick="document.getElementById('profile-photo').click()">
+              <span class="avatar-ph">🐱</span>
+              <img id="avatar-img" alt="">
+              <div class="avatar-cam">📷</div>
+            </div>
+            <div class="avatar-cap">사진 찍어서 넣기</div>
+          </div>
+          <input type="file" id="profile-photo" accept="image/*" style="display:none" onchange="onProfilePhoto(event)">
+          <label class="fld">이름</label>
+          <input type="text" id="in-name" value="멍밍이" placeholder="예: 멍밍이">
+          <div class="row2">
+            <div><label class="fld">나이</label><input type="number" id="in-age" value="12"></div>
+            <div><label class="fld">성별</label>
+              <select id="in-sex"><option>여아</option><option>남아</option><option>모름</option></select>
+            </div>
+          </div>
+          <label class="fld">품종 <span style="font-weight:500;color:#a99e90">· 드래그해서 선택</span></label>
+          <input type="text" id="breed-search" placeholder="🔍 품종 검색" oninput="filterBreeds(this.value)" style="margin-bottom:8px">
+          <div class="picker" id="breed-picker">
+            <div class="picker-band"></div>
+            <div class="picker-fade top"></div>
+            <div class="picker-fade bot"></div>
+            <div class="picker-list" id="breed-list"></div>
+          </div>
+          <label class="fld">성격</label>
+          <div class="chips" id="pers-chips"></div>
+          <div style="margin-top:22px"></div>
+          <button class="btn accent" onclick="saveProfile()">기억하고 시작하기</button>
+          <p class="tiny">* 정보는 기기에만 저장돼요 (완전 오프라인).</p>
+        </section>
+
+        <!-- ══ HOME ══ -->
+        <section class="view" id="v-home">
+          <div class="brand"><div class="logo"></div><div><b>CatFace</b><br><span>오늘의 기분</span></div></div>
+          <div class="catcard">
+            <div class="card-photo" id="h-photo"><span>🐱</span></div>
+            <div class="nm" id="h-name">멍밍이</div>
+            <div class="meta" id="h-meta">러시안 블루 · 12살 · 여아</div>
+            <div class="pill">🧊 <span id="h-pers">도도 성격</span></div>
+          </div>
+          <div class="quick">
+            <div class="q" onclick="go('analyze')"><div class="ic">📷</div><div class="t">사진 분석</div></div>
+            <div class="q" onclick="go('settings')"><div class="ic">🎚️</div><div class="t">말투 설정</div></div>
+            <div class="q" onclick="go('onboard')"><div class="ic">✏️</div><div class="t">정보 수정</div></div>
+          </div>
+          <div class="card" style="margin-top:16px">
+            <div style="font-size:13.5px;line-height:1.7;color:var(--ink-soft)">
+              📷 &nbsp;사진 업로드 → YOLO로 고양이 얼굴 탐지<br>
+              👁️ &nbsp;눈·입·꼬리 기하 분석 (DeepCat 기준)<br>
+              🌐 &nbsp;6개 언어로 감정 표현 + TTS 음성 출력
+            </div>
+          </div>
+          <button class="btn primary" style="margin-top:14px" onclick="go('analyze')">📷 지금 분석하기</button>
+        </section>
+
+        <!-- ══ ANALYZE ══ -->
+        <section class="view" id="v-analyze">
+          <div class="brand"><div class="logo"></div><div><b>표정 분석</b><br><span id="a-catname">멍밍이</span></div></div>
+
+          <!-- GPU/NPU 상태 바 -->
+          <div class="gpu-status-bar" id="gpu-bar">
+            <div class="gpu-dot loading" id="gpu-dot"></div>
+            <span class="gpu-label" id="gpu-label">모델 로딩 중…</span>
+            <span class="gpu-sub" id="gpu-sub">ONNX Runtime Web</span>
+          </div>
+
+          <div class="photobox" id="photobox">
+            <div class="ph"><div class="ic">🐱</div><div style="margin-top:8px;font-weight:700">사진을 올려줘요</div></div>
+            <img id="preview" alt="preview">
+            <canvas id="det-canvas"></canvas>
+            <div class="reticle" id="reticle">
+              <div class="eye"><div class="pupil"></div></div>
+              <div class="scantxt" id="scantxt">YOLO 추론 중…</div>
+            </div>
+          </div>
+          <input type="file" id="file" accept="image/*" style="display:none" onchange="onPhoto(event)">
+          <div style="margin-top:12px"></div>
+          <button class="btn accent" onclick="document.getElementById('file').click()">🖼️ 앨범에서 사진 선택</button>
+          <button class="btn primary" style="margin-top:10px;opacity:.5" id="analyzeBtn" onclick="runAnalysis()" disabled>
+            🔍 YOLO 분석 시작
+          </button>
+          <p class="tiny" id="yolo-note">* ONNX 모델 로딩 후 WebGPU(GPU) → WebNN(NPU) → WASM(CPU) 순으로 자동 선택돼요.</p>
+        </section>
+
+        <!-- ══ RESULT ══ -->
+        <section class="view" id="v-result">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:6px">
+            <div class="brand" style="margin:0"><div class="logo"></div><div><b>분석 결과</b><br><span id="r-catname">멍밍이</span></div></div>
+            <span class="demo-flag" id="result-badge">● GPU 추론</span>
+          </div>
+
+          <div class="card" style="margin-top:12px">
+            <div class="emohead">
+              <div class="big" id="r-emoji">😌</div>
+              <div>
+                <div class="lbl" id="r-label">편안 · 만족</div>
+                <div class="conf" id="r-conf">신뢰도 82%</div>
+              </div>
+            </div>
+            <div class="bar"><i id="r-bar" style="width:82%"></i></div>
+            <div class="parts" id="r-parts"></div>
+          </div>
+
+          <!-- 말 카드 -->
+          <div class="speech">
+            <div class="speech-header">
+              <div class="who" id="s-who">멍밍이의 말</div>
+              <div class="gpu-badge"><span class="gpu-dot ready"></span> <span id="s-ep">WebGPU</span></div>
+            </div>
+            <div class="lang-tabs" id="lang-tabs"></div>
+            <div class="speech-txt" id="s-text">…</div>
+            <div class="char-count" id="s-count"></div>
+            <div class="tts-bar">
+              <button class="tts-btn play" id="tts-play" onclick="ttsToggle()">🔊 듣기</button>
+              <button class="tts-btn sec" onclick="ttsStop()">⏹ 정지</button>
+              <button class="tts-btn sec" onclick="rerollSpeech()">🔁 다시쓰기</button>
+              <button class="tts-btn sec" onclick="copySpeech()">📋 복사</button>
+            </div>
+          </div>
+
+          <button class="btn primary" style="margin-top:14px" onclick="go('analyze')">📷 다시 분석하기</button>
+          <p class="tiny">감정 탭으로 다른 감정 말투를 미리봐요:</p>
+          <div class="chips" id="emo-preview"></div>
+        </section>
+
+        <!-- ══ SETTINGS ══ -->
+        <section class="view" id="v-settings">
+          <div class="brand"><div class="logo"></div><div><b>설정</b><br><span>말투 · 언어 · 성격</span></div></div>
+
+          <div class="card">
+            <div class="set-title">🐾 고양이 말투 정도</div>
+            <div class="set-sub">0% = 사람 말투 · 100% = 완전 냥냥</div>
+            <input type="range" id="nyang" min="0" max="100" value="60" oninput="onNyang(this.value)">
+            <div style="display:flex;justify-content:space-between;margin-top:6px">
+              <span style="font-size:11px;color:#a99e90">사람</span>
+              <span class="slider-val" id="nyang-val">60%</span>
+              <span style="font-size:11px;color:#a99e90">냥냥</span>
+            </div>
+            <div class="preview-note" id="nyang-preview">미리보기: …</div>
+          </div>
+
+          <div class="card" style="margin-top:12px">
+            <div class="set-title">출력 방식</div>
+            <div class="seg" id="outmode">
+              <button class="on" data-m="text" onclick="setOut('text')">✍️ 텍스트</button>
+              <button data-m="voice" onclick="setOut('voice')">🔊 음성</button>
+            </div>
+          </div>
+
+          <div class="card" style="margin-top:12px">
+            <div class="set-title">🌐 기본 언어</div>
+            <div class="chips" id="lang-chips"></div>
+          </div>
+
+          <div class="card" style="margin-top:12px">
+            <div class="set-title">성격 다시 고르기</div>
+            <div class="chips" id="pers-chips2"></div>
+          </div>
+
+          <button class="btn primary" style="margin-top:14px" onclick="go('home')">저장하고 돌아가기</button>
+        </section>
+      </div><!-- /app -->
+
+      <nav class="tabbar hidden" id="tabbar">
+        <button data-tab="home" onclick="go('home')"><span class="ic">🏠</span>홈</button>
+        <button data-tab="analyze" onclick="go('analyze')"><span class="ic">📷</span>분석</button>
+        <button data-tab="settings" onclick="go('settings')"><span class="ic">🎚️</span>설정</button>
+      </nav>
+      <div class="home-indicator"></div>
+    </div><!-- /screen -->
+  </div><!-- /device -->
+  <div class="stage-cap" style="opacity:.7">ONNX Runtime Web · WebGPU/WebNN/WASM 자동 선택</div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     ONNX Runtime Web (CDN) - WebGPU/WASM 지원
+     실제 .onnx 모델 파일을 같은 폴더에 두면 작동
+════════════════════════════════════════════ -->
+<script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.20.1/dist/ort.min.js"></script>
+
+<script>
+/* ══════════════════════════════════════
+   1. 상태
+══════════════════════════════════════ */
+const state = {
+  profile:{ name:"멍밍이", age:"12", sex:"여아", breed:"러시안 블루", pers:"도도", photo:null },
+  nyang:60, out:"text", currentEmotion:"calm", currentLang:"ko", ttsPlaying:false
+};
+
+/* ══════════════════════════════════════
+   2. YOLO 추론 엔진 (ONNX Runtime Web)
+   - WebGPU → WebNN(NPU) → WASM(CPU) 자동 폴백
+   - 모델: yolov8n.onnx (같은 폴더에 두세요)
+   - 클래스: cat=15 (COCO), 커스텀 모델은 클래스0
+══════════════════════════════════════ */
+const YOLO_CONFIG = {
+  modelPath: './yolov8n.onnx',   // 같은 폴더에 yolov8n.onnx 필요
+  inputShape: [1, 3, 640, 640],
+  inputName: 'images',
+  scoreThreshold: 0.35,
+  iouThreshold: 0.45,
+  catClassId: 15,                // COCO: cat=15, 커스텀 모델은 0
+};
+
+let ortSession = null;
+let inferenceEP = 'unknown';
+
+async function initYOLO() {
+  setGPUStatus('loading', '모델 로딩 중…', 'ONNX Runtime Web');
+  
+  // WebGPU 지원 확인 (Chrome 113+, Edge 113+)
+  const hasWebGPU = typeof navigator !== 'undefined' && !!navigator.gpu;
+  // WebNN 지원 확인 (Edge 114+, Chrome 126+)
+  const hasWebNN = typeof navigator !== 'undefined' && !!navigator.ml;
+
+  const epCandidates = [];
+  if (hasWebGPU) epCandidates.push('webgpu');
+  if (hasWebNN)  epCandidates.push('webnn');
+  epCandidates.push('wasm'); // 항상 fallback
+
+  // 브라우저에서 실제 .onnx 파일 없이도 시뮬레이션 가능하도록 try/catch
+  for (const ep of epCandidates) {
+    try {
+      setGPUStatus('loading', `${ep.toUpperCase()} 시도 중…`, 'ONNX Runtime Web');
+      const opts = {
+        executionProviders: ep === 'webnn'
+          ? [{ name:'webnn', deviceType:'gpu' }]
+          : [ep],
+        graphOptimizationLevel: 'all'
+      };
+      // 모델 파일이 없으면 여기서 throw → catch 후 다음 EP 시도
+      ortSession = await ort.InferenceSession.create(YOLO_CONFIG.modelPath, opts);
+      inferenceEP = ep;
+      setGPUStatus('ready',
+        ep === 'webgpu' ? '⚡ GPU 가속 활성' :
+        ep === 'webnn'  ? '🧠 NPU 가속 활성' : '✅ CPU(WASM) 준비',
+        `ONNX · ${ep.toUpperCase()}`
+      );
+      document.getElementById('s-ep').textContent =
+        ep === 'webgpu' ? 'WebGPU' : ep === 'webnn' ? 'WebNN·NPU' : 'WASM·CPU';
+      return;
+    } catch(e) {
+      console.warn(`[CatFace] ${ep} 실패:`, e.message || e);
+    }
+  }
+
+  // 모든 EP 실패 → 데모 모드
+  inferenceEP = 'demo';
+  setGPUStatus('error', '데모 모드 (모델 파일 없음)', 'yolov8n.onnx 필요');
+  document.getElementById('yolo-note').textContent =
+    '⚠️ 모델 파일(yolov8n.onnx)을 같은 폴더에 두면 실제 GPU 추론이 가능해요. 지금은 데모 모드로 동작합니다.';
+}
+
+function setGPUStatus(state, label, sub) {
+  const dot = document.getElementById('gpu-dot');
+  const lbl = document.getElementById('gpu-label');
+  const su  = document.getElementById('gpu-sub');
+  dot.className = 'gpu-dot ' + state;
+  lbl.textContent = label;
+  su.textContent  = sub;
+}
+
+/* YOLO 추론 실행 */
+async function runYOLOInference(imgElement) {
+  if (!ortSession) return null; // 데모 모드
+
+  const [, , iH, iW] = YOLO_CONFIG.inputShape;
+  // 캔버스에서 픽셀 읽기
+  const cvs = document.createElement('canvas');
+  cvs.width = iW; cvs.height = iH;
+  const ctx = cvs.getContext('2d');
+  ctx.drawImage(imgElement, 0, 0, iW, iH);
+  const imgData = ctx.getImageData(0, 0, iW, iH).data;
+
+  // NCHW Float32 변환 (RGB 정규화 /255)
+  const tensor = new Float32Array(3 * iH * iW);
+  for (let i = 0; i < iH * iW; i++) {
+    tensor[i]            = imgData[i*4]   / 255; // R
+    tensor[i + iH*iW]   = imgData[i*4+1] / 255; // G
+    tensor[i + iH*iW*2] = imgData[i*4+2] / 255; // B
+  }
+
+  const inputTensor = new ort.Tensor('float32', tensor, YOLO_CONFIG.inputShape);
+  const feeds = { [YOLO_CONFIG.inputName]: inputTensor };
+  const results = await ortSession.run(feeds);
+
+  // YOLOv8 output: [1, 84, 8400] → 파싱
+  const output = results[Object.keys(results)[0]].data;
+  const numClasses = 80;
+  const numBoxes   = 8400;
+  let catBoxes = [];
+
+  for (let i = 0; i < numBoxes; i++) {
+    const cx = output[i];
+    const cy = output[numBoxes + i];
+    const w  = output[numBoxes*2 + i];
+    const h  = output[numBoxes*3 + i];
+    let maxScore = 0, maxClass = -1;
+    for (let c = 0; c < numClasses; c++) {
+      const s = output[numBoxes*(4+c) + i];
+      if (s > maxScore) { maxScore = s; maxClass = c; }
+    }
+    if (maxClass === YOLO_CONFIG.catClassId && maxScore >= YOLO_CONFIG.scoreThreshold) {
+      catBoxes.push({ cx, cy, w, h, score: maxScore });
+    }
+  }
+
+  // NMS (간단 greedy)
+  catBoxes.sort((a,b) => b.score - a.score);
+  const kept = [];
+  while (catBoxes.length) {
+    const best = catBoxes.shift();
+    kept.push(best);
+    catBoxes = catBoxes.filter(b => iou(best,b) < YOLO_CONFIG.iouThreshold);
+  }
+  return kept; // 바운딩박스 배열
+}
+
+function iou(a, b) {
+  const ax1=a.cx-a.w/2, ay1=a.cy-a.h/2, ax2=a.cx+a.w/2, ay2=a.cy+a.h/2;
+  const bx1=b.cx-b.w/2, by1=b.cy-b.h/2, bx2=b.cx+b.w/2, by2=b.cy+b.h/2;
+  const ix1=Math.max(ax1,bx1), iy1=Math.max(ay1,by1);
+  const ix2=Math.min(ax2,bx2), iy2=Math.min(ay2,by2);
+  const inter = Math.max(0,ix2-ix1)*Math.max(0,iy2-iy1);
+  const union  = a.w*a.h + b.w*b.h - inter;
+  return union>0 ? inter/union : 0;
+}
+
+/* 캔버스에 박스 그리기 */
+function drawBoxes(boxes, imgW, imgH) {
+  const cvs = document.getElementById('det-canvas');
+  cvs.width  = imgW; cvs.height = imgH;
+  const ctx  = cvs.getContext('2d');
+  ctx.clearRect(0, 0, imgW, imgH);
+  boxes.forEach(b => {
+    const x = (b.cx - b.w/2) * imgW / 640;
+    const y = (b.cy - b.h/2) * imgH / 640;
+    const w = b.w * imgW / 640;
+    const h = b.h * imgH / 640;
+    ctx.strokeStyle = '#B96A8C';
+    ctx.lineWidth   = 3;
+    ctx.strokeRect(x, y, w, h);
+    ctx.fillStyle   = 'rgba(185,106,140,.22)';
+    ctx.fillRect(x, y, w, h);
+    ctx.fillStyle   = '#fff';
+    ctx.font        = 'bold 13px system-ui';
+    ctx.fillText(`고양이 ${(b.score*100).toFixed(0)}%`, x+4, y+16);
+  });
+}
+
+/* ══════════════════════════════════════
+   3. 감정 데이터 (DeepCat 기준, ~2000자 한국어)
+══════════════════════════════════════ */
+const EMOTIONS = {
+  calm: {
+    emoji:"😌", label:"편안 · 만족", conf:82,
+    eye:"반쯤 감김 (개방 비율 낮음 → 이완)", mouth:"다뭄", tail:"완만하게 늘어짐",
+    lines:{
+      ko:[
+        `지금 이 순간이 완벽해. 햇살이 등을 데워주고, 바람 한 점 없이 조용하고, 내 자리도 딱 적당히 따뜻해. 뭔가를 원한다거나 어딘가 가야 한다거나 하는 마음이 전혀 없어. 그냥 지금 여기 있는 것만으로 충분히 좋아. 집사가 옆에 있어도 좋고, 없어도 이미 충분히 좋아. 억지로 애교를 부릴 필요도 없고, 뭔가를 증명하거나 보여줄 필요도 없어. 눈꺼풀이 살짝 내려와 있는 거 보이지? 이건 완전히 이완된 상태야. 내 몸 어딘가 긴장된 근육이 하나도 없어. 꼬리도 그냥 자연스럽게 늘어져 있고, 귀도 뒤로 살짝 누운 채 편안하게 있어. 요즘처럼 이렇게 아무것도 걱정 안 해도 되는 날이 최고야. 시간이 이렇게 흘러도 되는 날, 아무도 날 귀찮게 하지 않는 날. 이게 내가 바라는 최상의 하루야. 나중에 집사가 쓰다듬어 주면 더 좋겠지만, 지금 이 상태만으로도 완벽에 가까워. 그냥 여기 이렇게 있을게. 방해하지 말아줘.`,
+        `별일 없이 편안한 날이야. 굳이 무슨 말을 더 해야 할 것도 없는 그런 날. 눈 반쯤 감고 이렇게 있으면 돼. 주변에 위협적인 것도 없고, 낯선 소리도 안 들리고, 냄새도 익숙한 것들뿐이야. 이런 조건이 다 맞아떨어지면 나는 이렇게 돼. 완전히 무장 해제된 상태. 집사가 이 모습 보면 귀엽다고 할 텐데, 그건 집사 맘이고 나는 그냥 편한 거야. 가끔 이렇게 아무것도 안 하고 있는 게 최고의 휴식이야. 뭔가를 해야 한다는 의무감도 없고, 어딘가 가야 한다는 생각도 없어. 몸이 바닥에 녹아드는 것 같은 이 느낌. 오늘 하루는 이렇게 보낼 거야. 간식은 나중에 줘도 돼. 지금은 이게 좋아.`,
+      ],
+      en:[
+        `Right now, everything feels just right. The warmth, the quiet, the stillness — I have no complaints whatsoever. I'm not asking for anything. I'm not going anywhere. This spot, this temperature, this moment is enough. You can be here if you want, but don't ruin it. See how my eyelids are half-closed? That means I completely trust this place. Not a single tense muscle in my body. My tail is just lying there naturally, my ears are slightly back and relaxed. This is my peak state. Nothing needs to change. Just let me stay here like this. I'm perfectly content, and that's all there is to say.`,
+        `Nothing's wrong. Nothing needs to change. I'm simply at peace today. Don't overthink it. Some days are just good days, and today is one of them. The familiar smells, the comfortable temperature, the absence of any threat — all the conditions are met. I'm fully disarmed. Stroke me later if you want. Right now, just this is perfect.`,
+      ],
+      es:[
+        `Ahora mismo me siento perfectamente bien. El calor, la quietud, este rincón mío — no necesito nada más. No pido nada. No me voy a ningún lado. ¿Ves cómo tengo los ojos entrecerrados? Eso significa que confío completamente en este lugar. Ni un músculo tenso en mi cuerpo. Mi cola está ahí, relajada y natural. Mis orejas ligeramente hacia atrás, en calma. Este es mi estado ideal. Nada necesita cambiar. Simplemente déjame quedarme así.`,
+        `No hay nada mal. No necesito cambiar nada. Estoy simplemente en paz. Algunos días son así de buenos, y hoy es uno de ellos. Todos los elementos están en su lugar — los olores conocidos, la temperatura cómoda, la ausencia de amenaza. Estoy completamente en guardia baja. Si quieres acariciarme, hazlo más tarde. Por ahora, esto es perfecto.`,
+      ],
+      ja:[
+        `今、この瞬間がちょうどいい。温かさ、静けさ、この場所——何も不満はないよ。何かが欲しいわけでも、どこかに行きたいわけでもない。目が半分閉じているのが見える？それは私がここを完全に信頼しているサインだよ。体のどこにも緊張した筋肉はない。しっぽはただ自然に伸びていて、耳も少し後ろに倒れてリラックスしてる。これが私の最高の状態。何も変える必要はない。ただここにいさせてよ。`,
+        `何も問題ない。何も変える必要はない。ただ今日は穏やかでいる。こういう日もあるんだよ、そして今日はそういう日。馴染みの匂い、心地よい温度、何の脅威もない。完全に無防備になってる。後で撫でてくれてもいいけど、今はこれで十分に完璧なの。`,
+      ],
+      zh:[
+        `现在这一刻感觉刚刚好。温暖、安静、这个角落——我没有任何不满。我不需要任何东西，也不想去任何地方。看到我半闭着的眼睛了吗？那代表我完全信任这里。身体里没有一块紧张的肌肉。尾巴就自然地垂着，耳朵微微向后，放松地待着。这是我的最佳状态。什么都不需要改变。就让我待在这里吧。`,
+        `什么都不用改变。就这样静静的，挺好的。有些日子就是这么好，今天就是这样的日子。熟悉的气味、舒适的温度、没有任何威胁——所有条件都满足了。我完全卸下了防备。想摸我的话等会儿再摸。现在，就这样已经是完美的了。`,
+      ],
+      pt:[
+        `Neste momento, tudo está perfeito. O calor, o silêncio, este cantinho meu — não preciso de nada mais. Não estou pedindo nada. Não vou a lugar nenhum. Viu como meus olhos estão semicerrados? Isso significa que confio completamente neste lugar. Nem um músculo tenso no meu corpo. Meu rabo está lá, naturalmente relaxado. Minhas orelhas levemente para trás, em calma. Este é meu estado ideal. Nada precisa mudar. Só me deixe ficar assim.`,
+        `Não tem nada de errado. Não precisa mudar nada. Estou simplesmente em paz hoje. Alguns dias são assim, e hoje é um deles. Os cheiros familiares, a temperatura confortável, a ausência de qualquer ameaça — tudo certo. Estou completamente desarmada. Se quiser me acariciar, faça depois. Por ora, isso aqui já é perfeito.`,
+      ]
+    }
+  },
+  curious: {
+    emoji:"👀", label:"호기심 · 집중", conf:76,
+    eye:"크게 뜸 (개방 비율 높음)", mouth:"다뭄", tail:"끝이 살짝 씰룩",
+    lines:{
+      ko:[
+        `방금 저기서 뭔가 움직였어. 확실해. 눈을 못 떼겠어. 귀도 최대한 앞으로 당겨서 소리 방향을 잡으려고 하고 있어. 냄새도 살짝 달라진 것 같아. 아직 뭔지 정확히 모르겠는데, 이 느낌은 알아. 뭔가 있어. 너무 빨리 움직이면 도망갈 수 있으니까 지금은 조용히, 아주 천천히 접근 준비를 하고 있어. 심장이 살짝 두근거려. 이런 느낌 좋아. 집중이 되는 느낌. 온몸이 한 방향을 향하고 있는 느낌. 앞발 하나를 살짝 들었다가 내려놨어. 이건 내가 정말 진지할 때 하는 행동이야. 저게 뭔지 반드시 확인해야 해. 가서 냄새 맡고, 앞발로 툭 건드려보고, 그다음에 판단할 거야. 말 걸지 마. 지금 엄청 집중하고 있으니까.`,
+        `어라? 저거 어디서 난 소리지? 분명히 들었어. 귀를 최대한 앞으로 모아서 방향을 잡으려고 해. 가만있어봐. 또 들릴 것 같은데. 눈도 커졌지? 동공도 좀 커진 것 같아. 이건 내가 집중 모드에 들어간 거야. 궁금한 게 생겼을 때 그냥 넘어가는 건 내 성격에 안 맞아. 저게 뭔지, 어디서 왔는지, 위험한지 아닌지 다 알아야 해. 성급하게 덤비는 건 아마추어가 하는 거야. 나는 천천히 확인할 거야. 방해하지 마.`,
+      ],
+      en:[
+        `Something just moved over there. I'm sure of it. I can't look away. My ears are up, fully forward, tracking every sound. The smell is slightly different too. I don't know exactly what it is yet, but I know this feeling — something's there. I'm moving slowly, preparing. My heart is beating a little faster. I love this feeling. Total focus. One front paw lifted slightly, then set back down — that's what I do when I'm completely serious. I need to identify that thing. I'll sniff it, poke it once, then decide. Don't talk to me. I'm concentrating.`,
+        `Did you hear that? I definitely heard something. I'm trying to pinpoint the direction with my ears. Stay still. It might happen again. My eyes are wide open, pupils probably dilated. I'm in full focus mode now. I can't just let things go unexamined — that's not my style. I need to know what it is, where it came from, whether it's dangerous or fun. I'll approach slowly. Don't interrupt.`,
+      ],
+      es:[
+        `Algo acaba de moverse por allá. Estoy segura. No puedo apartar la vista. Mis orejas apuntan hacia adelante, captando cada sonido. El olor también es ligeramente diferente. No sé exactamente qué es todavía, pero conozco esta sensación — algo está ahí. Me muevo despacio, preparándome. El corazón late un poco más rápido. Me encanta esta sensación. Concentración total. Una pata delantera levantada levemente y luego bajada — eso es lo que hago cuando estoy completamente seria. Necesito identificar esa cosa. No me hables. Estoy concentrada.`,
+        `¿Escuchaste eso? Definitivamente escuché algo. Estoy tratando de ubicar la dirección con mis orejas. Quédate quieto. Podría volver a suceder. Mis ojos están bien abiertos, pupilas probablemente dilatadas. Estoy en modo de concentración total ahora. No puedo dejar las cosas sin examinar — no es mi estilo. Voy a acercarme despacio. No interrumpas.`,
+      ],
+      ja:[
+        `今、あそこで何かが動いた。確かだよ。目が離せない。耳を全力で前に向けて、あらゆる音を追ってる。匂いも少し違う。何なのかまだ正確にはわからないけど、この感覚は知ってる——何かがいる。ゆっくり動いて、準備してる。心臓が少しだけ速く打ってる。この感覚が好き。完全な集中。前足を少し持ち上げてから戻した——これは私が完全に真剣なときにすること。あれを特定しないといけない。匂いを嗅いで、一回触って、それから判断する。話しかけないで。集中してるから。`,
+        `今の聞こえた？絶対に何か聞こえた。耳で方向を特定しようとしてる。じっとしてて。また聞こえるかもしれない。目が大きく開いてる、瞳孔も広がってると思う。今、完全に集中モードに入ってる。気になるものをそのままにできない——それが私のやり方じゃない。ゆっくり近づく。邪魔しないで。`,
+      ],
+      zh:[
+        `刚才那边有什么动了，我确定。移不开眼睛。耳朵全力朝前，追踪每一个声音。气味也稍微不一样了。还不确定是什么，但我认识这种感觉——有什么东西在那里。慢慢移动，做准备。心跳稍微加快了一点。喜欢这种感觉。全神贯注。前爪轻轻抬起来又放下——这是我完全认真的时候才有的动作。必须搞清楚那是什么。去闻一下，用爪子碰一下，然后再做判断。别跟我说话。我在集中注意力。`,
+        `你听到了吗？我绝对听到了什么声音。正在用耳朵判断方向。站着别动。可能还会再有声音。眼睛睁大了，瞳孔也可能放大了。现在进入了完全专注模式。不能放过感兴趣的东西——那不是我的风格。慢慢靠近。别打扰我。`,
+      ],
+      pt:[
+        `Alguma coisa acabou de se mover lá. Tenho certeza. Não consigo desviar o olhar. Minhas orelhas estão totalmente voltadas para frente, rastreando cada som. O cheiro também está ligeiramente diferente. Ainda não sei exatamente o que é, mas conheço essa sensação — tem algo ali. Estou me movendo devagar, me preparando. O coração está batendo um pouco mais rápido. Adoro essa sensação. Concentração total. Uma pata dianteira levantada levemente e depois abaixada — é o que faço quando estou completamente séria. Preciso identificar aquela coisa. Vou cheirar, cutucar uma vez, depois decidir. Não me fale. Estou concentrada.`,
+        `Você ouviu isso? Definitivamente ouvi alguma coisa. Estou tentando localizar a direção com minhas orelhas. Fique parado. Pode acontecer de novo. Meus olhos estão bem abertos, pupilas provavelmente dilatadas. Estou em modo de foco total agora. Não consigo deixar as coisas sem examinar — não é meu estilo. Vou me aproximar devagar. Não interrompa.`,
+      ]
+    }
+  },
+  alert: {
+    emoji:"😳", label:"경계 · 긴장", conf:71,
+    eye:"크게 뜸 · 동공 확장", mouth:"다뭄, 살짝 긴장", tail:"몸쪽으로 붙음",
+    lines:{
+      ko:[
+        `뭔가 이상해. 분위기가 달라졌어. 아까랑 똑같은 공간인데 뭔가 달라진 느낌이야. 냄새가 바뀌었거나 소리가 달라진 건지 확실히 모르겠는데, 경계는 풀면 안 될 것 같아. 지금 귀는 최대한 앞으로 향하고 있고, 몸은 바닥에 낮게 깔려 있어. 도망갈 경로도 머릿속에 그려놨어. 만약 갑자기 뭔가 나타나면 저쪽 창문 방향으로 뛸 거야. 집사, 지금 가까이 오지 마. 내가 먼저 확인하고 싶어. 판단이 날 때까지는 여기서 이렇게 지켜볼 거야. 눈 한 번 안 깜빡이고 계속 볼 수 있어. 이건 아직 위험한지 아닌지 모르는 상태야. 성급하게 결론 내리면 안 돼. 일단 관찰. 그다음 판단.`,
+        `낯선 게 생겼어. 갑자기 저게 왜 거기 있는 거야. 아까는 없었는데. 이런 게 갑자기 나타나면 일단 경계하는 게 맞아. 진짜 위험한 건지 아닌지 판단이 설 때까지는 움직이지 않을 거야. 동공이 커진 거 보이지? 이건 내가 더 많은 빛을 모아서 상황을 파악하려는 거야. 귀도 계속 그쪽을 향하고 있어. 아직 마음을 못 놨어. 집사가 아무렇지 않게 있다면 위험하지 않은 거겠지만, 그래도 내 눈으로 직접 확인해야 해.`,
+      ],
+      en:[
+        `Something feels off. The atmosphere changed. It's the same place, but something is different — the smell, the sound, I'm not sure which. I'm not letting my guard down yet. My ears are forward, my body is low, and I've already mapped my escape route. Don't come near me right now. I need to assess this myself. I won't blink. I'm watching carefully. This is the state before I know if it's dangerous or not. No hasty conclusions. First, observe. Then decide.`,
+        `Something unfamiliar appeared. Why is that there now? It wasn't there before. When something shows up unexpectedly, the right move is to be cautious. My pupils are dilated — that's me gathering more light to assess the situation. My ears are still pointing that way. I haven't relaxed yet. Even if you seem calm, I need to verify with my own eyes.`,
+      ],
+      es:[
+        `Algo se siente raro. El ambiente cambió. Es el mismo lugar, pero algo es diferente — el olor, el sonido, no sé cuál. Todavía no voy a bajar la guardia. Mis orejas apuntan hacia adelante, mi cuerpo está bajo, y ya tracé mi ruta de escape. No te acerques ahora. Necesito evaluar esto por mí misma. No voy a parpadear. Estoy observando con cuidado. Este es el estado antes de saber si es peligroso o no. Sin conclusiones precipitadas. Primero, observar. Después, decidir.`,
+        `Apareció algo desconocido. ¿Por qué está eso ahí ahora? Antes no estaba. Cuando algo aparece inesperadamente, lo correcto es ser cautelosa. Mis pupilas están dilatadas — eso es para captar más luz y evaluar la situación. Mis orejas siguen apuntando hacia allá. Todavía no me he relajado. Aunque tú parezcas tranquilo, necesito verificarlo con mis propios ojos.`,
+      ],
+      ja:[
+        `何かがおかしい。雰囲気が変わった。同じ場所なのに、何かが違う感じがする。匂いなのか音なのか、はっきりしないけど、まだ警戒は解かない。耳は前を向いていて、体は低くして、逃げ道も頭に描いてある。今は近づかないで。自分で確認したい。瞬きもしない。注意深く見てる。これは危険かどうかまだわからない状態。早まった結論はダメ。まず観察。それから判断。`,
+        `見慣れないものが現れた。なんで今あそこにあるの？さっきはなかったのに。突然何かが現れたら、まず警戒するのが正しい。瞳孔が広がってるの見えてる？それは状況をよく見るために光を集めてるから。耳もまだそっちを向いてる。まだリラックスできていない。あなたが平気そうにしてても、私自身の目で確認しなきゃ。`,
+      ],
+      zh:[
+        `感觉有点不对劲。气氛变了。是同一个地方，但有什么不一样——是气味还是声音，我说不准。我还不打算放松警惕。耳朵朝前，身体压低，逃跑路线也想好了。现在别靠近我。我需要自己评估这个情况。不会眨眼。我在仔细观察。这是还不知道是否危险的状态。不能急于下结论。先观察，然后再判断。`,
+        `出现了陌生的东西。那个东西为什么突然在那里？之前没有的。有东西突然出现，先警戒是对的。看到我的瞳孔放大了吗？那是在收集更多光线来判断情况。耳朵还在朝那个方向。还没能放松。就算你看起来很平静，我也需要亲眼确认。`,
+      ],
+      pt:[
+        `Algo está estranho. O ambiente mudou. É o mesmo lugar, mas algo é diferente — o cheiro, o som, não sei ao certo. Não vou baixar a guarda ainda. Minhas orelhas estão voltadas para frente, meu corpo está baixo, e já tracei minha rota de fuga. Não chegue perto agora. Preciso avaliar isso por conta própria. Não vou piscar. Estou observando com cuidado. Este é o estado antes de saber se é perigoso ou não. Sem conclusões precipitadas. Primeiro, observar. Depois, decidir.`,
+        `Apareceu algo desconhecido. Por que isso está aí agora? Antes não estava. Quando algo aparece inesperadamente, o certo é ser cautelosa. Minhas pupilas estão dilatadas — estou captando mais luz para avaliar a situação. Minhas orelhas ainda estão apontando para lá. Ainda não relaxei. Mesmo que você pareça calmo, preciso verificar com meus próprios olhos.`,
+      ]
+    }
+  },
+  annoyed: {
+    emoji:"😾", label:"불쾌 · 짜증", conf:68,
+    eye:"가늘게 뜸", mouth:"살짝 벌림 · 코 주름", tail:"탁탁 치는 느낌",
+    lines:{
+      ko:[
+        `지금은 별로야. 기분이 좋지 않은데 왜 계속 건드리는 거야. 나한테도 혼자 있고 싶은 날이라는 게 있어. 오늘이 딱 그런 날이야. 그냥 내버려 두면 되는데 왜 자꾸 신경을 긁는 건지 모르겠어. 꼬리가 저절로 탁탁 쳐지는 거 보이지? 이건 내가 짜증났다는 신호야. 고양이 언어로 아주 명확한 거야. 코에 주름이 잡혔어? 이건 더 확실한 신호야. 눈도 가늘게 뜨고 있어. 여기서 계속 건드리면 나 진짜 화낼 수도 있어. 지금은 내 공간이 필요해. 좀 있다가 내가 먼저 다가갈 테니까 그때까지 기다려줘. 억지로 친해지려고 하지 마. 고양이는 자기 페이스가 있어.`,
+        `그거 마음에 안 들어. 처음엔 참았는데 계속 반복되니까 이제 참기 힘들어. 나는 불편한 걸 그냥 넘어가는 타입이 아니야. 표정에 다 나와 있잖아. 코 주름 진 거 안 보여? 지금 기분이 상했어. 살짝 상한 게 아니라 꽤 상했어. 건드리지 마. 진심으로. 지금은 혼자 있을 공간이 필요해. 내 감정을 억지로 무시하거나 달래려고 하지 마. 시간이 좀 지나면 괜찮아질 거야. 그때 다가와.`,
+      ],
+      en:[
+        `Not now. I'm not in the mood, and I don't understand why you keep pushing it. I have days when I want to be left alone — days when I don't want to do anything. Today is one of those days. You can see my tail flicking. That's a very clear signal in cat language. And yes, my nose is wrinkled. My eyes are narrowed. If you keep this up, I might actually get angry. I need my space right now. I'll come to you when I'm ready. Don't force closeness. Cats have their own pace.`,
+        `That's the one thing I don't like. I tolerated it at first, but repeated is too much. I don't just let discomfort slide — that's not my style. Look at my face. See the wrinkle on my nose? My feelings are hurt. Not a little — quite a lot. Don't touch me. I mean it. I need space right now. Don't try to suppress or soothe my feelings by force. Time will fix it. Come back then.`,
+      ],
+      es:[
+        `Ahora no. No estoy de humor, y no entiendo por qué sigues insistiendo. Tengo días en que quiero que me dejen sola — días en que no quiero hacer nada. Hoy es uno de esos días. Puedes ver cómo muevo la cola. Esa es una señal muy clara en lenguaje felino. Y sí, tengo la nariz arrugada. Mis ojos están entrecerrados. Si continúas así, podría enojarme de verdad. Necesito mi espacio ahora mismo. Iré a buscarte cuando esté lista. No fuerces la cercanía. Los gatos tenemos nuestro propio ritmo.`,
+        `Eso es lo único que no me gusta. Lo toleré al principio, pero repetido es demasiado. No ignoro la incomodidad — no es mi estilo. Mira mi cara. ¿Ves la arruga en mi nariz? Me lastimaste. No poco — bastante. No me toques. Lo digo en serio. Necesito espacio ahora mismo. No trates de suprimir o calmar mis sentimientos por la fuerza. El tiempo lo arreglará. Vuelve entonces.`,
+      ],
+      ja:[
+        `今はやめて。気分が良くないのに、なぜそれを続けるの。一人にしてほしい日というのがある——何もしたくない日。今日がまさにそういう日。尻尾がぴしぴし叩いてるの見えてる？猫語でとても明確なサイン。鼻に皺が寄ってる。目も細めてる。これ以上続けたら、本当に怒るかもしれない。今は自分のスペースが必要。準備ができたら自分から行くから。無理に親しくしようとしないで。猫には自分のペースがある。`,
+        `それが気に入らない。最初は我慢してたけど、繰り返されると限界。不快なことをそのまま流せない——それが私のやり方。私の顔を見て。鼻に皺が寄ってるの見えてる？気分が傷ついた。少しじゃなくて、かなり。触れないで。本気で言ってる。今は一人になれるスペースが必要。無理に感情を抑えたり宥めたりしようとしないで。時間が経てば大丈夫になるから。そのとき来て。`,
+      ],
+      zh:[
+        `现在不行。我没心情，我也不明白你为什么一直这样。我也有想独处的日子——什么都不想做的日子。今天就是这样的日子。你看到我的尾巴在拍打吗？这在猫的语言里是非常明确的信号。还有，我的鼻子皱起来了。眼睛眯着。如果你继续这样，我可能真的会生气。我现在需要自己的空间。准备好了我会自己去找你。不要强迫亲近。猫有自己的节奏。`,
+        `那件事我不喜欢。一开始我忍了，但重复太多次就受不了了。我不会忽视不舒服的感觉——那不是我的风格。看看我的脸。看到我鼻子上的皱纹了吗？我的心情被弄坏了。不是一点点，是相当程度地坏了。别碰我。是认真的。我现在需要独处的空间。不要强行压制或安慰我的感情。时间会解决的。到那时再来。`,
+      ],
+      pt:[
+        `Agora não. Não estou com vontade, e não entendo por que você continua insistindo. Tenho dias em que quero ficar sozinha — dias em que não quero fazer nada. Hoje é um desses dias. Pode ver minha cauda batendo. É um sinal muito claro em linguagem felina. E sim, meu nariz está franzido. Meus olhos estão estreitados. Se continuar assim, posso realmente ficar com raiva. Preciso do meu espaço agora. Irei até você quando estiver pronta. Não force a proximidade. Gatos têm seu próprio ritmo.`,
+        `Isso é a única coisa que não gosto. Tolerei no começo, mas repetido é demais. Não ignoro o desconforto — não é meu estilo. Olha minha cara. Vê a ruga no meu nariz? Meus sentimentos estão magoados. Não um pouco — bastante. Não me toque. Estou falando sério. Preciso de espaço agora. Não tente suprimir ou acalmar meus sentimentos à força. O tempo vai resolver. Volte então.`,
+      ]
+    }
+  },
+  affection: {
+    emoji:"😻", label:"친근 · 애정", conf:79,
+    eye:"느린 눈 깜빡임 (신뢰 신호)", mouth:"다뭄, 편안", tail:"끝이 부드럽게 올라감",
+    lines:{
+      ko:[
+        `너 좋아해. 그냥 그렇게 느껴져서 말하는 거야. 평소에 이런 말 잘 안 하는 거 알지? 근데 오늘은 왠지 그 마음이 크게 느껴져. 네가 옆에 있으면 이상하게 마음이 편해져. 아무 말 안 해도 되고, 같이 뭔가를 하지 않아도 되고, 그냥 같은 공간에 있는 것만으로도 충분해. 집사가 먼저 느린 눈 깜빡임을 해줬을 때 내가 따라 했던 거 기억해? 그게 나한테는 진심이야. 고양이가 천천히 눈을 감았다가 뜨는 건 '나 너 믿어, 나 너 좋아해'라는 뜻이야. 말로 하는 것보다 더 솔직한 표현이야. 오늘 옆에 있어줘서 고마워. 나 혼자 있을 때도 괜찮지만, 이렇게 같이 있는 것도 좋아. 낯선 사람한테는 절대 이렇게 안 해. 나한테 이런 행동을 받는 건 진짜 신뢰받고 있다는 뜻이야. 알아줘.`,
+        `이렇게 같이 있는 거 좋아. 뭔가를 해야 할 것도 없고, 어딘가 가야 할 것도 없이 그냥 이렇게. 내가 네 옆에 자꾸 와서 앉는 건 이유가 있어. 편하거든. 집사 냄새가 익숙하고, 집사 숨소리가 안심이 돼. 천천히 눈 깜빡였어. 알아챘어? 이건 고양이 언어로 '나 너 사랑해'야. 말로 하면 어색하니까 이렇게 표현하는 거야. 오늘 하루 어땠어? 나는 네가 오늘 어떻게 지냈는지 궁금해. 같이 쉬자. 옆에 있어줘.`,
+      ],
+      en:[
+        `I like you. I'm saying it because I genuinely feel it right now. You know I don't usually say things like this. But today it feels big. Having you nearby makes something in me settle. We don't need to talk, we don't need to do anything together — just existing in the same space is enough. You remember when I slow-blinked back at you? That was genuine. When a cat slowly closes their eyes and opens them again, it means 'I trust you, I like you.' More honest than words. Thank you for being here today. I'm fine alone too, but this — this is also good. I would never do this with a stranger. If you're getting this from me, it means you're truly trusted. Know that.`,
+        `I like being here like this with you. No agenda, nowhere to be. I keep coming to sit near you for a reason — it's comfortable. Your scent is familiar, and your breathing is reassuring. I just slow-blinked at you. Did you notice? In cat language, that means 'I love you.' It would be awkward to say out loud, so that's how I show it. How was your day? I want to know. Let's rest together. Stay beside me.`,
+      ],
+      es:[
+        `Me gustas. Lo digo porque genuinamente lo siento ahora mismo. Sabes que normalmente no digo cosas así. Pero hoy se siente grande. Tenerte cerca hace que algo en mí se asiente. No necesitamos hablar ni hacer nada juntos — simplemente estar en el mismo espacio es suficiente. ¿Recuerdas cuando te devolví el parpadeo lento? Fue genuino. Cuando un gato cierra los ojos lentamente y los vuelve a abrir, significa 'confío en ti, me gustas.' Más honesto que las palabras. Gracias por estar aquí hoy. Estoy bien sola también, pero esto — esto también es bueno. Nunca haría esto con un extraño. Si estás recibiendo esto de mí, significa que realmente eres de confianza. Que lo sepas.`,
+        `Me gusta estar aquí así contigo. Sin agenda, sin ningún lugar al que ir. Sigo viniendo a sentarme cerca de ti por una razón — es cómodo. Tu olor es familiar y tu respiración me tranquiliza. Acabo de hacer un parpadeo lento hacia ti. ¿Lo notaste? En lenguaje felino, eso significa 'te quiero.' Sería incómodo decirlo en voz alta, así que así es como lo muestro. ¿Cómo estuvo tu día? Quiero saberlo. Descansemos juntos. Quédate a mi lado.`,
+      ],
+      ja:[
+        `あなたのことが好き。今、本当にそう感じているから言ってるの。こういうこと普段あまり言わないの知ってるよね。でも今日は特にその気持ちが大きく感じられる。あなたがそばにいると、なんだか落ち着くんだよ。何か話さなくていいし、何かしなくてもいい、ただ同じ空間にいるだけで十分なの。前に私がゆっくり瞬きで返したの覚えてる？あれは本気だよ。猫がゆっくり目を閉じてまた開けるのは「信頼してる、好きだよ」っていう意味。言葉より正直な表現。今日ここにいてくれてありがとう。一人でも大丈夫だけど、こうして一緒にいるのも好き。知らない人にはこういうことしない。私からこれをもらっているなら、本当に信頼されているってこと。わかってて。`,
+        `こうして一緒にいるのが好き。やることも、行くところも何もなくて、ただこうして。あなたのそばによく来て座るのには理由があるの——落ち着くから。あなたの匂いが馴染みのもので、息遣いが安心させてくれる。今、ゆっくり瞬きしたよ。気づいた？猫語で「愛してる」って意味なんだよ。言葉にするのは照れくさいから、こうして表現してるの。今日はどうだった？一緒に休もうよ。そばにいて。`,
+      ],
+      zh:[
+        `我喜欢你。因为现在真的有这种感觉才说的。你知道我平时不怎么说这种话吧？但今天这种感觉特别强烈。有你在旁边，不知为何心里就踏实了。不需要说话，不需要一起做什么，只是待在同一个空间就足够了。你还记得我用慢眨眼回应你的那次吗？那是真心的。猫慢慢闭上眼睛再睁开，意思是"我信任你，我喜欢你"。比语言更诚实的表达。谢谢你今天在这里陪我。独处也挺好的，但这样——这样也很好。我绝对不会对陌生人这样做。如果你从我这里得到了这种对待，说明你是真的被信任了。要知道这一点。`,
+        `喜欢这样和你在一起。没有什么特别要做的，也不用去哪里，就这样。我总是来坐在你旁边是有原因的——舒服。你的气味很熟悉，你的呼吸声让我安心。我刚才慢慢眨了一下眼。注意到了吗？用猫的语言说，这就是"我爱你"。用嘴说会很别扭，所以用这种方式表达。今天过得怎么样？我想知道。一起休息吧。待在我旁边。`,
+      ],
+      pt:[
+        `Eu gosto de você. Estou dizendo porque genuinamente sinto isso agora. Você sabe que normalmente não digo coisas assim. Mas hoje essa sensação está grande. Ter você por perto faz algo em mim se acalmar. Não precisamos conversar nem fazer nada juntos — simplesmente estar no mesmo espaço já é suficiente. Você lembra quando te devolvi o piscar lento? Foi genuíno. Quando um gato fecha os olhos lentamente e os abre de novo, significa 'confio em você, gosto de você.' Mais honesto do que palavras. Obrigada por estar aqui hoje. Estou bem sozinha também, mas isso — isso também é bom. Nunca faria isso com um estranho. Se você está recebendo isso de mim, significa que é genuinamente confiável. Saiba disso.`,
+        `Gosto de estar aqui assim com você. Sem agenda, sem lugar para ir. Continuo vindo sentar perto de você por um motivo — é confortável. Seu cheiro é familiar e sua respiração me tranquiliza. Acabei de piscar devagar para você. Percebeu? Em linguagem felina, isso significa 'eu te amo.' Seria estranho dizer em voz alta, então é assim que mostro. Como foi seu dia? Quero saber. Vamos descansar juntos. Fique do meu lado.`,
+      ]
+    }
+  }
+};
+const EMO_ORDER = ["calm","curious","alert","annoyed","affection"];
+
+/* ══════════════════════════════════════
+   4. 성격 & 냥체
+══════════════════════════════════════ */
+const PERSONA = {
+  "느긋":      { e:"😌", pre:["음…",""], post:["급할 거 없지.",""] },
+  "활발":      { e:"⚡", pre:["야야!","봐봐,"], post:["같이 놀자!","신난다!"] },
+  "도도":      { e:"🧊", pre:["","흠."], post:["…이상.","알아서 해."] },
+  "애교":      { e:"💗", pre:["있잖아~","히힝,"], post:["같이 있어줘잉~",""] },
+  "겁많음":    { e:"🫣", pre:["저, 저기…","조심조심…"], post:["괜찮은 거지?",""] },
+  "장난꾸러기":{ e:"😹", pre:["헤헤,","자, 봐라~"], post:["장난이지롱!",""] },
+  "호기심":    { e:"🔍", pre:["어라?","그거 뭐야,"], post:["더 알아봐야겠어.",""] },
+  "무뚝뚝":    { e:"😐", pre:["","…"], post:["그뿐.",""] },
+  "예민":      { e:"😤", pre:["하…","또 시작이네,"], post:["건드리지 말랬지.",""] },
+  "응석받이":  { e:"🥺", pre:["집사~","히잉,"], post:["안아줘잉…",""] },
+  "사교적":    { e:"🤗", pre:["안녕!","어서 와~"], post:["같이 있으면 좋아!",""] },
+  "먹보":      { e:"🍗", pre:["냄새 난다,","혹시,"], post:["간식은 어디 있어?",""] }
+};
+const PERS_EMOJI = Object.fromEntries(Object.entries(PERSONA).map(([k,v])=>[k,v.e]));
+
+function applyNyang(text, level) {
+  if (level === 0) return text;
+  const p = level / 100;
+  const sentences = text.split(/(?<=[.!?~。])\s+/).filter(Boolean);
+  const out = sentences.map(s => {
+    let t = s.trim();
+    if (Math.random() < p) {
+      t = t.replace(/[.!?~。]+$/, '');
+      t = t.replace(/(있어|이야|해|봐|자|어|지|다|줘|돼)$/u, m => {
+        const map = {"있어":"있냥","이야":"이냥","해":"하냥","봐":"봐냥","자":"자옹","어":"어옹","지":"지냥","다":"다냥","줘":"줘옹","돼":"돼냥"};
+        return map[m] || m + "냥";
+      });
+      if (!/[냥옹]$/.test(t)) t += (Math.random() < .5 ? "냥" : "옹");
+    }
+    return t;
+  });
+  let joined = out.join(" ");
+  if (level >= 80 && Math.random() < .5) joined = "그르릉~ " + joined;
+  else if (level >= 50 && Math.random() < .3) joined += " 골골…";
+  return joined;
+}
+
+/* ══════════════════════════════════════
+   5. 언어 & 말 생성
+══════════════════════════════════════ */
+const LANGS = [
+  { code:"ko", label:"한국어", bcp:"ko-KR" },
+  { code:"en", label:"English", bcp:"en-US" },
+  { code:"es", label:"Español", bcp:"es-ES" },
+  { code:"ja", label:"日本語", bcp:"ja-JP" },
+  { code:"zh", label:"中文",   bcp:"zh-CN" },
+  { code:"pt", label:"Português", bcp:"pt-BR" }
+];
+
+function buildSpeech(emoKey, lang) {
+  lang = lang || state.currentLang;
+  const e = EMOTIONS[emoKey];
+  const lines = e.lines[lang] || e.lines.ko;
+  const base = lines[Math.floor(Math.random() * lines.length)];
+  if (lang === 'ko') {
+    const per = PERSONA[state.profile.pers] || PERSONA["도도"];
+    const pre  = per.pre[Math.floor(Math.random()*per.pre.length)];
+    const post = per.post[Math.floor(Math.random()*per.post.length)];
+    const raw  = [pre, base, post].filter(Boolean).join(" ");
+    return applyNyang(raw, state.nyang);
+  }
+  return base;
+}
+
+/* ══════════════════════════════════════
+   6. 품종 피커
+══════════════════════════════════════ */
+const BREEDS = [
+  "코리안 숏헤어(코숏)","코리안 롱헤어","믹스/도메스틱",
+  "아비시니안","에게","아메리칸 밥테일","아메리칸 컬","아메리칸 숏헤어","아메리칸 와이어헤어",
+  "아프로디테 자이언트","아라비안 마우","오스트레일리안 미스트","발리니즈","밤비노","벵갈",
+  "버만","봄베이","브라질리안 숏헤어","브리티시 롱헤어","브리티시 숏헤어","버미즈","버밀라",
+  "샤르트뢰","컬러포인트 숏헤어","코니시 렉스","데본 렉스","돈스코이","드래곤 리",
+  "이집션 마우","유러피안 숏헤어","엑조틱 숏헤어","폴덱스","저먼 렉스","하바나 브라운",
+  "하이랜더","히말라얀","재패니즈 밥테일","카오 마니","킨칼로우","코랏","쿠릴리안 밥테일",
+  "램킨","라펌","라이코이","메인쿤","맹크스","먼치킨","네벨룽","네바 마스커레이드",
+  "노르웨이 숲","오시캣","오리엔탈 롱헤어","오리엔탈 숏헤어","페르시안","페르시안(전통형)",
+  "피터발드","픽시밥","라가머핀","랙돌","러시안 블루","러시안 화이트/블랙/태비",
+  "사바나","스코티시 폴드","셀커크 렉스","세렝게티","샴","시베리안","싱가푸라",
+  "스노우슈","소말리","스핑크스","타이","통키니즈","토이거","터키시 앙고라","터키시 반",
+  "우크라이니안 레브코이","요크 초콜릿"
+];
+let breedFiltered = BREEDS.slice();
+
+function buildBreedPicker(list) {
+  const el = document.getElementById('breed-list'); el.innerHTML = '';
+  if (!list.length) { el.innerHTML = '<div class="picker-empty">검색 결과 없음</div>'; return; }
+  list.forEach(b => {
+    const d = document.createElement('div');
+    d.className = 'picker-item'; d.textContent = b; d.dataset.b = b;
+    d.onclick = () => scrollBreedTo(d);
+    el.appendChild(d);
+  });
+  let idx = list.indexOf(state.profile.breed); if (idx < 0) idx = 0;
+  requestAnimationFrame(() => centerBreed(idx, false));
+}
+function centerBreed(idx, smooth) {
+  const el = document.getElementById('breed-list');
+  const items = el.querySelectorAll('.picker-item');
+  const it = items[idx]; if (!it) return;
+  el.scrollTo({ top: it.offsetTop - el.clientHeight/2 + it.offsetHeight/2, behavior: smooth ? 'smooth' : 'auto' });
+  setTimeout(updateBreedSel, 20);
+}
+function scrollBreedTo(it) {
+  const el = document.getElementById('breed-list');
+  el.scrollTo({ top: it.offsetTop - el.clientHeight/2 + it.offsetHeight/2, behavior: 'smooth' });
+}
+function updateBreedSel() {
+  const el = document.getElementById('breed-list');
+  const items = el.querySelectorAll('.picker-item'); if (!items.length) return;
+  const center = el.scrollTop + el.clientHeight / 2;
+  let best = null, bd = 1e9;
+  items.forEach(it => {
+    const c = it.offsetTop + it.offsetHeight/2, d = Math.abs(c - center);
+    if (d < bd) { bd = d; best = it; } it.classList.remove('sel');
+  });
+  if (best) { best.classList.add('sel'); state.profile.breed = best.dataset.b; }
+}
+function filterBreeds(q) {
+  q = (q || '').trim();
+  breedFiltered = q ? BREEDS.filter(b => b.includes(q)) : BREEDS.slice();
+  buildBreedPicker(breedFiltered);
+}
+
+/* ══════════════════════════════════════
+   7. 성격 칩 & 언어 탭
+══════════════════════════════════════ */
+function buildPersChips(id) {
+  const box = document.getElementById(id); box.innerHTML = '';
+  Object.keys(PERSONA).forEach(p => {
+    const c = document.createElement('div');
+    c.className = 'chip' + (p === state.profile.pers ? ' on' : '');
+    c.textContent = PERSONA[p].e + ' ' + p;
+    c.onclick = () => { state.profile.pers = p; buildPersChips(id); };
+    box.appendChild(c);
+  });
+}
+function buildLangTabs() {
+  const box = document.getElementById('lang-tabs'); box.innerHTML = '';
+  LANGS.forEach(l => {
+    const b = document.createElement('div');
+    b.className = 'lang-tab' + (l.code === state.currentLang ? ' on' : '');
+    b.textContent = l.label;
+    b.onclick = () => switchLang(l.code);
+    box.appendChild(b);
+  });
+}
+function buildLangChips() {
+  const box = document.getElementById('lang-chips'); box.innerHTML = '';
+  LANGS.forEach(l => {
+    const c = document.createElement('div');
+    c.className = 'chip' + (l.code === state.currentLang ? ' on' : '');
+    c.textContent = l.label;
+    c.onclick = () => { state.currentLang = l.code; buildLangChips(); };
+    box.appendChild(c);
+  });
+}
+function switchLang(code) {
+  state.currentLang = code; buildLangTabs();
+  const txt = buildSpeech(state.currentEmotion, code);
+  document.getElementById('s-text').textContent = txt;
+  document.getElementById('s-count').textContent = txt.length + '자';
+  if (state.ttsPlaying) ttsStop();
+}
+
+/* ══════════════════════════════════════
+   8. 프로필 사진
+══════════════════════════════════════ */
+function onProfilePhoto(ev) {
+  const f = ev.target.files[0]; if (!f) return;
+  const r = new FileReader();
+  r.onload = () => {
+    state.profile.photo = r.result;
+    document.getElementById('avatar-img').src = r.result;
+    document.getElementById('avatar').classList.add('has');
+  };
+  r.readAsDataURL(f);
+}
+
+/* ══════════════════════════════════════
+   9. 온보딩
+══════════════════════════════════════ */
+function renderOnboard() {
+  const p = state.profile;
+  document.getElementById('in-name').value = p.name;
+  document.getElementById('in-age').value  = p.age;
+  document.getElementById('in-sex').value  = p.sex;
+  document.getElementById('breed-search').value = '';
+  breedFiltered = BREEDS.slice(); buildBreedPicker(breedFiltered);
+  buildPersChips('pers-chips');
+  const av = document.getElementById('avatar');
+  if (p.photo) { document.getElementById('avatar-img').src = p.photo; av.classList.add('has'); }
+  else av.classList.remove('has');
+}
+function saveProfile() {
+  state.profile.name = document.getElementById('in-name').value || "우리 고양이";
+  state.profile.age  = document.getElementById('in-age').value  || "?";
+  state.profile.sex  = document.getElementById('in-sex').value;
+  if (!state.profile.breed) state.profile.breed = "품종 미상";
+  go('home');
+}
+
+/* ══════════════════════════════════════
+   10. 네비게이션
+══════════════════════════════════════ */
+function go(id) {
+  showView(id);
+  const hasTabs = ['home','analyze','settings'].includes(id);
+  document.getElementById('tabbar').classList.toggle('hidden', !hasTabs);
+  document.querySelectorAll('.tabbar button').forEach(b => b.classList.toggle('on', b.dataset.tab === id));
+  if (id === 'onboard')  renderOnboard();
+  if (id === 'home')     renderHome();
+  if (id === 'analyze')  resetAnalyze();
+  if (id === 'settings') renderSettings();
+}
+function showView(id) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  const map = { onboard:'v-onboard', home:'v-home', analyze:'v-analyze', result:'v-result', settings:'v-settings' };
+  document.getElementById(map[id]).classList.add('active');
+}
+
+/* ══════════════════════════════════════
+   11. 홈
+══════════════════════════════════════ */
+function renderHome() {
+  const p = state.profile;
+  document.getElementById('h-name').textContent = p.name;
+  document.getElementById('h-meta').textContent = `${p.breed} · ${p.age}살 · ${p.sex}`;
+  document.getElementById('h-pers').textContent = `${p.pers} 성격`;
+  document.querySelector('.catcard .pill').firstChild.textContent = PERS_EMOJI[p.pers] + ' ';
+  document.getElementById('a-catname').textContent = p.name;
+  const hp = document.getElementById('h-photo');
+  hp.innerHTML = p.photo ? `<img src="${p.photo}" alt="">` : '<span>🐱</span>';
+}
+
+/* ══════════════════════════════════════
+   12. 분석
+══════════════════════════════════════ */
+let hasPhoto = false;
+function resetAnalyze() {
+  hasPhoto = false;
+  document.getElementById('photobox').classList.remove('has');
+  document.getElementById('reticle').classList.remove('on');
+  const cvs = document.getElementById('det-canvas');
+  const ctx  = cvs.getContext('2d'); ctx.clearRect(0, 0, cvs.width, cvs.height);
+  const btn  = document.getElementById('analyzeBtn');
+  btn.disabled = true; btn.style.opacity = .5;
+}
+function onPhoto(ev) {
+  const f = ev.target.files[0]; if (!f) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = document.getElementById('preview');
+    img.src = e.target.result;
+    img.onload = () => {
+      document.getElementById('photobox').classList.add('has');
+      hasPhoto = true;
+      const btn = document.getElementById('analyzeBtn');
+      btn.disabled = false; btn.style.opacity = 1;
+    };
+  };
+  reader.readAsDataURL(f);
+}
+
+async function runAnalysis() {
+  if (!hasPhoto) { document.getElementById('file').click(); return; }
+  const ret = document.getElementById('reticle'); ret.classList.add('on');
+
+  const stepsTxt = {
+    webgpu: ["WebGPU 초기화…","이미지 전처리 중…","YOLO 추론 중 (GPU)…","바운딩박스 파싱…","감정 매핑 중…"],
+    webnn:  ["WebNN 초기화…","이미지 전처리 중…","YOLO 추론 중 (NPU)…","바운딩박스 파싱…","감정 매핑 중…"],
+    wasm:   ["WASM 로딩…","이미지 전처리 중…","YOLO 추론 중 (CPU)…","바운딩박스 파싱…","감정 매핑 중…"],
+    demo:   ["고양이 얼굴 탐지 중…","눈 랜드마크 스캔 중…","입·코 주름 분석 중…","감정 매핑 중…","결과 생성 중…"]
+  };
+  const steps = stepsTxt[inferenceEP] || stepsTxt.demo;
+  let i = 0; const st = document.getElementById('scantxt');
+  const iv = setInterval(() => { st.textContent = steps[i++ % steps.length]; }, 380);
+
+  try {
+    let detectedEmotion;
+    if (ortSession) {
+      // 실제 YOLO 추론
+      const img = document.getElementById('preview');
+      const boxes = await runYOLOInference(img);
+      if (boxes && boxes.length > 0) {
+        drawBoxes(boxes, img.naturalWidth, img.naturalHeight);
+        // 박스 크기/위치 → 감정 규칙 (DeepCat 기반 heuristic)
+        const b = boxes[0];
+        const ratio = b.h / b.w;
+        if (ratio > 1.3) detectedEmotion = 'alert';
+        else if (b.score > 0.8) detectedEmotion = 'calm';
+        else detectedEmotion = EMO_ORDER[Math.floor(Math.random() * EMO_ORDER.length)];
+      } else {
+        detectedEmotion = EMO_ORDER[Math.floor(Math.random() * EMO_ORDER.length)];
+      }
+    } else {
+      // 데모 모드: 랜덤 감정
+      await new Promise(r => setTimeout(r, 1800));
+      detectedEmotion = EMO_ORDER[Math.floor(Math.random() * EMO_ORDER.length)];
+    }
+    clearInterval(iv); ret.classList.remove('on');
+    // 배지 업데이트
+    document.getElementById('result-badge').textContent =
+      inferenceEP === 'webgpu' ? '⚡ GPU 추론' :
+      inferenceEP === 'webnn'  ? '🧠 NPU 추론' :
+      inferenceEP === 'wasm'   ? '✅ CPU 추론' : '● 데모 모드';
+    showResult(detectedEmotion);
+  } catch(e) {
+    clearInterval(iv); ret.classList.remove('on');
+    console.error('[CatFace] 추론 오류:', e);
+    showResult(EMO_ORDER[Math.floor(Math.random() * EMO_ORDER.length)]);
+  }
+}
+
+/* ══════════════════════════════════════
+   13. 결과
+══════════════════════════════════════ */
+function showResult(emoKey) {
+  ttsStop();
+  state.currentEmotion = emoKey;
+  const e = EMOTIONS[emoKey];
+  document.getElementById('r-catname').textContent = state.profile.name;
+  document.getElementById('r-emoji').textContent   = e.emoji;
+  document.getElementById('r-label').textContent   = e.label;
+  document.getElementById('r-conf').textContent    = `신뢰도 ${e.conf}%`;
+  document.getElementById('r-bar').style.width     = e.conf + '%';
+  document.getElementById('r-parts').innerHTML = `
+    <div class="part"><div class="k">👁️</div><div><b>눈</b> · <span class="v">${e.eye}</span></div></div>
+    <div class="part"><div class="k">👄</div><div><b>입/코</b> · <span class="v">${e.mouth}</span></div></div>
+    <div class="part"><div class="k miss">〰️</div><div><b>꼬리</b> · <span class="v">얼굴 사진 · 확인 불가</span></div></div>`;
+  document.getElementById('s-who').textContent = `${state.profile.name}의 말`;
+  buildLangTabs();
+  const txt = buildSpeech(emoKey, state.currentLang);
+  document.getElementById('s-text').textContent = txt;
+  document.getElementById('s-count').textContent = txt.length + '자';
+
+  const box = document.getElementById('emo-preview'); box.innerHTML = '';
+  EMO_ORDER.forEach(k => {
+    const c = document.createElement('div');
+    c.className = 'chip' + (k === emoKey ? ' on' : '');
+    c.textContent = EMOTIONS[k].emoji + ' ' + EMOTIONS[k].label.split(' ')[0];
+    c.onclick = () => showResult(k);
+    box.appendChild(c);
+  });
+  showView('result');
+  document.getElementById('tabbar').classList.add('hidden');
+  if (state.out === 'voice') setTimeout(ttsPlay, 300);
+}
+function rerollSpeech() {
+  ttsStop();
+  const txt = buildSpeech(state.currentEmotion, state.currentLang);
+  document.getElementById('s-text').textContent = txt;
+  document.getElementById('s-count').textContent = txt.length + '자';
+}
+function copySpeech() {
+  const txt = document.getElementById('s-text').textContent;
+  if (navigator.clipboard) navigator.clipboard.writeText(txt);
+  else { const ta = document.createElement('textarea'); ta.value = txt; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); }
+  const btn = document.querySelector('.tts-btn.sec:nth-child(4)');
+  if(btn){ const o = btn.textContent; btn.textContent='✅ 복사됨'; setTimeout(()=>btn.textContent=o,1500); }
+}
+
+/* ══════════════════════════════════════
+   14. TTS
+══════════════════════════════════════ */
+function getLangBcp() {
+  return (LANGS.find(x => x.code === state.currentLang) || LANGS[0]).bcp;
+}
+function ttsPlay() {
+  if (!('speechSynthesis' in window)) return;
+  const txt = document.getElementById('s-text').textContent;
+  const u   = new SpeechSynthesisUtterance(txt);
+  u.lang = getLangBcp(); u.rate = 1.0; u.pitch = 1.2;
+  u.onstart = () => { state.ttsPlaying = true;  setPlayBtn(true);  };
+  u.onend   = () => { state.ttsPlaying = false; setPlayBtn(false); };
+  u.onerror = () => { state.ttsPlaying = false; setPlayBtn(false); };
+  speechSynthesis.cancel(); speechSynthesis.speak(u);
+}
+function ttsStop()   { if ('speechSynthesis' in window) speechSynthesis.cancel(); state.ttsPlaying = false; setPlayBtn(false); }
+function ttsToggle() { state.ttsPlaying ? ttsStop() : ttsPlay(); }
+function setPlayBtn(playing) {
+  const btn = document.getElementById('tts-play');
+  if (playing) { btn.textContent = '⏸ 일시정지'; btn.classList.add('playing'); }
+  else         { btn.textContent = '🔊 듣기';    btn.classList.remove('playing'); }
+}
+
+/* ══════════════════════════════════════
+   15. 설정
+══════════════════════════════════════ */
+function onNyang(v) {
+  state.nyang = +v;
+  document.getElementById('nyang-val').textContent = v + '%';
+  const s = applyNyang("지금 이 자리가 따뜻하고 편안해. 옆에 있어줘.", state.nyang);
+  document.getElementById('nyang-preview').textContent = '미리보기: ' + s;
+}
+function setOut(m) {
+  state.out = m;
+  document.querySelectorAll('#outmode button').forEach(b => b.classList.toggle('on', b.dataset.m === m));
+}
+function renderSettings() {
+  document.getElementById('nyang').value = state.nyang; onNyang(state.nyang);
+  document.querySelectorAll('#outmode button').forEach(b => b.classList.toggle('on', b.dataset.m === state.out));
+  buildLangChips(); buildPersChips('pers-chips2');
+}
+
+/* ══════════════════════════════════════
+   16. 시계 & 초기화
+══════════════════════════════════════ */
+function tick() {
+  const d = new Date();
+  document.getElementById('clock').textContent = `${d.getHours()}:${String(d.getMinutes()).padStart(2,'0')}`;
+}
+tick(); setInterval(tick, 10000);
+
+document.getElementById('breed-list').addEventListener('scroll', () => {
+  updateBreedSel();
+  clearTimeout(window.__bt);
+  window.__bt = setTimeout(updateBreedSel, 90);
+});
+
+// 앱 시작: 온보딩 렌더 + YOLO 초기화
+renderOnboard();
+initYOLO();
+</script>
+</body>
+</html>
