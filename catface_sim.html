@@ -425,7 +425,8 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;heigh
 ══════════════════════════════════════ */
 const state = {
   profile:{ name:"멍밍이", age:"12", sex:"여아", breed:"러시안 블루", pers:"도도", photo:null },
-  nyang:60, out:"text", currentEmotion:"calm", currentLang:"ko", ttsPlaying:false
+  nyang:60, out:"text", currentEmotion:"calm", currentLang:"ko", ttsPlaying:false,
+  lastDetectionFound: true  // 마지막 탐지에서 고양이를 찾았는지 여부
 };
 
 /* ══════════════════════════════════════
@@ -801,6 +802,31 @@ const LANGS = [
 
 function buildSpeech(emoKey, lang) {
   lang = lang || state.currentLang;
+
+  // 고양이가 아닐 때: 특별한 화난 메시지
+  if (!state.lastDetectionFound && emoKey === 'annoyed') {
+    const notCatMessages = {
+      ko: [
+        "아 진짜 화난다! 나 지금 그 사진에 고양이가 없는 줄 알았어? 저게 뭐야... 개? 새? 다른 게 뭐가 있는데... 집사한테 자랑하고 싶으니까 고양이 사진을 올려줘! 제발!",
+        "뭐야 이건... 저게 나를 찍으려고 한 거야? 이건 고양이가 아니잖아! 자존심 상해. 나 고양이인데 다른 동물 사진을 보여주다니... 정신 차려 집사.",
+        "어? 저게 뭐지? 나한테 고양이가 아닌 사진을 보여줘? 나 고양이야. 고양이! 내 사진을 올려줘 진짜. 아니면 다른 고양이라도... 이 정도 수치는 없어.",
+        "이걸로 뭘 하려고 했어? 날 놀리는 건가? 이건... 이건 고양이가 아니잖아! 기분 진짜 나쁨. 제발 내 사진을 올려줘.",
+        "정말이야? 이 사진을? 고양이가 하나도 없는데? 집사, 진심으로 실망했어. 그냥 거울 봐. 그게 고양이야. 저건 절대 아니고."
+      ],
+      en: [
+        "Are you serious? There's no cat in this photo! What is this? Come on, upload a picture of a CAT. Preferably me. I'm furious right now.",
+        "This isn't a cat. I'm a cat. Do you understand the difference? I'm genuinely offended. Please, just take a proper cat photo.",
+        "You're testing my patience. This is definitely not a cat photo. Why would you show me this? Upload something with an actual cat!",
+        "I can't believe you did this. No cat here. Zero cats. This is insulting. Please just upload MY picture instead.",
+        "Is this some kind of joke? Where's the cat? I don't see any cat. Not here. Try again with an actual cat photo."
+      ]
+    };
+    const msgList = notCatMessages[lang] || notCatMessages.ko;
+    const msg = msgList[Math.floor(Math.random() * msgList.length)];
+    if (lang === 'ko') return applyNyang(msg, state.nyang);
+    return msg;
+  }
+
   const e = EMOTIONS[emoKey];
   const lines = e.lines[lang] || e.lines.ko;
   const base = lines[Math.floor(Math.random() * lines.length)];
@@ -1035,18 +1061,18 @@ async function runAnalysis() {
       const img = document.getElementById('preview');
       const boxes = await runYOLOInference(img);
       if (boxes && boxes.length > 0) {
+        // ✅ 고양이 탐지 성공 → 다양한 감정으로 매번 다른 응답
+        state.lastDetectionFound = true;
         drawBoxes(boxes, img.naturalWidth, img.naturalHeight);
-        // 박스 크기/위치 → 감정 규칙 (DeepCat 기반 heuristic)
-        const b = boxes[0];
-        const ratio = b.h / b.w;
-        if (ratio > 1.3) detectedEmotion = 'alert';
-        else if (b.score > 0.8) detectedEmotion = 'calm';
-        else detectedEmotion = EMO_ORDER[Math.floor(Math.random() * EMO_ORDER.length)];
-      } else {
         detectedEmotion = EMO_ORDER[Math.floor(Math.random() * EMO_ORDER.length)];
+      } else {
+        // ❌ 고양이를 찾지 못함 → 화낸다!
+        state.lastDetectionFound = false;
+        detectedEmotion = 'annoyed';
       }
     } else {
       // 데모 모드: 랜덤 감정
+      state.lastDetectionFound = true;
       await new Promise(r => setTimeout(r, 1800));
       detectedEmotion = EMO_ORDER[Math.floor(Math.random() * EMO_ORDER.length)];
     }

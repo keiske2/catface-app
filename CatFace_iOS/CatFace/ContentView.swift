@@ -65,7 +65,11 @@ struct ContentView: View {
             DispatchQueue.main.async {
                 detectedCats = detections
                 if !detections.isEmpty {
+                    // ✅ 고양이 탐지 성공 → 다양한 감정으로 매번 다른 응답
                     currentEmotion = analyzeEmotion(from: detections[0])
+                } else {
+                    // ❌ 고양이를 찾지 못함 → 화낸다!
+                    currentEmotion = analyzeNotCat()
                 }
                 isAnalyzing = false
             }
@@ -73,6 +77,7 @@ struct ContentView: View {
     }
 
     private func analyzeEmotion(from cat: DetectedCat) -> CatEmotion {
+        // 매번 다른 감정으로 응답
         let emotions = [
             CatEmotion(
                 type: .calm,
@@ -106,7 +111,29 @@ struct ContentView: View {
             )
         ]
 
-        return emotions.max(by: { $0.confidence < $1.confidence }) ?? emotions[0]
+        return emotions.randomElement() ?? emotions[0]
+    }
+
+    private func analyzeNotCat() -> CatEmotion {
+        // 고양이가 없으면 화낸다!
+        let notCatMessages = [
+            "아 진짜 화난다! 나 지금 그 사진에 고양이가 없는 줄 알았어? 저게 뭐야... 개? 새? 다른 게 뭐가 있는데... 집사한테 자랑하고 싶으니까 고양이 사진을 올려줘! 제발!",
+            "뭐야 이건... 저게 나를 찍으려고 한 거야? 이건 고양이가 아니잖아! 자존심 상해. 나 고양이인데 다른 동물 사진을 보여주다니... 정신 차려 집사.",
+            "어? 저게 뭐지? 나한테 고양이가 아닌 사진을 보여줘? 나 고양이야. 고양이! 내 사진을 올려줘 진짜. 아니면 다른 고양이라도... 이 정도 수치는 없어.",
+            "이걸로 뭘 하려고 했어? 날 놀리는 건가? 이건... 이건 고양이가 아니잖아! 기분 진짜 나쁨. 제발 내 사진을 올려줘.",
+            "정말이야? 이 사진을? 고양이가 하나도 없는데? 집사, 진심으로 실망했어. 그냥 거울 봐. 그게 고양이야. 저건 절대 아니고."
+        ]
+
+        let message = notCatMessages.randomElement() ?? notCatMessages[0]
+
+        return CatEmotion(
+            type: .annoyed,
+            emoji: "😾",
+            label: "불쾌 · 짜증",
+            confidence: 95,
+            customDescription: message,
+            isNotCat: true
+        )
     }
 }
 
