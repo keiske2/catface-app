@@ -426,7 +426,11 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;heigh
 const state = {
   profile:{ name:"멍밍이", age:"12", sex:"여아", breed:"러시안 블루", pers:"도도", photo:null },
   nyang:60, out:"text", currentEmotion:"calm", currentLang:"ko", ttsPlaying:false,
-  lastDetectionFound: true  // 마지막 탐지에서 고양이를 찾았는지 여부
+  lastDetectionFound: true,
+  // 터치 인터랙션
+  lastDetectedBoxes: [],  // 마지막 YOLO 탐지 결과
+  touchCount: 0,
+  lastTouchTime: 0
 };
 
 /* ══════════════════════════════════════
@@ -568,12 +572,22 @@ function iou(a, b) {
   return union>0 ? inter/union : 0;
 }
 
-/* 캔버스에 박스 그리기 */
+/* 캔버스에 박스 그리기 + 터치 인터랙션용 좌표 저장 */
 function drawBoxes(boxes, imgW, imgH) {
   const cvs = document.getElementById('det-canvas');
   cvs.width  = imgW; cvs.height = imgH;
   const ctx  = cvs.getContext('2d');
   ctx.clearRect(0, 0, imgW, imgH);
+
+  // 터치 인터랙션용 좌표 저장
+  state.lastDetectedBoxes = boxes.map(b => ({
+    x: (b.cx - b.w/2) * imgW / 640,
+    y: (b.cy - b.h/2) * imgH / 640,
+    w: b.w * imgW / 640,
+    h: b.h * imgH / 640,
+    score: b.score
+  }));
+
   boxes.forEach(b => {
     const x = (b.cx - b.w/2) * imgW / 640;
     const y = (b.cy - b.h/2) * imgH / 640;
@@ -746,6 +760,62 @@ const EMOTIONS = {
   }
 };
 const EMO_ORDER = ["calm","curious","alert","annoyed","affection"];
+
+/* ══════════════════════════════════════
+   4. 터치 인터랙션 반응 (YOLO 좌표 기반)
+══════════════════════════════════════ */
+const TOUCH_REACTIONS = {
+  head: {
+    ko: [
+      "음... 여기가 제일 좋아",
+      "아... 귀 뒤 기분 좋은데",
+      "여기 쓰다듬어 줄래? 좋아",
+      "아... 머리... 최고야",
+      "음... 여기 좋아... 계속 해줘"
+    ],
+    en: ["Mmm... here is the best", "Ah... behind the ears... feels good", "Keep petting my head", "Ahh... my head... the best", "Keep going..."]
+  },
+  body: {
+    ko: [
+      "아... 등... 기분 좋아",
+      "쓰다듬어 줘... 아... 편해",
+      "더... 계속 해줘... 기분 좋아",
+      "옆구리는 민감해... 하지만 좋아",
+      "아... 몸통... 아... 기분 좋은데"
+    ],
+    en: ["Ah... my back... feels good", "Pet me... ah... so comfortable", "More... keep going... feels good", "My sides are sensitive... but it feels good", "Ahhh... my body... so good"]
+  },
+  belly: {
+    ko: [
+      "아! 배는 건드리지 마!",
+      "배 올려놔!",
+      "...하지만 기분은 좋네... 더 해줄래?",
+      "배를 노리는 건가? 위험한데... 하지만 기분은 좋아",
+      "배는 함정이야... 하지만 좋네"
+    ],
+    en: ["Ah! Don't touch my belly!", "Hands off my belly!", "...but it feels good... more?", "Are you after my belly? Dangerous... but it feels good", "My belly is a trap... but I like it"]
+  },
+  tail: {
+    ko: [
+      "꼬리 건드리지 마!",
+      "아우... 꼬리야...",
+      "꼬리는 내거야!",
+      "꼬리 조심!",
+      "아우... 꼬리 건드리지 말라고!"
+    ],
+    en: ["Don't touch my tail!", "Oww... my tail...", "My tail is mine!", "Be careful with my tail!", "Owww... don't touch my tail!"]
+  },
+  unknown: {
+    ko: [
+      "음? 뭘 하는 거야?",
+      "거기... 뭐해?",
+      "흠... 거기도 괜찮네",
+      "어? 그 부분?",
+      "거기는 처음이네... 근데 괜찮은데?"
+    ],
+    en: ["Huh? What are you doing?", "There... what are you doing?", "Hmm... that's okay too", "Huh? That part?", "That's a first... but it feels okay?"]
+  }
+};
 
 /* ══════════════════════════════════════
    4. 성격 & 냥체
@@ -1195,6 +1265,151 @@ document.getElementById('breed-list').addEventListener('scroll', () => {
   clearTimeout(window.__bt);
   window.__bt = setTimeout(updateBreedSel, 90);
 });
+
+/* ══════════════════════════════════════
+   17. 터치 인터랙션
+══════════════════════════════════════ */
+function detectTouchPart(touchX, touchY) {
+  if (state.lastDetectedBoxes.length === 0) return 'unknown';
+
+  const box = state.lastDetectedBoxes[0];
+  if (!box) return 'unknown';
+
+  // 박스 내에서의 상대 위치 계산
+  const relX = (touchX - box.x) / box.w;
+  const relY = (touchY - box.y) / box.h;
+
+  // 터치가 박스 안에 있는가?
+  if (relX < 0 || relX > 1 || relY < 0 || relY > 1) {
+    return 'unknown';
+  }
+
+  // 부위 판단
+  if (relY < 0.35) {
+    // 상단 35% → 머리/귀
+    return 'head';
+  } else if (relY < 0.65) {
+    // 중단 30% → 몸통
+    return 'body';
+  } else if (relY < 0.80) {
+    // 하단 15% → 배
+    return 'belly';
+  } else {
+    // 맨 아래 → 꼬리
+    return 'tail';
+  }
+}
+
+function getTouchReaction(part) {
+  const lang = state.currentLang;
+  const reactions = TOUCH_REACTIONS[part] || TOUCH_REACTIONS.unknown;
+  const msgList = reactions[lang] || reactions.ko;
+  return msgList[Math.floor(Math.random() * msgList.length)];
+}
+
+function handleCanvasTouch(e) {
+  const cvs = document.getElementById('det-canvas');
+  if (!cvs) return;
+
+  const rect = cvs.getBoundingClientRect();
+  const touchX = e.clientX - rect.left;
+  const touchY = e.clientY - rect.top;
+
+  const part = detectTouchPart(touchX, touchY);
+  const reaction = getTouchReaction(part);
+
+  // 터치 반응 표시
+  showTouchReaction(part, reaction);
+
+  // TTS 재생
+  if (state.out === 'voice') {
+    ttsStop();
+    playTouchReaction(reaction);
+  }
+}
+
+function showTouchReaction(part, reaction) {
+  // 결과 화면에 터치 반응 표시
+  const resultBox = document.getElementById('v-result');
+  if (!resultBox) return;
+
+  // 기존 터치 반응 제거
+  const oldTouch = document.querySelector('.touch-reaction');
+  if (oldTouch) oldTouch.remove();
+
+  // 새 터치 반응 생성
+  const touchEl = document.createElement('div');
+  touchEl.className = 'touch-reaction';
+  touchEl.style.cssText = `
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(185, 106, 140, 0.95);
+    color: white;
+    padding: 16px 24px;
+    border-radius: 16px;
+    font-size: 14px;
+    font-weight: 700;
+    text-align: center;
+    z-index: 100;
+    max-width: 280px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+    animation: slideIn 0.3s ease-out;
+  `;
+
+  const emoji = {
+    head: '😸',
+    body: '😻',
+    belly: '😾',
+    tail: '😸',
+    unknown: '😐'
+  }[part] || '😐';
+
+  touchEl.innerHTML = `<div style="font-size:24px;margin-bottom:8px">${emoji}</div>${reaction}`;
+  resultBox.appendChild(touchEl);
+
+  // 2초 후 사라짐
+  setTimeout(() => touchEl.remove(), 2000);
+}
+
+function playTouchReaction(text) {
+  if (!('speechSynthesis' in window)) return;
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = getLangBcp();
+  u.rate = 1.0;
+  u.pitch = 1.2;
+  u.onstart = () => { state.ttsPlaying = true; };
+  u.onend = () => { state.ttsPlaying = false; };
+  speechSynthesis.speak(u);
+}
+
+// 캔버스에 터치 이벤트 리스너 추가
+document.addEventListener('DOMContentLoaded', () => {
+  setTimeout(() => {
+    const cvs = document.getElementById('det-canvas');
+    if (cvs) {
+      cvs.style.cursor = 'pointer';
+      cvs.addEventListener('click', handleCanvasTouch);
+    }
+  }, 100);
+});
+
+// CSS 애니메이션 추가
+const style = document.createElement('style');
+style.textContent = `
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translate(-50%, -50%) scale(0.8);
+    }
+    to {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+    }
+  }
+`;
+document.head.appendChild(style);
 
 // 앱 시작: 온보딩 렌더 + YOLO 초기화
 renderOnboard();
