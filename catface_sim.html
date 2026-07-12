@@ -3,7 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CatFace · 아이폰 15 Pro 시뮬레이션</title>
+<meta name="theme-color" content="#7A5FB0">
+<meta name="description" content="AI가 고양이의 표정을 분석해서 감정을 번역해주는 앱">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="CatFace">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect fill='%237A5FB0' width='180' height='180' rx='40'/><text x='50%' y='50%' font-size='100' fill='white' text-anchor='middle' dy='.3em' font-family='Arial'>🐱</text></svg>">
+<link rel="manifest" href="manifest.json">
+<title>CatFace · 고양이 표정 번역기</title>
 <style>
 :root{
   --paper:#F6F1EA; --ink:#2A2536; --ink-soft:#6B6478;
@@ -1555,6 +1562,31 @@ document.head.appendChild(style);
 // 앱 시작: 온보딩 렌더 + YOLO 초기화
 renderOnboard();
 initYOLO();
+
+// Service Worker 등록
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js')
+    .then(registration => {
+      console.log('✅ Service Worker 등록 성공:', registration);
+    })
+    .catch(error => {
+      console.warn('⚠️ Service Worker 등록 실패:', error);
+    });
+}
+
+// PWA 설치 프롬프트 처리
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  console.log('📱 PWA 설치 가능');
+  // 설치 버튼 표시 가능
+});
+
+window.addEventListener('appinstalled', () => {
+  console.log('🎉 PWA 설치됨');
+  deferredPrompt = null;
+});
 </script>
 </body>
 </html>
