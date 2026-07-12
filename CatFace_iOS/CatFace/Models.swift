@@ -7,14 +7,6 @@ struct DetectedCat {
     let id: Int
 }
 
-enum EmotionType {
-    case calm
-    case curious
-    case alert
-    case annoyed
-    case affection
-}
-
 struct CatEmotion {
     let type: EmotionType
     let emoji: String
