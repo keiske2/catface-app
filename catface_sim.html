@@ -817,6 +817,40 @@ const TOUCH_REACTIONS = {
   }
 };
 
+// 제스처 반응 (스와이프, 오래 누르기, 더블 탭)
+const GESTURE_REACTIONS = {
+  swipe: {
+    ko: [
+      "아... 쓰다듬어 줘... 계속 해줘",
+      "부드럽게... 아... 기분 좋아",
+      "아... 등을 넘나들며... 기분 좋은데",
+      "쓰다듬기... 최고야",
+      "아... 계속... 더 해줘"
+    ],
+    en: ["Ah... pet me... keep going", "Gently... ah... feels good", "Ah... stroking... feels so good", "Petting... the best", "Ah... more... keep going"]
+  },
+  longpress: {
+    ko: [
+      "아... 더... 더 강하게... 아... 좋아",
+      "음... 더 오래... 아... 편해",
+      "아... 계속 눌러줘... 기분 좋아",
+      "깊게... 아... 최고야",
+      "더... 더... 아... 아..."
+    ],
+    en: ["Ah... more... harder... ah... good", "Mmm... longer... ah... comfortable", "Ah... keep pressing... feels good", "Deeper... ah... the best", "More... more... ah... ah..."]
+  },
+  doubletap: {
+    ko: [
+      "자꾸 건드리면 화난다!",
+      "뭐해, 자꾸 건드려?",
+      "재빨리 건드리는 거야? 하지만 좋네",
+      "자꾸자꾸... 아 기분 좋은데",
+      "재빨리 두 번? 흠... 괜찮은데?"
+    ],
+    en: ["Stop touching me or I'll get mad!", "Why do you keep tapping?", "Quick taps? But it feels good", "Tap tap... ah feels good", "Double tap? Hmm... not bad?"]
+  }
+};
+
 /* ══════════════════════════════════════
    4. 성격 & 냥체
 ══════════════════════════════════════ */
@@ -1269,6 +1303,9 @@ document.getElementById('breed-list').addEventListener('scroll', () => {
 /* ══════════════════════════════════════
    17. 터치 인터랙션
 ══════════════════════════════════════ */
+let touchStartX = 0, touchStartY = 0, touchStartTime = 0;
+let lastTapTime = 0;
+
 function detectTouchPart(touchX, touchY) {
   if (state.lastDetectedBoxes.length === 0) return 'unknown';
 
@@ -1307,24 +1344,76 @@ function getTouchReaction(part) {
   return msgList[Math.floor(Math.random() * msgList.length)];
 }
 
-function handleCanvasTouch(e) {
+function getGestureReaction(gesture) {
+  const lang = state.currentLang;
+  const reactions = GESTURE_REACTIONS[gesture] || GESTURE_REACTIONS.swipe;
+  const msgList = reactions[lang] || reactions.ko;
+  return msgList[Math.floor(Math.random() * msgList.length)];
+}
+
+function handleCanvasMouseDown(e) {
   const cvs = document.getElementById('det-canvas');
   if (!cvs) return;
 
   const rect = cvs.getBoundingClientRect();
-  const touchX = e.clientX - rect.left;
-  const touchY = e.clientY - rect.top;
+  touchStartX = e.clientX - rect.left;
+  touchStartY = e.clientY - rect.top;
+  touchStartTime = Date.now();
+}
 
-  const part = detectTouchPart(touchX, touchY);
-  const reaction = getTouchReaction(part);
+function handleCanvasMouseMove(e) {
+  // 드래그 중일 때는 아무것도 하지 않음 (mouseup에서 처리)
+}
 
-  // 터치 반응 표시
-  showTouchReaction(part, reaction);
+function handleCanvasMouseUp(e) {
+  const cvs = document.getElementById('det-canvas');
+  if (!cvs) return;
 
-  // TTS 재생
-  if (state.out === 'voice') {
-    ttsStop();
-    playTouchReaction(reaction);
+  const rect = cvs.getBoundingClientRect();
+  const touchEndX = e.clientX - rect.left;
+  const touchEndY = e.clientY - rect.top;
+  const touchDuration = Date.now() - touchStartTime;
+
+  // 스와이프 거리 계산
+  const deltaX = touchEndX - touchStartX;
+  const deltaY = touchEndY - touchStartY;
+  const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+
+  let gesture = null;
+  let part = detectTouchPart(touchStartX, touchStartY);
+
+  // 제스처 판단
+  if (touchDuration > 800) {
+    // 오래 누르기 (800ms 이상)
+    gesture = 'longpress';
+  } else if (distance > 50) {
+    // 스와이프 (50px 이상)
+    gesture = 'swipe';
+  } else {
+    // 더블 탭 확인
+    const now = Date.now();
+    if (now - lastTapTime < 300) {
+      gesture = 'doubletap';
+    }
+    lastTapTime = now;
+  }
+
+  if (!gesture) {
+    // 일반 탭
+    const reaction = getTouchReaction(part);
+    showTouchReaction(part, reaction);
+    if (state.out === 'voice') {
+      ttsStop();
+      playTouchReaction(reaction);
+    }
+  } else {
+    // 제스처 반응
+    const reaction = getGestureReaction(gesture);
+    showTouchReaction(part, reaction);
+    if (state.out === 'voice') {
+      ttsStop();
+      playTouchReaction(reaction);
+    }
   }
 }
 
@@ -1390,7 +1479,59 @@ document.addEventListener('DOMContentLoaded', () => {
     const cvs = document.getElementById('det-canvas');
     if (cvs) {
       cvs.style.cursor = 'pointer';
-      cvs.addEventListener('click', handleCanvasTouch);
+      cvs.addEventListener('mousedown', handleCanvasMouseDown);
+      cvs.addEventListener('mousemove', handleCanvasMouseMove);
+      cvs.addEventListener('mouseup', handleCanvasMouseUp);
+      // 터치 이벤트도 지원
+      cvs.addEventListener('touchstart', (e) => {
+        const touch = e.touches[0];
+        const rect = cvs.getBoundingClientRect();
+        touchStartX = touch.clientX - rect.left;
+        touchStartY = touch.clientY - rect.top;
+        touchStartTime = Date.now();
+      });
+      cvs.addEventListener('touchend', (e) => {
+        const touch = e.changedTouches[0];
+        const rect = cvs.getBoundingClientRect();
+        const touchEndX = touch.clientX - rect.left;
+        const touchEndY = touch.clientY - rect.top;
+        const touchDuration = Date.now() - touchStartTime;
+
+        const deltaX = touchEndX - touchStartX;
+        const deltaY = touchEndY - touchStartY;
+        const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+
+        let gesture = null;
+        let part = detectTouchPart(touchStartX, touchStartY);
+
+        if (touchDuration > 800) {
+          gesture = 'longpress';
+        } else if (distance > 50) {
+          gesture = 'swipe';
+        } else {
+          const now = Date.now();
+          if (now - lastTapTime < 300) {
+            gesture = 'doubletap';
+          }
+          lastTapTime = now;
+        }
+
+        if (!gesture) {
+          const reaction = getTouchReaction(part);
+          showTouchReaction(part, reaction);
+          if (state.out === 'voice') {
+            ttsStop();
+            playTouchReaction(reaction);
+          }
+        } else {
+          const reaction = getGestureReaction(gesture);
+          showTouchReaction(part, reaction);
+          if (state.out === 'voice') {
+            ttsStop();
+            playTouchReaction(reaction);
+          }
+        }
+      });
     }
   }, 100);
 });

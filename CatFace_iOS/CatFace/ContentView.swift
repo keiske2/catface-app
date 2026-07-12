@@ -37,6 +37,9 @@ struct ContentView: View {
                 onImageSelected: { image in
                     selectedImage = image
                     analyzeImage(image)
+                },
+                onTouchGesture: { gesture, part in
+                    handleTouchGesture(gesture: gesture, part: part)
                 }
             )
             .tag(1)
@@ -134,6 +137,28 @@ struct ContentView: View {
             customDescription: message,
             isNotCat: true
         )
+    }
+
+    private func handleTouchGesture(gesture: String, part: String) {
+        let gestures = [
+            "swipe": ["아... 쓰다듬어 줘... 계속 해줘", "부드럽게... 아... 기분 좋아", "아... 등을 넘나들며... 기분 좋은데", "쓰다듬기... 최고야", "아... 계속... 더 해줘"],
+            "longpress": ["아... 더... 더 강하게... 아... 좋아", "음... 더 오래... 아... 편해", "아... 계속 눌러줘... 기분 좋아", "깊게... 아... 최고야", "더... 더... 아... 아..."],
+            "doubletap": ["자꾸 건드리면 화난다!", "뭐해, 자꾸 건드려?", "재빨리 건드리는 거야? 하지만 좋네", "자꾸자꾸... 아 기분 좋은데", "재빨리 두 번? 흠... 괜찮은데?"]
+        ]
+
+        if let reactions = gestures[gesture] {
+            let message = reactions.randomElement() ?? reactions[0]
+            let emoji = ["head": "😸", "body": "😻", "belly": "😾", "tail": "😸", "unknown": "😐"][part] ?? "😐"
+
+            currentEmotion = CatEmotion(
+                type: .affection,
+                emoji: emoji,
+                label: "터치 반응",
+                confidence: Int.random(in: 75...95),
+                customDescription: message,
+                isNotCat: false
+            )
+        }
     }
 }
 

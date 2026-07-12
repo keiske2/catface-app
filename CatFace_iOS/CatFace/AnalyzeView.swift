@@ -9,11 +9,14 @@ struct AnalyzeView: View {
     @Binding var catName: String
 
     var onImageSelected: (UIImage) -> Void
+    var onTouchGesture: (String, String) -> Void = { _, _ in }
 
     @State private var showingImagePicker = false
     @State private var imagePickerItem: PhotosPickerItem?
     @State private var selectedText: String = ""
     @State private var showingSpeech = false
+    @State private var lastTapTime: Date = Date()
+    @State private var touchStartTime: Date = Date()
 
     var body: some View {
         NavigationStack {
@@ -70,13 +73,33 @@ struct AnalyzeView: View {
                         // 사진 영역
                         VStack(spacing: 12) {
                             if let image = selectedImage {
-                                Image(uiImage: image)
-                                    .resizable()
-                                    .scaledToFill()
-                                    .frame(maxWidth: .infinity)
-                                    .frame(height: 300)
+                                ZStack {
+                                    Image(uiImage: image)
+                                        .resizable()
+                                        .scaledToFill()
+                                        .frame(maxWidth: .infinity)
+                                        .frame(height: 300)
+                                        .cornerRadius(16)
+                                        .clipped()
+
+                                    // 제스처 감지용 투명 오버레이
+                                    GestureDetectionView(
+                                        onTapGesture: { part in
+                                            onTouchGesture("tap", part)
+                                        },
+                                        onSwipeGesture: { part in
+                                            onTouchGesture("swipe", part)
+                                        },
+                                        onLongPressGesture: { part in
+                                            onTouchGesture("longpress", part)
+                                        },
+                                        onDoubleTapGesture: { part in
+                                            onTouchGesture("doubletap", part)
+                                        }
+                                    )
                                     .cornerRadius(16)
-                                    .clipped()
+                                }
+                                .frame(height: 300)
                             } else {
                                 VStack(spacing: 8) {
                                     Image(systemName: "cat.fill")
@@ -210,6 +233,124 @@ struct AnalyzeView: View {
     }
 }
 
+// MARK: - 제스처 감지 View
+struct GestureDetectionView: UIViewRepresentable {
+    var onTapGesture: (String) -> Void
+    var onSwipeGesture: (String) -> Void
+    var onLongPressGesture: (String) -> Void
+    var onDoubleTapGesture: (String) -> Void
+
+    func makeUIView(context: Context) -> UIView {
+        let view = UIView()
+        view.backgroundColor = .clear
+
+        // 싱글 탭
+        let singleTap = UITapGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.handleSingleTap(_:)))
+        singleTap.numberOfTapsRequired = 1
+        view.addGestureRecognizer(singleTap)
+
+        // 더블 탭
+        let doubleTap = UITapGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.handleDoubleTap(_:)))
+        doubleTap.numberOfTapsRequired = 2
+        view.addGestureRecognizer(doubleTap)
+        singleTap.require(toFail: doubleTap)
+
+        // 스와이프
+        let swipe = UIPanGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.handleSwipe(_:)))
+        view.addGestureRecognizer(swipe)
+
+        // 오래 누르기
+        let longPress = UILongPressGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.handleLongPress(_:)))
+        longPress.minimumPressDuration = 0.8
+        view.addGestureRecognizer(longPress)
+
+        return view
+    }
+
+    func updateUIView(_ uiView: UIView, context: Context) {}
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(
+            onTapGesture: onTapGesture,
+            onSwipeGesture: onSwipeGesture,
+            onLongPressGesture: onLongPressGesture,
+            onDoubleTapGesture: onDoubleTapGesture
+        )
+    }
+
+    class Coordinator: NSObject {
+        var onTapGesture: (String) -> Void
+        var onSwipeGesture: (String) -> Void
+        var onLongPressGesture: (String) -> Void
+        var onDoubleTapGesture: (String) -> Void
+
+        init(
+            onTapGesture: @escaping (String) -> Void,
+            onSwipeGesture: @escaping (String) -> Void,
+            onLongPressGesture: @escaping (String) -> Void,
+            onDoubleTapGesture: @escaping (String) -> Void
+        ) {
+            self.onTapGesture = onTapGesture
+            self.onSwipeGesture = onSwipeGesture
+            self.onLongPressGesture = onLongPressGesture
+            self.onDoubleTapGesture = onDoubleTapGesture
+        }
+
+        func getPartFromLocation(_ location: CGPoint, in bounds: CGRect) -> String {
+            let relY = location.y / bounds.height
+
+            if relY < 0.35 {
+                return "head"
+            } else if relY < 0.65 {
+                return "body"
+            } else if relY < 0.80 {
+                return "belly"
+            } else {
+                return "tail"
+            }
+        }
+
+        @objc func handleSingleTap(_ gesture: UITapGestureRecognizer) {
+            guard let view = gesture.view else { return }
+            let location = gesture.location(in: view)
+            let part = getPartFromLocation(location, in: view.bounds)
+            onTapGesture(part)
+        }
+
+        @objc func handleDoubleTap(_ gesture: UITapGestureRecognizer) {
+            guard let view = gesture.view else { return }
+            let location = gesture.location(in: view)
+            let part = getPartFromLocation(location, in: view.bounds)
+            onDoubleTapGesture(part)
+        }
+
+        @objc func handleSwipe(_ gesture: UIPanGestureRecognizer) {
+            guard let view = gesture.view else { return }
+            let location = gesture.location(in: view)
+            let part = getPartFromLocation(location, in: view.bounds)
+
+            if gesture.state == .ended {
+                let velocity = gesture.velocity(in: view)
+                let distance = sqrt(velocity.x * velocity.x + velocity.y * velocity.y)
+
+                if distance > 200 {
+                    onSwipeGesture(part)
+                }
+            }
+        }
+
+        @objc func handleLongPress(_ gesture: UILongPressGestureRecognizer) {
+            guard let view = gesture.view else { return }
+            let location = gesture.location(in: view)
+            let part = getPartFromLocation(location, in: view.bounds)
+
+            if gesture.state == .began {
+                onLongPressGesture(part)
+            }
+        }
+    }
+}
+
 #Preview {
     AnalyzeView(
         selectedImage: .constant(nil),
@@ -222,6 +363,7 @@ struct AnalyzeView: View {
             confidence: 82
         )),
         catName: .constant("멍밍이"),
-        onImageSelected: { _ in }
+        onImageSelected: { _ in },
+        onTouchGesture: { _, _ in }
     )
 }
