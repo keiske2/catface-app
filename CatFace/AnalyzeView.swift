@@ -200,6 +200,7 @@ struct AnalyzeView: View {
                                 // 감정 설명
                                 Text(emotion.description)
                                     .font(.system(size: 14.5, weight: .medium))
+                                    .lineHeight(1.6)
                                     .foregroundColor(.gray)
 
                                 // TTS 재생
