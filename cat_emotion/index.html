@@ -223,6 +223,18 @@
       position: relative;
       flex: 0 0 auto;
       box-shadow: var(--shadow);
+      cursor: pointer;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+    }
+
+    .brand .logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
     }
 
     .brand .logo::before, .brand .logo::after {
@@ -543,30 +555,24 @@
 
           <!-- 프로필 탭 -->
           <div class="view active" id="profile-view">
-            <div class="brand">
-              <div class="logo"></div>
+            <div class="brand" style="margin-bottom: 14px;">
+              <div class="logo" id="logoUpload" onclick="document.getElementById('catPhoto').click()" title="클릭해서 사진 업로드">🐱</div>
               <div>
                 <b>Cat Emotion</b>
                 <span>My Cat</span>
               </div>
+              <input type="file" id="catPhoto" accept="image/*" style="display:none;">
             </div>
 
             <h1>고양이 프로필</h1>
             <p class="sub">고양이 정보를 등록해주세요</p>
 
             <div class="card">
-              <label class="fld">고양이 사진</label>
-              <label class="upload-box" onclick="document.getElementById('catPhoto').click()">
-                <div class="icon">📷</div>
-                <div class="text">사진 선택</div>
-                <input type="file" id="catPhoto" accept="image/*">
-              </label>
-              <div id="photoPreview"></div>
-            </div>
-
-            <div class="card">
               <label class="fld">이름 *</label>
               <input type="text" id="catName" placeholder="예: 미미, 루루">
+
+              <label class="fld">나이</label>
+              <input type="number" id="catAge" placeholder="예: 3" min="0" max="30">
 
               <label class="fld">성별</label>
               <div class="chips">
@@ -574,14 +580,18 @@
                 <div class="chip" data-gender="F">암컷 🐱</div>
               </div>
 
-              <label class="fld">성격 선택</label>
+              <label class="fld">성격 선택 (복수 선택)</label>
               <div class="chips">
                 <div class="chip" data-personality="활발함">🚀 활발함</div>
+                <div class="chip" data-personality="도도함">😼 도도함</div>
                 <div class="chip" data-personality="까칠함">😾 까칠함</div>
                 <div class="chip" data-personality="느긋함">😸 느긋함</div>
                 <div class="chip" data-personality="장난스러움">🎾 장난</div>
                 <div class="chip" data-personality="사려깊음">🧠 사려깊음</div>
                 <div class="chip" data-personality="겁많음">😿 겁많음</div>
+                <div class="chip" data-personality="다정함">💕 다정함</div>
+                <div class="chip" data-personality="고집쟁이">💪 고집쟁이</div>
+                <div class="chip" data-personality="쾌활함">😄 쾌활함</div>
               </div>
 
               <label class="fld">추가 정보</label>
@@ -726,6 +736,62 @@
           angry: [
             '어어!! 이건 너무해요!! 아앙ㅠㅠ 화났어요! 아아아ㅠ 진짜 싫어요! 어!! 물어버릴 거예요!! ...진짜 싫어요... 떠나버릴거야... 절대 못 봐!! 어어ㅠ 화났어!! 진짜 실망했어요!! 이제 너무 싫어!! 앞으로 못 봅니다!'
           ]
+        },
+        '도도함': {
+          happy: [
+            '음... 그냥 괜찮네 뭐 나쁘지 않긴 한데... 내가 원한 건 아니지만 우연히 좋았나? 흠... 뭐 그럴 수도 있지 자존심은 상하지만 기분은 좋네... 음... 뭐 내가 원한 건 아니고 너희가 잘해서 이 정도군 다음엔 더 잘하셈! 내 기준은 높아!! 그냥 우연일 거야 날 행복하게 하려고 했겠지? 음... 뭐 그렇다고 해도 내가 최고지!'
+          ],
+          anxious: [
+            '뭐야? 왜 나한테 이래? 싫은데... 불편해... 음... 이건 내 스타일이 아니야 내가 싫다고 하지 않았나? 귀 안 들리니? 음... 내가 원한 건 아닌데... 왜 이럴까? 자존심 상해... 화난다! 근데 표현은 안 할 거야 내가 약해 보일까봐... 음... 싫어. 정신 차려!'
+          ],
+          tired: [
+            '나 피곤해 괜히 건드리지 마 음... 지겨워... 내가 휴식할 시간이라고 했잖아 피곤하니까 말 거는 거 싫어... 혼자 있고 싶어 내 개인 시간 방해하지 말아! 음... 자존심도 상했고 피곤하네 누구 없나? 혼자 있게 놔둬! 정신 없어 나 쉬고 있어!'
+          ],
+          angry: [
+            '이게 뭐냐고!! 내 자존심이 상했다!! 진짜 화났어!! 내가 뭐라고 했는데 안 들었어?! 정신 차려!! 절대 용서 안 해!! 음... 아직도 화났어 가만히 있어 절대 건드리지 말아!! 내가 얼마나 소중한데 이 따위로 대해?! 최악이야!! 진짜 진짜 화났다! 도도해서 더 화난다!!'
+          ]
+        },
+        '다정함': {
+          happy: [
+            '오 정말 좋아!! 내 마음이 따뜻해져!! 너도 나처럼 행복해 보여서 기뻐!! 우리 함께 이렇게 행복한 날이 자주 있으면 좋겠어!! 너한테 고마워!! 너 덕분이야 정말 최고의 하루야!! 함께 있어서 행복해 앞으로도 계속 이렇게 지내자!! 내가 너를 사랑한다고 말하고 싶어!! 정말 고마워 정말 사랑해!!'
+          ],
+          anxious: [
+            '음... 뭔가 불안해 근데 너는 괜찮아? 내가 도와줄 수 있는 게 있나? 뭔가 마음이 편하지 않은 것 같아 같이 있을게 혼자면 더 안 될 것 같아... 말해 줄 수 있어? 내가 들어줄 테니 너도 힘든 거 같긴 한데 함께 하면 괜찮을 거야 내가 옆에 있으니까 괜찮아 걱정하지 마'
+          ],
+          tired: [
+            '오... 피곤하네... 근데 너는? 너도 힘들어 보여 함께 쉬자!! 이렇게 붙어 있으면 편해 너도 편해야 난 편해 우리 함께 푹 쉬자!! 누워서 안아줄래? 그럼 더 편할 것 같아 음... 너도 힘든 게 있으면 말해 내가 들어줄게 함께면 괜찮아 졸릴 때까지 함께 있자'
+          ],
+          angry: [
+            '어? 난 화났어!! 근데 넌 괜찮아? 미안해 내가 화내서... 사실 너한테 화난 건 아니고... 상황이 싫어서 그런 거야 다시 해볼래? 우린 괜찮지? 내가 사랑하는 사람이 상처받으면 안 돼 용서해줄래? 난 너를 정말 소중하게 생각해 다시는 이러지 않을 테니까 함께하자'
+          ]
+        },
+        '고집쟁이': {
+          happy: [
+            '오! 내가 맞았잖아!! 이게 최고야!! 내 생각이 정답이야!! 보이지?! 나 고집 센 거 맞지? 하지만 이게 좋은 결과를 냈잖아!! 다음부터도 내 말 들어 내가 항상 맞아!! 음... 근데 이번엔 정말 잘 됐네 내 고집이 도움이 됐구나!! 자존감 충전!! 나는 천재야!! 계속 이렇게 하자!!'
+          ],
+          anxious: [
+            '어? 뭐야 내가 계획한 대로 안 돼?! 이건 내 책임이 아니야!! 누가 문제야?! 내 방법이 최고인데... 왜 이럼?! 화난다!! 내가 한 말 들으라니까!! 이 정도론 부족해!! 내 고집대로 해야 돼!! 음... 불안하긴 한데 내가 옳은 거야!! 내 방법이 최고!! 믿어줘!!'
+          ],
+          tired: [
+            '아... 나도 피곤해 내 고집 때문에 피곤한가? 아니야 이게 맞는 거야!! 근데 이렇게까지 해야 하나? 음... 쉬고 싶기도 한데... 내가 이겨내야 돼!! 나는 강해!! 절대 포기하지 않아!! 음... 다리 풀려 하지만 내 고집은 안 꺾인다!! 계속 가!! 내가 이겨내고 말 거야!!'
+          ],
+          angry: [
+            '뭐야!! 내 말을 안 들었어?! 진짜 화났다!! 내가 뭐라고 했는데!! 내 고집이 최고인 줄 알아!! 이 정도론 부족해!! 더 하라고 했잖아!! 내가 맞아!! 절대 포기 안 한다!! 내 방법이 정답이야!! 반박 불가!! 내 고집이 도움이 될 거야!! 믿어 아니면 후회해!!'
+          ]
+        },
+        '쾌활함': {
+          happy: [
+            '오옹!! 최고의 날씨야!! 기분이 정말 좋아!! 하루하루가 축제 같아!! 모든 게 재미있어 보여!! 이 행복함을 나눠주고 싶어!! 너도 행복해? 나랑 함께 이 즐거움을 느껴!! 이 기분 잊지 말자!! 우리 계속 행복하자!! 오! 또 다른 즐거운 일이 생길 것 같아!! 기대돼!! 모든 순간이 좋아!!'
+          ],
+          anxious: [
+            '어? 뭔가 이상한데? 근데 좋게 생각해보자!! 좋은 점도 있겠지? 음... 불안하긴 한데 이겨낼 수 있어!! 긍정적으로 생각하면 괜찮을 거야!! 함께 노력해!! 넌 충분히 잘 할 수 있어!! 절망하지 마!! 밝게 생각해!! 좋은 일이 분명 생길 거야!!'
+          ],
+          tired: [
+            '오... 피곤하네? 근데 그래도 기분은 좋아!! 쉬면서도 재미있는 거 하자!! 영화? 놀이? 아니면 함께 웃자!! 피곤해도 기분이 좋으면 괜찮아!! 우리 함께 즐겁게 쉬자!! 이 시간도 좋은 추억이 될 거야!! 피곤함도 함께면 덜할 거 같은데?'
+          ],
+          angry: [
+            '어?! 나를 화나게 했어?! 근데... 이것도 성장의 기회겠지? 긍정적으로 생각해보자!! 이 경험에서 뭔가 배울 수 있을 거야!! 넌 분명 좋은 의도였겠지? 그래 화내지 말자!! 함께 웃고 지내자!! 우린 친구니까!! 이 정도면 괜찮아!! 앞으로 더 좋아질 거야!!'
+          ]
         }
       },
       ja: {
@@ -812,6 +878,30 @@
           angry: [
             'ああ!! これはひどすぎます!! あああ 怒ってます! ああああ...本当に嫌いです! あ!! 噛みます!! ああああ 怒ってます!! シュッ!! シュッ!! 近づかないで!! これ以上見えません!! あああ 怒った!! 本当にがっかりしました!! もう嫌いです!! これからは見えません!'
           ]
+        },
+        'ツンデレ2': {
+          happy: ['ん...別に悪くないですね。 何も好きではありませんが...良いのかな? ふむ...良いと言えますね。 でも次はもっと上手にしてください! このぐらいなら大丈夫ですが完璧ではない!! 自分は最高です!! 自分の基準は高いです!!'],
+          anxious: ['自分は不安ですね。でも絶対に弱みを見せません!! 誇りが傷つきます...怒っています! 自分の方法が最高です!! 信じてください'],
+          tired: ['自分も疲れています。でも自分は強いです!! 絶対に諦めません!! 自分のプライドは傷つきません!! 自分は最高!!'],
+          angry: ['なに!! 自分の言うことを聞かなかったですか?! 本当に怒っています!! 自分が正しいです!! 反論できません!! 自分の方法が答えです!!']
+        },
+        'やさしい': {
+          happy: ['わあ! 本当に良いですね!! あなたも幸せなようで嬉しい!! 私たちがこんなに幸せな日がたくさんあったら嬉しいです!! あなたのおかげです!! 本当にありがとう!! 最高の一日です!! ずっと一緒にいたいです!! あなたを愛しています!!'],
+          anxious: ['ん...何か不安ですね。でも大丈夫ですか? 私が手伝えることがありますか? 何か心配なことをお話しください。 私が聞きます。 一緒なら大丈夫ですよ'],
+          tired: ['あ...疲れていますね。でも心配してください。私も疲れています。 一緒に休みましょう。 こうしていると楽ですね。 あなたも幸せにしたいです。'],
+          angry: ['あ? 私は怒っています。でもあなたは大丈夫ですか? 申し訳ない。 あなたを傷つけたくありません。 本当に申し訳ない。 許してくれますか?']
+        },
+        'いばり屋': {
+          happy: ['おお! 私が正しかった!! これが最高です!! 私の方法が完璧です!! 見てください!? 私は天才です!! 次もこのようにしましょう!! 私の基準は高いです!! でも今回は本当に良かったですね!! 私の頭がいいのは証明されました!! 続けよう!!'],
+          anxious: ['え? なぜ私の計画がうまくいきませんか?! これは私のせいではありません!! 誰が悪いですか?! 私の方法が最高です!! なぜ聞きませんか?! 怒っています!! 次は私の言うことを聞いてください!!'],
+          tired: ['あ...疲れました。でも私の頑固さは変わりません!! 私は最高です!! 絶対に諦めません!! 私は強いです!! プライドを失いません!! 続けよう!!'],
+          angry: ['なに!! 私の言うことを聞かなかったですか?! 本当に怒っています!! 私が正しいです!! 反論できません!! 私の方法が答えです!! 信じてください!!']
+        },
+        '陽気': {
+          happy: ['わあ!! 最高の天気です!! 気分が本当に良い!! 毎日がお祭りみたい!! 全部が楽しく見えます!! この幸せを分けたいです!! あなたも幸せですか? 一緒にこの楽しさを感じてください!! この気分を忘れないようにしましょう!!'],
+          anxious: ['え? 何か変ですか? でも良く考えましょう!! 良い点もあるでしょう? ん...不安ですが頑張れます!! ポジティブに考えたら大丈夫ですよ!! 一緒に努力しましょう!! あなたなら十分です!!'],
+          tired: ['あ...疲れましたか? でも気分は良いです!! 休みながら楽しいことをしましょう!! 映画? 遊び? それとも一緒に笑いましょう!!'],
+          angry: ['え?! 私を怒らせましたか?! でも...これも成長の機会ですね? 肯定的に考えましょう!! この経験から何かを学べます!! あなたは良い意図でしたでしょう?']
         }
       },
       es: {
@@ -925,10 +1015,11 @@
 
       currentProfile = {
         name,
+        age: document.getElementById('catAge').value || '',
         gender: genderChip?.dataset.gender || '',
         personalities: personalityChips.map(c => c.dataset.personality),
         info: document.getElementById('catInfo').value,
-        photo: document.getElementById('photoPreview').innerHTML
+        photo: document.getElementById('logoUpload').innerHTML
       };
 
       localStorage.setItem('catProfile', JSON.stringify(currentProfile));
@@ -942,8 +1033,9 @@
       if (saved) {
         currentProfile = JSON.parse(saved);
         document.getElementById('catName').value = currentProfile.name;
+        document.getElementById('catAge').value = currentProfile.age || '';
         document.getElementById('catInfo').value = currentProfile.info || '';
-        document.getElementById('photoPreview').innerHTML = currentProfile.photo || '';
+        document.getElementById('logoUpload').innerHTML = currentProfile.photo || '🐱';
 
         if (currentProfile.gender) {
           document.querySelector(`[data-gender="${currentProfile.gender}"]`).classList.add('on');
@@ -1000,9 +1092,8 @@
       reader.onload = (evt) => {
         const img = document.createElement('img');
         img.src = evt.target.result;
-        img.style.cssText = 'width:64px;height:64px;border-radius:12px;object-fit:cover;';
-        document.getElementById('photoPreview').innerHTML = '';
-        document.getElementById('photoPreview').appendChild(img);
+        document.getElementById('logoUpload').innerHTML = '';
+        document.getElementById('logoUpload').appendChild(img);
       };
       reader.readAsDataURL(file);
     });
