@@ -499,6 +499,7 @@
         <div class="app">
           <div class="language-selector">
             <button class="lang-btn active" data-lang="ko">한국어 🇰🇷</button>
+            <button class="lang-btn" data-lang="en">English 🇺🇸</button>
             <button class="lang-btn" data-lang="ja">日本語 🇯🇵</button>
             <button class="lang-btn" data-lang="es">Español 🇪🇸</button>
           </div>
@@ -585,9 +586,19 @@
             <div class="emotion-result" id="results" style="display: none;">
               <div class="emotion-emoji" id="emotionEmoji">😸</div>
               <div id="detectionInfo" class="detection-info"></div>
-              <div class="response-text" id="responseText"></div>
+
+              <div style="background: rgba(122, 95, 176, 0.1); border-left: 3px solid var(--violet); padding: 12px; border-radius: 8px; margin: 12px 0; font-size: 12px; line-height: 1.8; font-weight: 500;">
+                <div style="margin-bottom: 10px;">
+                  <div id="responseText1"></div>
+                  <button class="btn primary sound-btn" onclick="speakResponse(0)" style="margin-top: 8px;">🔊 음성 1</button>
+                </div>
+                <div style="border-top: 1px solid rgba(122, 95, 176, 0.2); padding-top: 10px; margin-top: 10px;">
+                  <div id="responseText2"></div>
+                  <button class="btn primary sound-btn" onclick="speakResponse(1)" style="margin-top: 8px;">🔊 음성 2</button>
+                </div>
+              </div>
+
               <div class="char-count" id="charCount"></div>
-              <button class="btn primary sound-btn" onclick="speakResponse()">🔊 다시 듣기</button>
             </div>
           </div>
         </div>
@@ -605,28 +616,72 @@
 
   <script>
     let currentProfile = null;
-    let lastResponse = '';
+    let lastResponses = ['', ''];  // 텍스트 2개 저장
     let currentLang = 'ko';
 
     const responses = {
       ko: {
         '활발함': {
-          happy: ['우와!! 정말 신난다!!! 오늘따라 기분이 정말 좋아!! 놀 준비가 되어 있다고!! 어디로 갈까? 공? 줄? 아니면... 잠깐 이게 뭐야?! 오오오 재미있는 걸 찾았어!! 이거 가지고 한번 놀아볼까? 정말 최고의 날이야!!! 모든 것이 재미있어 보여!! 너도 이 느낌 알지? 이런 행복함!! 언제나 이렇게 살 수 있으면 좋겠어!! 헤헤헤 정말 즐거워!!'],
-          anxious: ['어? 뭔가 이상한데... 근데 흥미롭긴 한데? 음... 조금 불편한 느낌이긴 한데... 어라? 이게 뭐지? 조금 두렵지만 궁금해!! 어쩌지? 진짜 이건 뭐야?! 좀 더 알고 싶은데 무섭네... 근데 놀아보고 싶기도 하고!! 아 복잡해!! 도대체 뭔데!! 움... 조금 불편해... 하지만 할 수 있을 것 같아!!'],
-          tired: ['에그... 피곤해ㅠㅠ 어ㅋㅋ 피곤하다 지쳤어... 아 진짜 피곤해ㅠ 눈이 자꾸 감겨 와 어ㅋㅋㅋ 지겨워ㅠㅠ 근데 놀고 싶기도 하고!! 아 이게 뭐하는 거야? 너무 피곤해ㅠ 좀 쉬고 싶은데!! 아 맞다 아까 저 공은 뭐야? 아니야 피곤해... 나중에 하자... zzz'],
-          angry: ['뭐야!! 화난다!!! 앙나!! 슈슉!! 슈슉!! 진짜 화났어!! 뭐 하는 거야!! 이 무례한!! 건드리면 손목 간다!! 진짜 화났다고!! 왜 이럴 때 나한테 이럼?! 최악이야!! 앙!! 화난다!!! 싫어!!! 진짜 진짜 화났어!! 하라고 한 거 아닌데!!']
+          happy: [
+            '우와!! 정말 신난다!!! 오늘따라 기분이 정말 좋아!! 놀 준비가 되어 있다고!! 어디로 갈까? 공? 줄? 아니면... 잠깐 이게 뭐야?! 오오오 재미있는 걸 찾았어!!',
+            '헤헤헤 최고야!! 이런 날씨 정말 좋네!! 놀 준비 완벽!! 뭐든 재미있을 것 같은데!! 같이 신나게 놀까?! 정말 설레!!!'
+          ],
+          anxious: [
+            '어? 뭔가 이상한데... 근데 흥미롭긴 한데? 음... 조금 불편한 느낌이긴 한데... 어라? 이게 뭐지? 조금 두렵지만 궁금해!!',
+            '음... 좀 이상한데? 뭐하는 거야? 무섭기도 하고... 궁금하기도 하고... 어쩌지? 같이 해볼까?'
+          ],
+          tired: [
+            '에그... 피곤해ㅠㅠ 어ㅋㅋ 피곤하다 지쳤어... 아 진짜 피곤해ㅠ 눈이 자꾸 감겨 와 어ㅋㅋㅋ 지겨워ㅠㅠ',
+            '어... 피곤한데... 근데 놀고는 싶어ㅠ 약간만 더... 아니 역시 너무 피곤해ㅠ 잠깐 쉬고 싶어...'
+          ],
+          angry: [
+            '뭐야!! 화난다!!! 앙나!! 슈슉!! 슈슉!! 진짜 화났어!! 뭐 하는 거야!! 이 무례한!! 건드리면 손목 간다!!',
+            '진짜 화났다고!! 왜 이럴 때 나한테 이럼?! 최악이야!! 앙!! 화난다!!! 싫어!!! 진짜 진짜 화났어!!'
+          ]
         },
         '도도함': {
-          happy: ['음... 그냥 괜찮네 뭐 나쁘지 않긴 한데... 내가 원한 건 아니지만 우연히 좋았나? 흠... 뭐 그럴 수도 있지 자존심은 상하지만 기분은 좋네... 음... 뭐 내가 원한 건 아니고 너희가 잘해서 이 정도군 다음엔 더 잘하셈! 내 기준은 높아!! 그냥 우연일 거야 날 행복하게 하려고 했겠지? 음... 뭐 그렇다고 해도 내가 최고지!'],
-          anxious: ['뭐야? 왜 나한테 이래? 싫은데... 불편해... 음... 이건 내 스타일이 아니야 내가 싫다고 하지 않았나? 귀 안 들리니? 음... 내가 원한 건 아닌데... 왜 이럴까? 자존심 상해... 화난다! 근데 표현은 안 할 거야 내가 약해 보일까봐... 음... 싫어. 정신 차려!'],
-          tired: ['나 피곤해 괜히 건드리지 마 음... 지겨워... 내가 휴식할 시간이라고 했잖아 피곤하니까 말 거는 거 싫어... 혼자 있고 싶어 내 개인 시간 방해하지 말아! 음... 자존심도 상했고 피곤하네 누구 없나? 혼자 있게 놔둬! 정신 없어 나 쉬고 있어!'],
-          angry: ['이게 뭐냐고!! 내 자존심이 상했다!! 진짜 화났어!! 내가 뭐라고 했는데 안 들었어?! 정신 차려!! 절대 용서 안 해!! 음... 아직도 화났어 가만히 있어 절대 건드리지 말아!! 내가 얼마나 소중한데 이 따위로 대해?! 최악이야!! 진짜 진짜 화났다! 도도해서 더 화난다!!']
+          happy: [
+            '음... 그냥 괜찮네 뭐 나쁘지 않긴 한데... 내가 원한 건 아니지만 우연히 좋았나? 흠... 뭐 그럴 수도 있지',
+            '자존심은 상하지만 기분은 좋네... 음... 내 기준은 높아!! 그냥 우연일 거야 날 행복하게 하려고 했겠지?'
+          ],
+          anxious: [
+            '뭐야? 왜 나한테 이래? 싫은데... 불편해... 음... 이건 내 스타일이 아니야 내가 싫다고 하지 않았나?',
+            '귀 안 들리니? 음... 내가 원한 건 아닌데... 왜 이럴까? 자존심 상해... 화난다! 정신 차려!'
+          ],
+          tired: [
+            '나 피곤해 괜히 건드리지 마 음... 지겨워... 내가 휴식할 시간이라고 했잖아 피곤하니까 말 거는 거 싫어...',
+            '혼자 있고 싶어 내 개인 시간 방해하지 말아! 음... 자존심도 상했고 피곤하네 정신 없어 나 쉬고 있어!'
+          ],
+          angry: [
+            '이게 뭐냐고!! 내 자존심이 상했다!! 진짜 화났어!! 내가 뭐라고 했는데 안 들었어?! 정신 차려!!',
+            '절대 용서 안 해!! 내가 얼마나 소중한데 이 따위로 대해?! 최악이야!! 진짜 진짜 화났다!'
+          ]
         },
         '까칠함': {
           happy: ['음... 나쁘진 않네 흠... 괜찮긴 한데... 뭐 그럴 수도 있지 음... 좋다고 할 수 있겠네 흠흠... 나쁘지 않습니다 근데 다음엔 더 잘하셈! 이 정도면 괜찮지만 완벽하진 않아!! 그냥 뭐... 괜찮은 것 같긴 한데... 좋은 날씨네... 아니지 그건 상관없고... 음... 그렇구나...'],
           anxious: ['뭐하는 거야? 귀찮아.. 흐음... 싫어 불안하네... 뭔가 계획이 있었는데?! 좀 불편해 음... 뭔가 마음에 안 드네 정신 차려!! 뭐하는 건데?! 흠... 불편해... 싫어!! 좀 정신 차려!! 뭐하는 거예요?! 가만히 있던 내를 움직이게 하지 말아!!!'],
           tired: ['모르겠어... 지겨워 피곤하니까 가 컹... 조용히 해 지쳤어... 나 혼자 있고 싶어 피곤하니까 건드리지 말아!! 아 정신 없어... 지겨워ㅠ 누구 없나? 혼자 있고 싶은데!! 흠... 피곤해 약간 짜증나네... 모르겠어... 그냥 가...'],
           angry: ['뭐야!! 슈슉!! 슈슉!! 이 무례한!! 화났다!!! 진짜 화났어!! 물려줄거야!! 접근하지 마!! 이 정도론 모자랐나?! 정말 나쁜데요... 아주!!! 화났어요!! 건드리면 진짜 물어!! 싫어!! 물린다고!!! 피하지 못하게 해줄 거야!!']
+        }
+      },
+      en: {
+        'active': {
+          happy: [
+            'Wow!! This is amazing!!! I\'m so happy today! I\'m ready to play! Where should we go? A ball? A string? Wait... what\'s this?!',
+            'Hehe amazing! Great weather! Let\'s play together! Everything looks so fun! Come on let\'s have fun!'
+          ],
+          anxious: [
+            'Hmm? Something feels strange... but it\'s interesting too? A little uncomfortable but... what is this? A little scary but curious!!',
+            'What? What are you doing? Scary... but also want to try... what should I do? Hmm...'
+          ],
+          tired: [
+            'Ugh... so tired... hehe so sleepy... I\'m exhausted... my eyes keep closing... everything feels boring...',
+            'Tired but also want to play... too tired though... just want to rest for a bit... zzz'
+          ],
+          angry: [
+            'What!! I\'m furious!!! Hiss! Hiss! Really angry! What are you doing! You\'re so rude! Touch me and I\'ll scratch you!',
+            'I\'m really really angry! Why are you doing this?! This is the worst! Hiss!! I hate this!!'
+          ]
         }
       },
       ja: {},
@@ -835,12 +890,20 @@
 
             const emotion = yoloDetector.analyzeEmotion(detectionResult, selectedPersonality);
 
-            // 대사 선택
-            const personalityResponses = responses[currentLang][selectedPersonality];
+            // 대사 선택 (2개)
+            const personalityResponses = responses[currentLang]?.[selectedPersonality];
+            lastResponses = ['', ''];
+
             if (personalityResponses) {
               const responses_for_emotion = personalityResponses[emotion.emotion];
-              if (responses_for_emotion && responses_for_emotion.length > 0) {
-                lastResponse = responses_for_emotion[Math.floor(Math.random() * responses_for_emotion.length)];
+              if (responses_for_emotion && responses_for_emotion.length >= 2) {
+                // 배열에서 2개 선택
+                lastResponses[0] = responses_for_emotion[0];
+                lastResponses[1] = responses_for_emotion[1];
+              } else if (responses_for_emotion && responses_for_emotion.length === 1) {
+                // 1개면 2개 모두 같은 텍스트
+                lastResponses[0] = responses_for_emotion[0];
+                lastResponses[1] = responses_for_emotion[0];
               }
             }
 
@@ -864,28 +927,38 @@
 
     function displayResult(emoji, detection) {
       document.getElementById('emotionEmoji').textContent = emoji;
-      document.getElementById('responseText').textContent = lastResponse || '분석 완료!';
-      document.getElementById('charCount').textContent = `${(lastResponse || '').length} 자`;
+      document.getElementById('responseText1').textContent = lastResponses[0] || '분석 완료!';
+      document.getElementById('responseText2').textContent = lastResponses[1] || '분석 완료!';
+
+      const totalChars = (lastResponses[0] || '').length + (lastResponses[1] || '').length;
+      document.getElementById('charCount').textContent = `총 ${totalChars} 자`;
+
       document.getElementById('detectionInfo').textContent =
         detection?.hasCat
           ? `고양이 감지: ${detection.catCount}마리 (신뢰도: ${detection.confidence}%)`
           : '고양이가 감지되지 않았습니다';
+
       document.getElementById('results').style.display = 'block';
 
-      speakResponse();
+      // 음성 자동 재생 (첫 번째)
+      speakResponse(0);
     }
 
-    function speakResponse() {
+    function speakResponse(index = 0) {
       const langMap = {
         ko: 'ko-KR',
         ja: 'ja-JP',
-        es: 'es-ES'
+        es: 'es-ES',
+        en: 'en-US'
       };
 
-      const utterance = new SpeechSynthesisUtterance(lastResponse);
+      const textToSpeak = lastResponses[index] || '';
+      if (!textToSpeak) return;
+
+      const utterance = new SpeechSynthesisUtterance(textToSpeak);
       utterance.lang = langMap[currentLang];
       utterance.rate = 0.9;
-      utterance.pitch = Math.random() * 0.4 + 0.8;
+      utterance.pitch = 0.8 + Math.random() * 0.4;
 
       speechSynthesis.cancel();
       speechSynthesis.speak(utterance);
