@@ -657,6 +657,11 @@
         document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
         btn.classList.add('active');
         document.getElementById(`${tabName}-view`).classList.add('active');
+
+        // 분석 탭 진입 시 프로필 정보 표시
+        if (tabName === 'analyze' && currentProfile) {
+          updateAnalyzeTab();
+        }
       });
     });
 
@@ -681,38 +686,88 @@
       };
 
       try {
-        await profileManager.saveProfile(profile);
+        // IndexedDB 저장
+        if (profileManager.db) {
+          await profileManager.saveProfile(profile);
+        } else {
+          // 폴백: localStorage
+          profileManager.saveProfileFallback(profile);
+        }
+
         currentProfile = profile;
-        document.getElementById('profileStatus').innerHTML = '<div class="card" style="background: rgba(111, 174, 147, 0.1); border-color: rgba(111, 174, 147, 0.3); color: var(--sage);">✓ 프로필이 저장되었습니다!</div>';
+
+        // 저장 메시지 표시
+        document.getElementById('profileStatus').innerHTML = '<div class="card" style="background: rgba(111, 174, 147, 0.1); border-color: rgba(111, 174, 147, 0.3); color: var(--sage); margin-top: 12px;">✓ 프로필이 저장되었습니다!</div>';
+
+        // 2초 후 분석 탭으로 이동
+        setTimeout(() => {
+          document.querySelector('[data-tab="analyze"]').click();
+          updateAnalyzeTab();
+        }, 2000);
+      } catch (error) {
+        console.error('프로필 저장 실패:', error);
+        // 폴백
+        profileManager.saveProfileFallback(profile);
+        currentProfile = profile;
+
+        document.getElementById('profileStatus').innerHTML = '<div class="card" style="background: rgba(111, 174, 147, 0.1); border-color: rgba(111, 174, 147, 0.3); color: var(--sage); margin-top: 12px;">✓ 프로필이 저장되었습니다!</div>';
 
         setTimeout(() => {
           document.querySelector('[data-tab="analyze"]').click();
-          document.getElementById('analyzeCatName').textContent = name;
-        }, 1000);
-      } catch (error) {
-        console.error('프로필 저장 실패:', error);
-        // 폴백: localStorage
-        await profileManager.saveProfileFallback(profile);
-        currentProfile = profile;
+          updateAnalyzeTab();
+        }, 2000);
       }
+    }
+
+    // 분석 탭 업데이트
+    function updateAnalyzeTab() {
+      if (!currentProfile) return;
+
+      const genderText = currentProfile.gender === 'M' ? '수컷' : currentProfile.gender === 'F' ? '암컷' : '';
+      const personalitiesText = currentProfile.personalities?.join(', ') || '';
+      const ageText = currentProfile.age ? `, ${currentProfile.age}살` : '';
+
+      // 환영 카드 업데이트
+      document.getElementById('welcomeCard').innerHTML = `
+        <div class="nm">🐱 ${currentProfile.name}</div>
+        <div class="meta">${genderText}${ageText} | ${personalitiesText}</div>
+        <div style="width: 80px; height: 80px; border-radius: 12px; margin-top: 10px; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; overflow: hidden;">
+          ${currentProfile.photo}
+        </div>
+      `;
+
+      document.getElementById('analyzeCatName').textContent = currentProfile.name;
     }
 
     // 프로필 로드
     async function loadProfile() {
       try {
-        const profile = await profileManager.getProfile();
+        let profile = null;
+
+        // IndexedDB에서 로드
+        if (profileManager.db) {
+          profile = await profileManager.getProfile();
+        }
+
+        // IndexedDB 실패 시 localStorage에서 로드
         if (!profile) {
-          const fallback = await profileManager.getProfileFallback();
-          if (fallback) {
-            currentProfile = fallback;
-            loadProfileUI(fallback);
-          }
-        } else {
+          profile = await profileManager.getProfileFallback();
+        }
+
+        if (profile) {
           currentProfile = profile;
           loadProfileUI(profile);
+          updateAnalyzeTab();
         }
       } catch (error) {
         console.error('프로필 로드 실패:', error);
+        // localStorage 폴백
+        const fallback = localStorage.getItem('catProfile');
+        if (fallback) {
+          currentProfile = JSON.parse(fallback);
+          loadProfileUI(currentProfile);
+          updateAnalyzeTab();
+        }
       }
     }
 
