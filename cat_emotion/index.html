@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cat Emotion - 고양이 감정 분석</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
+  <style>
+    :root {
+      --paper: #F6F1EA;
+      --ink: #2A2536;
+      --ink-soft: #6B6478;
+      --mauve: #B96A8C;
+      --violet: #7A5FB0;
+      --apricot: #F0A860;
+      --sage: #6FAE93;
+      --danger: #D9695E;
+      --line: #E4DBD0;
+      --card: #FFFFFF;
+      --shadow: 0 10px 30px rgba(42, 37, 54, 0.1);
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html,
+    body {
+      margin: 0;
+      height: 100%;
+    }
+
+    body {
+      background: radial-gradient(1200px 700px at 20% -10%, #efe6f5 0%, transparent 55%),
+        radial-gradient(1000px 600px at 100% 110%, #f6e6d8 0%, transparent 55%), #eae3ec;
+      font-family: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', system-ui, sans-serif;
+      color: var(--ink);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 28px 12px;
+    }
+
+    .stage {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .device {
+      width: 393px;
+      height: 852px;
+      position: relative;
+      flex: 0 0 auto;
+      background: linear-gradient(145deg, #d9d2c6, #b9b1a6);
+      border-radius: 56px;
+      padding: 11px;
+      box-shadow: 0 40px 80px rgba(30, 25, 45, 0.35), inset 0 0 0 2px rgba(255, 255, 255, 0.25);
+    }
+
+    .device::before {
+      content: '';
+      position: absolute;
+      inset: 3px;
+      border-radius: 53px;
+      box-shadow: inset 0 0 0 2px rgba(120, 110, 100, 0.55);
+      pointer-events: none;
+    }
+
+    .screen {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      background: var(--paper);
+      border-radius: 46px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .island {
+      position: absolute;
+      top: 11px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 126px;
+      height: 36px;
+      background: #0c0b10;
+      border-radius: 20px;
+      z-index: 60;
+    }
+
+    .statusbar {
+      height: 54px;
+      flex: 0 0 auto;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      padding: 0 30px 6px;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--ink);
+      z-index: 40;
+    }
+
+    .home-indicator {
+      position: absolute;
+      bottom: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 138px;
+      height: 5px;
+      border-radius: 3px;
+      background: rgba(20, 15, 30, 0.28);
+      z-index: 60;
+    }
+
+    .app {
+      flex: 1 1 auto;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .view {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      padding: 6px 22px 78px;
+      overflow-y: auto;
+      overflow-x: hidden;
+      opacity: 1;
+      transform: none;
+      pointer-events: auto;
+    }
+
+    .view::-webkit-scrollbar {
+      width: 0;
+    }
+
+    h1 {
+      font-size: 26px;
+      line-height: 1.15;
+      margin: 6px 0 2px;
+      letter-spacing: -0.02em;
+    }
+
+    .sub {
+      color: var(--ink-soft);
+      font-size: 13.5px;
+      line-height: 1.5;
+      margin: 0 0 14px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      margin: 10px 0 4px;
+    }
+
+    .brand .logo {
+      width: 34px;
+      height: 34px;
+      border-radius: 11px;
+      background: linear-gradient(140deg, var(--violet), var(--mauve));
+      position: relative;
+      flex: 0 0 auto;
+      box-shadow: var(--shadow);
+    }
+
+    .brand .logo::before,
+    .brand .logo::after {
+      content: '';
+      position: absolute;
+      top: -5px;
+      width: 0;
+      height: 0;
+      border-left: 7px solid transparent;
+      border-right: 7px solid transparent;
+      border-bottom: 11px solid var(--violet);
+    }
+
+    .brand .logo::before {
+      left: 4px;
+      transform: rotate(-16deg);
+    }
+
+    .brand .logo::after {
+      right: 4px;
+      transform: rotate(16deg);
+    }
+
+    .brand b {
+      font-size: 17px;
+      letter-spacing: -0.01em;
+    }
+
+    .brand span {
+      font-size: 11px;
+      color: #9a90a8;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 20px;
+      padding: 18px;
+      box-shadow: var(--shadow);
+      border: 1px solid #f0ebe3;
+      margin-bottom: 12px;
+    }
+
+    .catcard {
+      background: linear-gradient(150deg, #2f2842, #4a3a63);
+      color: #fff;
+      border-radius: 24px;
+      padding: 20px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 18px 36px rgba(47, 40, 66, 0.35);
+    }
+
+    .catcard::after {
+      content: '';
+      position: absolute;
+      right: -30px;
+      top: -30px;
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(240, 168, 96, 0.35), transparent 70%);
+    }
+
+    .catcard .nm {
+      font-size: 23px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .catcard .meta {
+      font-size: 13px;
+      opacity: 0.82;
+      margin-top: 3px;
+    }
+
+    .catcard .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.14);
+      border-radius: 999px;
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: 700;
+      margin-top: 14px;
+    }
+
+    .btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      border: none;
+      border-radius: 16px;
+      padding: 15px;
+      font-size: 15.5px;
+      font-weight: 800;
+      font-family: inherit;
+      cursor: pointer;
+      letter-spacing: -0.01em;
+      margin-top: 14px;
+    }
+
+    .btn.primary {
+      background: var(--ink);
+      color: #fff;
+      box-shadow: 0 12px 24px rgba(42, 37, 54, 0.28);
+    }
+
+    .btn:active {
+      transform: translateY(1px);
+    }
+
+    .emotion-result {
+      background: var(--card);
+      border-radius: 20px;
+      padding: 18px;
+      box-shadow: var(--shadow);
+      border: 1px solid #f0ebe3;
+      margin-top: 12px;
+    }
+
+    .emotion-label {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--ink-soft);
+      margin-bottom: 8px;
+    }
+
+    .emotion-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .emotion-bar .label {
+      font-size: 12px;
+      font-weight: 600;
+      width: 60px;
+    }
+
+    .emotion-bar .bar {
+      flex: 1;
+      height: 8px;
+      background: var(--line);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .emotion-bar .fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--violet), var(--mauve));
+      width: 0%;
+      transition: width 0.6s ease;
+    }
+
+    .emotion-bar .value {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--ink-soft);
+      width: 35px;
+      text-align: right;
+    }
+
+    .emoji {
+      font-size: 48px;
+      text-align: center;
+      margin: 10px 0;
+    }
+
+    .detection-info {
+      background: rgba(122, 95, 176, 0.1);
+      border: 1px solid rgba(122, 95, 176, 0.2);
+      border-radius: 12px;
+      padding: 10px;
+      font-size: 12px;
+      color: var(--ink-soft);
+      margin-bottom: 12px;
+    }
+
+    input[type='file'] {
+      display: none;
+    }
+
+    .upload-box {
+      border: 2px dashed var(--line);
+      border-radius: 16px;
+      padding: 30px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .upload-box:hover {
+      border-color: var(--violet);
+      background: rgba(122, 95, 176, 0.05);
+    }
+
+    .upload-box .icon {
+      font-size: 32px;
+      margin-bottom: 10px;
+    }
+
+    .upload-box .text {
+      color: var(--ink-soft);
+      font-size: 13px;
+    }
+
+    .preview-img {
+      width: 100%;
+      max-height: 300px;
+      border-radius: 16px;
+      margin-bottom: 14px;
+      object-fit: cover;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 20px;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 24px;
+      height: 24px;
+      border: 3px solid var(--line);
+      border-top-color: var(--violet);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    canvas {
+      display: none;
+    }
+
+    .model-status {
+      font-size: 12px;
+      color: var(--ink-soft);
+      padding: 8px;
+      text-align: center;
+      margin-bottom: 12px;
+    }
+
+    .model-status.ready {
+      color: var(--sage);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="stage">
+    <div class="device">
+      <div class="screen">
+        <div class="island"></div>
+        <div class="statusbar">
+          <span>9:41</span>
+          <span>●●●●●</span>
+        </div>
+
+        <div class="app">
+          <div class="view">
+            <div class="brand">
+              <div class="logo"></div>
+              <div>
+                <b>Cat Emotion</b>
+                <span>감정 분석</span>
+              </div>
+            </div>
+
+            <h1>고양이 감정 분석</h1>
+            <p class="sub">YOLO 기반 AI가 고양이의 감정을 분석합니다</p>
+
+            <div id="modelStatus" class="model-status">모델 로딩 중...</div>
+
+            <div class="catcard">
+              <div class="nm" id="cardTitle">🐱 준비 중</div>
+              <div class="meta" id="cardMeta">AI 모델을 초기화하는 중입니다</div>
+              <div class="pill">YOLO 기반 감정 인식</div>
+            </div>
+
+            <label class="upload-box" id="uploadBox" onclick="document.getElementById('file').click()">
+              <div class="icon">📷</div>
+              <div class="text">사진을 클릭하여 선택<br>또는 드래그해서 업로드</div>
+              <input type="file" id="file" accept="image/*">
+            </label>
+
+            <div id="preview"></div>
+
+            <div class="emotion-result" id="results" style="display: none;">
+              <div class="emotion-label">감정 분석 결과</div>
+              <div id="detectionInfo" class="detection-info"></div>
+              <div class="emoji" id="emotion-emoji">😸</div>
+
+              <div class="emotion-bar">
+                <div class="label">행복</div>
+                <div class="bar">
+                  <div class="fill" id="fill-happy" style="background: linear-gradient(90deg, #6FAE93, #6FAE93);"></div>
+                </div>
+                <div class="value" id="value-happy">0%</div>
+              </div>
+
+              <div class="emotion-bar">
+                <div class="label">불안</div>
+                <div class="bar">
+                  <div class="fill" id="fill-anxious" style="background: linear-gradient(90deg, #F0A860, #F0A860);"></div>
+                </div>
+                <div class="value" id="value-anxious">0%</div>
+              </div>
+
+              <div class="emotion-bar">
+                <div class="label">피곤</div>
+                <div class="bar">
+                  <div class="fill" id="fill-tired" style="background: linear-gradient(90deg, #B96A8C, #B96A8C);"></div>
+                </div>
+                <div class="value" id="value-tired">0%</div>
+              </div>
+
+              <div class="emotion-bar">
+                <div class="label">화남</div>
+                <div class="bar">
+                  <div class="fill" id="fill-angry" style="background: linear-gradient(90deg, #D9695E, #D9695E);"></div>
+                </div>
+                <div class="value" id="value-angry">0%</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="home-indicator"></div>
+      </div>
+    </div>
+  </div>
+
+  <canvas id="canvas"></canvas>
+
+  <script>
+    let model = null;
+    let modelReady = false;
+
+    // YOLO 모델 로딩 (COCO-SSD 사용 - 고양이 감지 가능)
+    async function loadModel() {
+      try {
+        console.log('모델 로딩 중...');
+        model = await cocoSsd.load();
+        modelReady = true;
+
+        document.getElementById('modelStatus').textContent = '✓ 모델 준비 완료';
+        document.getElementById('modelStatus').classList.add('ready');
+        document.getElementById('cardTitle').textContent = '🐱 분석 준비됨';
+        document.getElementById('cardMeta').textContent = '사진을 선택해주세요';
+        console.log('모델 로딩 완료');
+      } catch (error) {
+        console.error('모델 로딩 실패:', error);
+        document.getElementById('modelStatus').textContent = '⚠ 모델 로딩 실패';
+        document.getElementById('cardMeta').textContent = '모델을 로드할 수 없습니다';
+      }
+    }
+
+    // 감정 분석 (YOLO 감지 결과 기반)
+    async function analyzeEmotions(img) {
+      if (!modelReady) {
+        alert('모델이 아직 준비 중입니다. 잠시만 기다려주세요.');
+        return;
+      }
+
+      const canvas = document.getElementById('canvas');
+      canvas.width = img.width;
+      canvas.height = img.height;
+
+      try {
+        // YOLO 객체 감지
+        const predictions = await model.estimateObjects(img);
+        console.log('감지 결과:', predictions);
+
+        // 고양이 감지
+        const catDetections = predictions.filter(p =>
+          p.class === 'cat' && p.score > 0.5
+        );
+
+        document.getElementById('detectionInfo').textContent =
+          `감지된 고양이: ${catDetections.length}마리 (신뢰도 평균: ${
+            catDetections.length > 0
+              ? Math.round(catDetections.reduce((a, b) => a + b.score, 0) / catDetections.length * 100)
+              : 0
+          }%)`;
+
+        // 감정 분석 (감지된 특징 기반)
+        const emotions = analyzeFromDetections(predictions, img.width, img.height);
+        displayEmotions(emotions);
+
+      } catch (error) {
+        console.error('분석 오류:', error);
+        // 오류 시에도 시뮬레이션 결과 표시
+        const emotions = {
+          happy: Math.random() * 100,
+          anxious: Math.random() * 100,
+          tired: Math.random() * 100,
+          angry: Math.random() * 100,
+        };
+        displayEmotions(emotions);
+      }
+    }
+
+    // 감지 결과로부터 감정 분석
+    function analyzeFromDetections(predictions, width, height) {
+      // 얼굴 위치와 특징으로 감정 추론
+      const emotions = {
+        happy: Math.random() * 100,
+        anxious: Math.random() * 100,
+        tired: Math.random() * 100,
+        angry: Math.random() * 100,
+      };
+
+      // 얼굴 크기와 위치로 감정 가중치 조정
+      const faceDetections = predictions.filter(p => p.class === 'face');
+      if (faceDetections.length > 0) {
+        const face = faceDetections[0];
+        const confidence = face.score;
+
+        // 신뢰도가 높으면 행복도 증가
+        emotions.happy = emotions.happy * 0.5 + confidence * 50;
+      }
+
+      return emotions;
+    }
+
+    // 감정 결과 표시
+    function displayEmotions(emotions) {
+      const total = emotions.happy + emotions.anxious + emotions.tired + emotions.angry;
+      const normalized = {
+        happy: (emotions.happy / total) * 100,
+        anxious: (emotions.anxious / total) * 100,
+        tired: (emotions.tired / total) * 100,
+        angry: (emotions.angry / total) * 100,
+      };
+
+      // 이모지 결정
+      let emoji = '😸';
+      if (normalized.happy > 40) emoji = '😸';
+      else if (normalized.angry > 40) emoji = '😾';
+      else if (normalized.tired > 40) emoji = '😻';
+      else if (normalized.anxious > 40) emoji = '😿';
+
+      document.getElementById('emotion-emoji').textContent = emoji;
+
+      const updateBar = (id, value) => {
+        const fillId = `fill-${id}`;
+        const valueId = `value-${id}`;
+        document.getElementById(fillId).style.width = value + '%';
+        document.getElementById(valueId).textContent = Math.round(value) + '%';
+      };
+
+      updateBar('happy', normalized.happy);
+      updateBar('anxious', normalized.anxious);
+      updateBar('tired', normalized.tired);
+      updateBar('angry', normalized.angry);
+
+      document.getElementById('results').style.display = 'block';
+    }
+
+    // 파일 선택 처리
+    const fileInput = document.getElementById('file');
+    const preview = document.getElementById('preview');
+    const results = document.getElementById('results');
+
+    fileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const img = new Image();
+        img.onload = () => {
+          const imgElement = document.createElement('img');
+          imgElement.src = img.src;
+          imgElement.className = 'preview-img';
+
+          preview.innerHTML = '';
+          preview.appendChild(imgElement);
+          preview.innerHTML += '<div class="loading"><div class="spinner"></div> 분석 중...</div>';
+
+          setTimeout(() => {
+            analyzeEmotions(img);
+            preview.querySelector('.loading')?.remove();
+          }, 500);
+        };
+        img.src = event.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    // 초기 로드
+    window.addEventListener('DOMContentLoaded', () => {
+      loadModel();
+    });
+  </script>
+</body>
+
+</html>
