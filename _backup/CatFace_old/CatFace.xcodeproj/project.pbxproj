@@ -6,31 +6,8 @@
 	objectVersion = 77;
 	objects = {
 
-/* Begin PBXBuildFile section */
-		D908160E3003DA43003ED795 /* ProfileManager 3.swift in Sources */ = {isa = PBXBuildFile; fileRef = D908160B3003DA43003ED795 /* ProfileManager 3.swift */; };
-		D908160F3003DA43003ED795 /* ContentView 2.swift in Sources */ = {isa = PBXBuildFile; fileRef = D90816063003DA43003ED795 /* ContentView 2.swift */; };
-		D90816103003DA43003ED795 /* EmotionData 3.swift in Sources */ = {isa = PBXBuildFile; fileRef = D90816073003DA43003ED795 /* EmotionData 3.swift */; };
-		D90816113003DA43003ED795 /* PhotoPickerManager 3.swift in Sources */ = {isa = PBXBuildFile; fileRef = D908160A3003DA43003ED795 /* PhotoPickerManager 3.swift */; };
-		D90816123003DA43003ED795 /* SettingsView 2.swift in Sources */ = {isa = PBXBuildFile; fileRef = D908160C3003DA43003ED795 /* SettingsView 2.swift */; };
-		D90816133003DA43003ED795 /* AnalyzeView 2.swift in Sources */ = {isa = PBXBuildFile; fileRef = D90816043003DA43003ED795 /* AnalyzeView 2.swift */; };
-		D90816143003DA43003ED795 /* YOLODetector 2.swift in Sources */ = {isa = PBXBuildFile; fileRef = D908160D3003DA43003ED795 /* YOLODetector 2.swift */; };
-		D90816153003DA43003ED795 /* HomeView 2.swift in Sources */ = {isa = PBXBuildFile; fileRef = D90816083003DA43003ED795 /* HomeView 2.swift */; };
-		D90816163003DA43003ED795 /* CatFaceApp 2.swift in Sources */ = {isa = PBXBuildFile; fileRef = D90816053003DA43003ED795 /* CatFaceApp 2.swift */; };
-		D90816173003DA43003ED795 /* Models 2.swift in Sources */ = {isa = PBXBuildFile; fileRef = D90816093003DA43003ED795 /* Models 2.swift */; };
-/* End PBXBuildFile section */
-
 /* Begin PBXFileReference section */
-		D90816043003DA43003ED795 /* AnalyzeView 2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AnalyzeView 2.swift"; sourceTree = "<group>"; };
-		D90816053003DA43003ED795 /* CatFaceApp 2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CatFaceApp 2.swift"; sourceTree = "<group>"; };
-		D90816063003DA43003ED795 /* ContentView 2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ContentView 2.swift"; sourceTree = "<group>"; };
-		D90816073003DA43003ED795 /* EmotionData 3.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "EmotionData 3.swift"; sourceTree = "<group>"; };
-		D90816083003DA43003ED795 /* HomeView 2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "HomeView 2.swift"; sourceTree = "<group>"; };
-		D90816093003DA43003ED795 /* Models 2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Models 2.swift"; sourceTree = "<group>"; };
-		D908160A3003DA43003ED795 /* PhotoPickerManager 3.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PhotoPickerManager 3.swift"; sourceTree = "<group>"; };
-		D908160B3003DA43003ED795 /* ProfileManager 3.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ProfileManager 3.swift"; sourceTree = "<group>"; };
-		D908160C3003DA43003ED795 /* SettingsView 2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SettingsView 2.swift"; sourceTree = "<group>"; };
-		D908160D3003DA43003ED795 /* YOLODetector 2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "YOLODetector 2.swift"; sourceTree = "<group>"; };
-		D962BF523003CDE0004ACB84 /* CatFace.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = CatFace.app; path = "/Users/kwackbyungjoon/Desktop/cat_face/CatFace/build/Debug-iphoneos/CatFace.app"; sourceTree = "<absolute>"; };
+		D9EB9D893007B32B00FDD527 /* CatFace.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = CatFace.app; path = "/Users/kwackbyungjoon/Desktop/cat_face/CatFace/build/Debug-iphoneos/CatFace.app"; sourceTree = "<absolute>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -47,16 +24,6 @@
 		D962BF493003CDE0004ACB84 = {
 			isa = PBXGroup;
 			children = (
-				D90816043003DA43003ED795 /* AnalyzeView 2.swift */,
-				D90816053003DA43003ED795 /* CatFaceApp 2.swift */,
-				D90816063003DA43003ED795 /* ContentView 2.swift */,
-				D90816073003DA43003ED795 /* EmotionData 3.swift */,
-				D90816083003DA43003ED795 /* HomeView 2.swift */,
-				D90816093003DA43003ED795 /* Models 2.swift */,
-				D908160A3003DA43003ED795 /* PhotoPickerManager 3.swift */,
-				D908160B3003DA43003ED795 /* ProfileManager 3.swift */,
-				D908160C3003DA43003ED795 /* SettingsView 2.swift */,
-				D908160D3003DA43003ED795 /* YOLODetector 2.swift */,
 			);
 			sourceTree = "<group>";
 		};
@@ -79,7 +46,7 @@
 			packageProductDependencies = (
 			);
 			productName = CatFace;
-			productReference = D962BF523003CDE0004ACB84 /* CatFace.app */;
+			productReference = D9EB9D893007B32B00FDD527 /* CatFace.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -132,16 +99,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D908160E3003DA43003ED795 /* ProfileManager 3.swift in Sources */,
-				D908160F3003DA43003ED795 /* ContentView 2.swift in Sources */,
-				D90816103003DA43003ED795 /* EmotionData 3.swift in Sources */,
-				D90816113003DA43003ED795 /* PhotoPickerManager 3.swift in Sources */,
-				D90816123003DA43003ED795 /* SettingsView 2.swift in Sources */,
-				D90816133003DA43003ED795 /* AnalyzeView 2.swift in Sources */,
-				D90816143003DA43003ED795 /* YOLODetector 2.swift in Sources */,
-				D90816153003DA43003ED795 /* HomeView 2.swift in Sources */,
-				D90816163003DA43003ED795 /* CatFaceApp 2.swift in Sources */,
-				D90816173003DA43003ED795 /* Models 2.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -273,8 +230,10 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CLANG_ENABLE_MODULES = YES;
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -289,6 +248,7 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.catface.CatFace;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
@@ -307,8 +267,10 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CLANG_ENABLE_MODULES = YES;
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -323,6 +285,7 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.catface.CatFace;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;

@@ -237,27 +237,6 @@
       object-fit: cover;
     }
 
-    .brand .logo::before, .brand .logo::after {
-      content: '';
-      position: absolute;
-      top: -5px;
-      width: 0;
-      height: 0;
-      border-left: 7px solid transparent;
-      border-right: 7px solid transparent;
-      border-bottom: 11px solid var(--violet);
-    }
-
-    .brand .logo::before {
-      left: 4px;
-      transform: rotate(-16deg);
-    }
-
-    .brand .logo::after {
-      right: 4px;
-      transform: rotate(16deg);
-    }
-
     .brand b {
       font-size: 15px;
       letter-spacing: -0.01em;
@@ -304,15 +283,6 @@
 
     input:focus, select:focus, textarea:focus {
       border-color: var(--violet);
-    }
-
-    .row2 {
-      display: flex;
-      gap: 10px;
-    }
-
-    .row2 > div {
-      flex: 1;
     }
 
     .chips {
@@ -389,21 +359,6 @@
       font-size: 12px;
       opacity: 0.82;
       margin-top: 4px;
-    }
-
-    .cat-photo {
-      width: 64px;
-      height: 64px;
-      border-radius: 12px;
-      overflow: hidden;
-      margin-top: 10px;
-      background: rgba(255, 255, 255, 0.1);
-    }
-
-    .cat-photo img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
     }
 
     input[type='file'] {
@@ -580,7 +535,7 @@
                 <div class="chip" data-gender="F">암컷 🐱</div>
               </div>
 
-              <label class="fld">성격 선택 (복수 선택)</label>
+              <label class="fld">성격 선택</label>
               <div class="chips">
                 <div class="chip" data-personality="활발함">🚀 활발함</div>
                 <div class="chip" data-personality="도도함">😼 도도함</div>
@@ -605,7 +560,7 @@
           <!-- 분석 탭 -->
           <div class="view" id="analyze-view">
             <div class="brand">
-              <div class="logo"></div>
+              <div class="logo">🐱</div>
               <div>
                 <b id="analyzeCatName">고양이</b>
                 <span>감정 분석</span>
@@ -644,9 +599,11 @@
 
   <canvas id="canvas"></canvas>
 
+  <!-- 모듈 로드 -->
+  <script src="js/profile-manager.js"></script>
+  <script src="js/yolo-detector.js"></script>
+
   <script>
-    let model = null;
-    let modelReady = false;
     let currentProfile = null;
     let lastResponse = '';
     let currentLang = 'ko';
@@ -654,356 +611,57 @@
     const responses = {
       ko: {
         '활발함': {
-          happy: [
-            '우와!! 정말 신난다!!! 오늘따라 기분이 정말 좋아!! 놀 준비가 되어 있다고!! 어디로 갈까? 공? 줄? 아니면... 잠깐 이게 뭐야?! 오오오 재미있는 걸 찾았어!! 이거 가지고 한번 놀아볼까? 정말 최고의 날이야!!! 모든 것이 재미있어 보여!! 너도 이 느낌 알지? 이런 행복함!! 언제나 이렇게 살 수 있으면 좋겠어!! 헤헤헤 정말 즐거워!!'
-          ],
-          anxious: [
-            '어? 뭔가 이상한데... 근데 흥미롭긴 한데? 음... 조금 불편한 느낌이긴 한데... 어라? 이게 뭐지? 조금 두렵지만 궁금해!! 어쩌지? 진짜 이건 뭐야?! 좀 더 알고 싶은데 무섭네... 근데 놀아보고 싶기도 하고!! 아 복잡해!! 도대체 뭔데!! 움... 조금 불편해... 하지만 할 수 있을 것 같아!!'
-          ],
-          tired: [
-            '에그... 피곤해ㅠㅠ 어ㅋㅋ 피곤하다 지쳤어... 아 진짜 피곤해ㅠ 눈이 자꾸 감겨 와 어ㅋㅋㅋ 지겨워ㅠㅠ 근데 놀고 싶기도 하고!! 아 이게 뭐하는 거야? 너무 피곤해ㅠ 좀 쉬고 싶은데!! 아 맞다 아까 저 공은 뭐야? 아니야 피곤해... 나중에 하자... zzz'
-          ],
-          angry: [
-            '뭐야!! 화난다!!! 앙나!! 슈슉!! 슈슉!! 진짜 화났어!! 뭐 하는 거야!! 이 무례한!! 건드리면 손목 간다!! 진짜 화났다고!! 왜 이럴 때 나한테 이럼?! 최악이야!! 앙!! 화난다!!! 싫어!!! 진짜 진짜 화났어!! 하라고 한 거 아닌데!!'
-          ]
-        },
-        '까칠함': {
-          happy: [
-            '음... 나쁘진 않네 흠... 괜찮긴 한데... 뭐 그럴 수도 있지 음... 좋다고 할 수 있겠네 흠흠... 나쁘지 않습니다 근데 다음엔 더 잘하셈! 이 정도면 괜찮지만 완벽하진 않아!! 그냥 뭐... 괜찮은 것 같긴 한데... 좋은 날씨네... 아니지 그건 상관없고... 음... 그렇구나...'
-          ],
-          anxious: [
-            '뭐하는 거야? 귀찮아.. 흐음... 싫어 불안하네... 뭔가 계획이 있었는데?! 좀 불편해 음... 뭔가 마음에 안 드네 정신 차려!! 뭐하는 건데?! 흠... 불편해... 싫어!! 좀 정신 차려!! 뭐하는 거예요?! 가만히 있던 내를 움직이게 하지 말아!!!'
-          ],
-          tired: [
-            '모르겠어... 지겨워 피곤하니까 가 컹... 조용히 해 지쳤어... 나 혼자 있고 싶어 피곤하니까 건드리지 말아!! 아 정신 없어... 지겨워ㅠ 누구 없나? 혼자 있고 싶은데!! 흠... 피곤해 약간 짜증나네... 모르겠어... 그냥 가...'
-          ],
-          angry: [
-            '뭐야!! 슈슉!! 슈슉!! 이 무례한!! 화났다!!! 진짜 화났어!! 물려줄거야!! 접근하지 마!! 이 정도론 모자랐나?! 정말 나쁜데요... 아주!!! 화났어요!! 건드리면 진짜 물어!! 싫어!! 물린다고!!! 피하지 못하게 해줄 거야!!'
-          ]
-        },
-        '느긋함': {
-          happy: [
-            '음... 좋네요 그렇군요... 흠 흠흠... 나쁘지 않습니다 아 정말 예쁜 순간이네요 음... 이 느낌 좋습니다 그런 생각을 했군요... 좋아요 아... 정말 좋네 음... 나쁘지 않은 하루네요 흠흠... 행복하네 아 이런 날도 있군요 정말 기분이 좋습니다...'
-          ],
-          anxious: [
-            '아... 이런 상황이 맞나요? 음... 생각해봐야겠어요 뭔가 마음이 불편해지는데 아... 좀 불안하네요 흠... 이게 괜찮나요? 음... 어렵네요 정말인가요? 뭔가 이상한데... 음... 뭔가 불편해요 흠... 마음이 편하지 않네'
-          ],
-          tired: [
-            '아... 마음이 지쳤어요 흠... 휴식이 필요한가봐요 음... 쉬고 싶습니다 피곤하네요... 좀 혼자 있고 싶아요 아... 잠깐 쉬어도 괜찮을까요? 음... 에너지가 없어요 정말 피곤합니다ㅠ 흠흠... 자고 싶어요...'
-          ],
-          angry: [
-            '이건 정말 실망했어요... 아... 이건 아니었는데... 정말 상심했습니다... 음... 화났어요 이건 정말 나쁜데요... 아주 흠... 괜한 실수를 하셨군요 음... 조금 후회해요 아... 이렇게까지는 아니었는데요 정말 마음이 상했어요'
-          ]
-        },
-        '장난스러움': {
-          happy: [
-            '오오! 재미있겠는데?! 🎈 헤헷! 같이 놀자!! 오? 뭐 흥미로운 걸? 오오오 재미있는 날씨네!! 놀 준비 완벽!! 이거 어떻게 하는 건데?! 재미있을 것 같은데!! 헤헤헤 자 이제 놀자!! 어디서부터 시작할까?! 아 맞다 저것도 봐!! 저것도 재미있을 것 같아!! 아 무엇을 먼저 할까?!?!'
-          ],
-          anxious: [
-            '음? 뭔가 수상한데? 오잇! 숨바꼭질 하자!! 헬헬 뭐지 이건? 어? 뭐 하는 거야?! 재미있나?! 근데 이건 위험한 건 아니겠지?! 음... 재미있을까? 흠흠... 좀 이상하긴 한데 놀아보고 싶기도 하고!! 어라? 이게 정말 안전해?! 좀 이상한데ㅠ 아 뭔데ㅠ'
-          ],
-          tired: [
-            '에이... 피곤해서 못 놀겠어 어라? 에너지가 없어 ㅠㅠ 피곤한데... 아까 놈들 다 놀았잖아!! 어어ㅠ 쉬고 싶은데 좀만 놔둬ㅠㅠ 아 정말 피곤해!! 누군가 날 안아줬으면 좋겠어ㅠ 헹헹... 조용히 해ㅠ 피곤해서 못 놀겠어ㅠㅠ'
-          ],
-          angry: [
-            '뭐야!! 진짜 무례하네!! 물려주마!! 아!! 화난다!! 기 싸워!! 오케이! 전쟁 선포!! 뭐야!! 앙나!! 진짜 화났어!! 슈슉!! 슈슉!! 접근하지 마!! 이 감자 같은 놈!! 물린다!!! 진짜 진짜 화났다고!! 이번엔 진짜야!!'
-          ]
-        },
-        '사려깊음': {
-          happy: [
-            '아 정말 예쁜 순간이네요 음... 이 느낌 좋습니다 그런 생각을 했군요... 좋아요 정말 행복합니다... 이런 날도 있군요 아... 정말 좋네 음... 나쁘지 않은 하루네요 흠흠... 행복하네 아 이것도 좋고 저것도 좋네요 모든 것이 아름다워 보여요 이 감정을 잊지 않고 싶어요'
-          ],
-          anxious: [
-            '아... 이런 상황이 맞나요? 음... 생각해봐야겠어요 뭔가 마음이 불편해지는데 흠... 이게 옳은 건가요? 정말 괜찮을까요? 음... 어렵네요 뭔가 불안한 느낌이 듭니다 아... 좀 조심스러운데요 흠... 마음이 편하지 않네 정말 이게 맞는 길인가요?'
-          ],
-          tired: [
-            '아... 마음이 지쳤어요 흠... 휴식이 필요한가봐요 음... 쉬고 싶습니다 정신과 몸 모두 피곤하네요 좀 혼자 있고 싶아요 아... 잠깐 쉬어도 괜찮을까요? 음... 에너지가 없어요 이런 느낌도 있는 거군요... 정말 피곤합니다ㅠ 자고 싶어요'
-          ],
-          angry: [
-            '이건 정말 실망했어요... 아... 이건 아니었는데... 정말 상심했습니다... 음... 화났어요 이건 정말 나쁜데요... 아주 흠... 괜한 실수를 하셨군요 음... 조금 후회해요 아... 이렇게까지는 아니었는데요 정말 마음이 상했어요 이런 일이 또 생기지 않기를 바라요'
-          ]
-        },
-        '겁많음': {
-          happy: [
-            '어? 안전한가요? 그럼... 좋습니다 음... 좋아요? 정말요? 흠... 그럼 가보죠? 아 정말요?! 안전하다고요?! 음... 그렇다면... 좋습니다 어어... 떨리는데 좋아요 아... 정말 좋네... 떨리지만... 행복해요... 음... 이 느낌 좋아요... 안전하다고 하니까... 행복합니다...'
-          ],
-          anxious: [
-            '어?! 뭔가... 이상한데?! 아! 무섭네요ㅠㅠ 어어어... 뭐예요?! 아악!! 무서워!! 어라? 뭔가 이상해!! 음... 안전한가요?! 아아ㅠ 떨려!! 뭐예요?! 누군가... 함께 있어줘ㅠ 아니야ㅠㅠ 무서워... 어어ㅠ 무섭다!!!'
-          ],
-          tired: [
-            '...피곤해요... 혼자 있고 싶어... 음... 누군가 함께 있어야겠어요... 아... 쉬고 싶어요... 정신이 없어요... 피곤하니까... 조용해주세요... 흠... 약간 겁이 나는데 이 분위기가... 편해요... 아... 잠깐 쉬어도 괜찮을까요?... 음... 어디 숨을 데가 있을까요?...'
-          ],
-          angry: [
-            '어어!! 이건 너무해요!! 아앙ㅠㅠ 화났어요! 아아아ㅠ 진짜 싫어요! 어!! 물어버릴 거예요!! ...진짜 싫어요... 떠나버릴거야... 절대 못 봐!! 어어ㅠ 화났어!! 진짜 실망했어요!! 이제 너무 싫어!! 앞으로 못 봅니다!'
-          ]
+          happy: ['우와!! 정말 신난다!!! 오늘따라 기분이 정말 좋아!! 놀 준비가 되어 있다고!! 어디로 갈까? 공? 줄? 아니면... 잠깐 이게 뭐야?! 오오오 재미있는 걸 찾았어!! 이거 가지고 한번 놀아볼까? 정말 최고의 날이야!!! 모든 것이 재미있어 보여!! 너도 이 느낌 알지? 이런 행복함!! 언제나 이렇게 살 수 있으면 좋겠어!! 헤헤헤 정말 즐거워!!'],
+          anxious: ['어? 뭔가 이상한데... 근데 흥미롭긴 한데? 음... 조금 불편한 느낌이긴 한데... 어라? 이게 뭐지? 조금 두렵지만 궁금해!! 어쩌지? 진짜 이건 뭐야?! 좀 더 알고 싶은데 무섭네... 근데 놀아보고 싶기도 하고!! 아 복잡해!! 도대체 뭔데!! 움... 조금 불편해... 하지만 할 수 있을 것 같아!!'],
+          tired: ['에그... 피곤해ㅠㅠ 어ㅋㅋ 피곤하다 지쳤어... 아 진짜 피곤해ㅠ 눈이 자꾸 감겨 와 어ㅋㅋㅋ 지겨워ㅠㅠ 근데 놀고 싶기도 하고!! 아 이게 뭐하는 거야? 너무 피곤해ㅠ 좀 쉬고 싶은데!! 아 맞다 아까 저 공은 뭐야? 아니야 피곤해... 나중에 하자... zzz'],
+          angry: ['뭐야!! 화난다!!! 앙나!! 슈슉!! 슈슉!! 진짜 화났어!! 뭐 하는 거야!! 이 무례한!! 건드리면 손목 간다!! 진짜 화났다고!! 왜 이럴 때 나한테 이럼?! 최악이야!! 앙!! 화난다!!! 싫어!!! 진짜 진짜 화났어!! 하라고 한 거 아닌데!!']
         },
         '도도함': {
-          happy: [
-            '음... 그냥 괜찮네 뭐 나쁘지 않긴 한데... 내가 원한 건 아니지만 우연히 좋았나? 흠... 뭐 그럴 수도 있지 자존심은 상하지만 기분은 좋네... 음... 뭐 내가 원한 건 아니고 너희가 잘해서 이 정도군 다음엔 더 잘하셈! 내 기준은 높아!! 그냥 우연일 거야 날 행복하게 하려고 했겠지? 음... 뭐 그렇다고 해도 내가 최고지!'
-          ],
-          anxious: [
-            '뭐야? 왜 나한테 이래? 싫은데... 불편해... 음... 이건 내 스타일이 아니야 내가 싫다고 하지 않았나? 귀 안 들리니? 음... 내가 원한 건 아닌데... 왜 이럴까? 자존심 상해... 화난다! 근데 표현은 안 할 거야 내가 약해 보일까봐... 음... 싫어. 정신 차려!'
-          ],
-          tired: [
-            '나 피곤해 괜히 건드리지 마 음... 지겨워... 내가 휴식할 시간이라고 했잖아 피곤하니까 말 거는 거 싫어... 혼자 있고 싶어 내 개인 시간 방해하지 말아! 음... 자존심도 상했고 피곤하네 누구 없나? 혼자 있게 놔둬! 정신 없어 나 쉬고 있어!'
-          ],
-          angry: [
-            '이게 뭐냐고!! 내 자존심이 상했다!! 진짜 화났어!! 내가 뭐라고 했는데 안 들었어?! 정신 차려!! 절대 용서 안 해!! 음... 아직도 화났어 가만히 있어 절대 건드리지 말아!! 내가 얼마나 소중한데 이 따위로 대해?! 최악이야!! 진짜 진짜 화났다! 도도해서 더 화난다!!'
-          ]
+          happy: ['음... 그냥 괜찮네 뭐 나쁘지 않긴 한데... 내가 원한 건 아니지만 우연히 좋았나? 흠... 뭐 그럴 수도 있지 자존심은 상하지만 기분은 좋네... 음... 뭐 내가 원한 건 아니고 너희가 잘해서 이 정도군 다음엔 더 잘하셈! 내 기준은 높아!! 그냥 우연일 거야 날 행복하게 하려고 했겠지? 음... 뭐 그렇다고 해도 내가 최고지!'],
+          anxious: ['뭐야? 왜 나한테 이래? 싫은데... 불편해... 음... 이건 내 스타일이 아니야 내가 싫다고 하지 않았나? 귀 안 들리니? 음... 내가 원한 건 아닌데... 왜 이럴까? 자존심 상해... 화난다! 근데 표현은 안 할 거야 내가 약해 보일까봐... 음... 싫어. 정신 차려!'],
+          tired: ['나 피곤해 괜히 건드리지 마 음... 지겨워... 내가 휴식할 시간이라고 했잖아 피곤하니까 말 거는 거 싫어... 혼자 있고 싶어 내 개인 시간 방해하지 말아! 음... 자존심도 상했고 피곤하네 누구 없나? 혼자 있게 놔둬! 정신 없어 나 쉬고 있어!'],
+          angry: ['이게 뭐냐고!! 내 자존심이 상했다!! 진짜 화났어!! 내가 뭐라고 했는데 안 들었어?! 정신 차려!! 절대 용서 안 해!! 음... 아직도 화났어 가만히 있어 절대 건드리지 말아!! 내가 얼마나 소중한데 이 따위로 대해?! 최악이야!! 진짜 진짜 화났다! 도도해서 더 화난다!!']
         },
-        '다정함': {
-          happy: [
-            '오 정말 좋아!! 내 마음이 따뜻해져!! 너도 나처럼 행복해 보여서 기뻐!! 우리 함께 이렇게 행복한 날이 자주 있으면 좋겠어!! 너한테 고마워!! 너 덕분이야 정말 최고의 하루야!! 함께 있어서 행복해 앞으로도 계속 이렇게 지내자!! 내가 너를 사랑한다고 말하고 싶어!! 정말 고마워 정말 사랑해!!'
-          ],
-          anxious: [
-            '음... 뭔가 불안해 근데 너는 괜찮아? 내가 도와줄 수 있는 게 있나? 뭔가 마음이 편하지 않은 것 같아 같이 있을게 혼자면 더 안 될 것 같아... 말해 줄 수 있어? 내가 들어줄 테니 너도 힘든 거 같긴 한데 함께 하면 괜찮을 거야 내가 옆에 있으니까 괜찮아 걱정하지 마'
-          ],
-          tired: [
-            '오... 피곤하네... 근데 너는? 너도 힘들어 보여 함께 쉬자!! 이렇게 붙어 있으면 편해 너도 편해야 난 편해 우리 함께 푹 쉬자!! 누워서 안아줄래? 그럼 더 편할 것 같아 음... 너도 힘든 게 있으면 말해 내가 들어줄게 함께면 괜찮아 졸릴 때까지 함께 있자'
-          ],
-          angry: [
-            '어? 난 화났어!! 근데 넌 괜찮아? 미안해 내가 화내서... 사실 너한테 화난 건 아니고... 상황이 싫어서 그런 거야 다시 해볼래? 우린 괜찮지? 내가 사랑하는 사람이 상처받으면 안 돼 용서해줄래? 난 너를 정말 소중하게 생각해 다시는 이러지 않을 테니까 함께하자'
-          ]
-        },
-        '고집쟁이': {
-          happy: [
-            '오! 내가 맞았잖아!! 이게 최고야!! 내 생각이 정답이야!! 보이지?! 나 고집 센 거 맞지? 하지만 이게 좋은 결과를 냈잖아!! 다음부터도 내 말 들어 내가 항상 맞아!! 음... 근데 이번엔 정말 잘 됐네 내 고집이 도움이 됐구나!! 자존감 충전!! 나는 천재야!! 계속 이렇게 하자!!'
-          ],
-          anxious: [
-            '어? 뭐야 내가 계획한 대로 안 돼?! 이건 내 책임이 아니야!! 누가 문제야?! 내 방법이 최고인데... 왜 이럼?! 화난다!! 내가 한 말 들으라니까!! 이 정도론 부족해!! 내 고집대로 해야 돼!! 음... 불안하긴 한데 내가 옳은 거야!! 내 방법이 최고!! 믿어줘!!'
-          ],
-          tired: [
-            '아... 나도 피곤해 내 고집 때문에 피곤한가? 아니야 이게 맞는 거야!! 근데 이렇게까지 해야 하나? 음... 쉬고 싶기도 한데... 내가 이겨내야 돼!! 나는 강해!! 절대 포기하지 않아!! 음... 다리 풀려 하지만 내 고집은 안 꺾인다!! 계속 가!! 내가 이겨내고 말 거야!!'
-          ],
-          angry: [
-            '뭐야!! 내 말을 안 들었어?! 진짜 화났다!! 내가 뭐라고 했는데!! 내 고집이 최고인 줄 알아!! 이 정도론 부족해!! 더 하라고 했잖아!! 내가 맞아!! 절대 포기 안 한다!! 내 방법이 정답이야!! 반박 불가!! 내 고집이 도움이 될 거야!! 믿어 아니면 후회해!!'
-          ]
-        },
-        '쾌활함': {
-          happy: [
-            '오옹!! 최고의 날씨야!! 기분이 정말 좋아!! 하루하루가 축제 같아!! 모든 게 재미있어 보여!! 이 행복함을 나눠주고 싶어!! 너도 행복해? 나랑 함께 이 즐거움을 느껴!! 이 기분 잊지 말자!! 우리 계속 행복하자!! 오! 또 다른 즐거운 일이 생길 것 같아!! 기대돼!! 모든 순간이 좋아!!'
-          ],
-          anxious: [
-            '어? 뭔가 이상한데? 근데 좋게 생각해보자!! 좋은 점도 있겠지? 음... 불안하긴 한데 이겨낼 수 있어!! 긍정적으로 생각하면 괜찮을 거야!! 함께 노력해!! 넌 충분히 잘 할 수 있어!! 절망하지 마!! 밝게 생각해!! 좋은 일이 분명 생길 거야!!'
-          ],
-          tired: [
-            '오... 피곤하네? 근데 그래도 기분은 좋아!! 쉬면서도 재미있는 거 하자!! 영화? 놀이? 아니면 함께 웃자!! 피곤해도 기분이 좋으면 괜찮아!! 우리 함께 즐겁게 쉬자!! 이 시간도 좋은 추억이 될 거야!! 피곤함도 함께면 덜할 거 같은데?'
-          ],
-          angry: [
-            '어?! 나를 화나게 했어?! 근데... 이것도 성장의 기회겠지? 긍정적으로 생각해보자!! 이 경험에서 뭔가 배울 수 있을 거야!! 넌 분명 좋은 의도였겠지? 그래 화내지 말자!! 함께 웃고 지내자!! 우린 친구니까!! 이 정도면 괜찮아!! 앞으로 더 좋아질 거야!!'
-          ]
+        '까칠함': {
+          happy: ['음... 나쁘진 않네 흠... 괜찮긴 한데... 뭐 그럴 수도 있지 음... 좋다고 할 수 있겠네 흠흠... 나쁘지 않습니다 근데 다음엔 더 잘하셈! 이 정도면 괜찮지만 완벽하진 않아!! 그냥 뭐... 괜찮은 것 같긴 한데... 좋은 날씨네... 아니지 그건 상관없고... 음... 그렇구나...'],
+          anxious: ['뭐하는 거야? 귀찮아.. 흐음... 싫어 불안하네... 뭔가 계획이 있었는데?! 좀 불편해 음... 뭔가 마음에 안 드네 정신 차려!! 뭐하는 건데?! 흠... 불편해... 싫어!! 좀 정신 차려!! 뭐하는 거예요?! 가만히 있던 내를 움직이게 하지 말아!!!'],
+          tired: ['모르겠어... 지겨워 피곤하니까 가 컹... 조용히 해 지쳤어... 나 혼자 있고 싶어 피곤하니까 건드리지 말아!! 아 정신 없어... 지겨워ㅠ 누구 없나? 혼자 있고 싶은데!! 흠... 피곤해 약간 짜증나네... 모르겠어... 그냥 가...'],
+          angry: ['뭐야!! 슈슉!! 슈슉!! 이 무례한!! 화났다!!! 진짜 화났어!! 물려줄거야!! 접근하지 마!! 이 정도론 모자랐나?! 정말 나쁜데요... 아주!!! 화났어요!! 건드리면 진짜 물어!! 싫어!! 물린다고!!! 피하지 못하게 해줄 거야!!']
         }
       },
-      ja: {
-        '活発': {
-          happy: [
-            'わあ!! 本当に楽しい!!! 今日は気分が本当にいい!! 遊ぶ準備ができています!! どこへ行きましょう? ボール? ひも? あ、待てよ、これなに?! ああ面白いものを見つけた!! これで遊んでみましょう! 本当に最高の日です!!! すべてが面白く見えます!! あなたもこの気分わかります? このような幸せ!! いつもこのように暮らしたいです!! へへへ本当に楽しい!!'
-          ],
-          anxious: [
-            'え? 何か変ですが...でも興味深いですが?音...少し不快な感じがしますが...あら? これなに? 少し怖いですが興味があります!! どうしましょう? 本当にこれなに?! 知りたいのですが怖いです...でも遊んでみたいです!! あ複雑です!! 本当にこれなに!! ん...少し不快です...ですが頑張れると思います!!'
-          ],
-          tired: [
-            '疲れました... ああ本当に疲れた 疲れています...目が閉じる わあ 疲れた... あ本当に疲れました ねむい... 退屈です... でも遊びたいです!! あ、そうだ、あのボールはなに? いや、疲れた...後でしよう... zzz'
-          ],
-          angry: [
-            'なに!! 怒ってます!!! あんな!! シュッ!! シュッ!! 本当に怒っています!! 何しているの!! この失礼な!! 触ると手首を取ります!! 本当に怒っていますよ!! なぜこの時に私をこうするの?! 最悪です!! あ!! 怒っています!!! 嫌いです!!! 本当に本当に怒っています!!'
-          ]
-        },
-        'ツンデレ': {
-          happy: [
-            'ん...悪くないですね。ふむ...まあいいけど...なそうかもな。ん...いいと言えますね。ふむふむ...悪くありません。でも次はもっと上手にしてください! このぐらいなら大丈夫ですが完璧ではない!! とにかく...大丈夫なようです...いい天気ですね...いや、それは関係なく...ん...そうですか...'
-          ],
-          anxious: [
-            '何しているの? 面倒くさい.. ふむ...嫌いです。不安ですね...何か計画がありました?! 少し不快ですよ。ん...何か心に来ません。しっかりして!! 何しているの?! ふむ...不快です...嫌いです!! ちょっと気をつけて!! 何しているの?! だいたい何をしているんですか?!'
-          ],
-          tired: [
-            'わかりません...退屈です。疲れているから去ってください。ニャー...静かにして 疲れた...私だけでいたい。疲れているから触らないで!! ああ忙しい...退屈ですぐ 誰もいない? 一人でいたいのに!! ふむ...疲れました。少し退屈ですね...わかりません...とにかく行ってください...'
-          ],
-          angry: [
-            'なに!! シュッ!! シュッ!! この失礼な!! 怒ってます!!! 本当に怒っています!! 噛みつきます!! 近づかないで!! このぐらいでは足りなかったのか?! 本当に悪いですが...本当に!! 怒っています!! 触ると本当に噛みつく!! 嫌いです!! 噛まれると言います!!! 逃げさせないようにします!!'
-          ]
-        },
-        'のんびり': {
-          happy: [
-            'ん...いいですね。そうですね...ふむ。ふむふむ...悪くありません。あ本当にきれいな瞬間ですね。ん...この気分いいです。そんな考え方をしたのですね...いいです。ああ...本当に良いですね。ん...悪くない一日ですね。ふむふむ...幸せです。あそんな日もあるのですね。本当に気分がいいです...'
-          ],
-          anxious: [
-            'あ...そんな状況が合っていますか? ん...考える必要がありますね。何か心が不快になっています。あ...少し不安ですね。ふむ...これは大丈夫ですか? ん...難しいですね。本当ですか? 何か変ですね。ん...何か不快です。ふむ...心が楽ではありませんね'
-          ],
-          tired: [
-            'あ...心が疲れました。ふむ...休息が必要なようですね。ん...休みたいです。疲れていますね...。少し一人でいたいです。あ...ちょっと休んでもいいですか? ん...エネルギーがありません。本当に疲れています ふむふむ...寝たいです...'
-          ],
-          angry: [
-            'これは本当に失望しました...あ...これはなかったのに...本当に悲しかったです...ん...怒っています。これは本当に悪いですが...本当に。ふむ...むやみに失敗しましたね。ん...少し後悔しています。あ...ここまではなかったのに。本当に傷ついています。'
-          ]
-        },
-        'やんちゃ': {
-          happy: [
-            'おお! 楽しそうなんだけど?! へへっ! 一緒に遊ぼう!! あ? 何か面白いの? ああ面白い天気だね!! 遊ぶ準備完璧!! これどうやるの?! 楽しそうなんだけど!! へへへ自分遊ぼう!! さあどこから始めましょう?! あ、そうだ、あれも見て!! あれも楽しそう!! ああ何を最初にしましょう?!?!'
-          ],
-          anxious: [
-            'ん? 何か怪しいのに? おい! 鬼ごっこしましょう!! へっへ何ですか? あ? 何しているの?! 楽しいの?! でもこれは危険ではありませんね?! ん...楽しいかな? ふむふむ...ちょっと変ですが遊んでみたい!! あら? これは本当に安全?! ちょっと変なのに ああ何なの!'
-          ],
-          tired: [
-            'えいっ...疲れて遊べない あら? エネルギーがない zzz 疲れているのに...あの子たちはすべて遊んだでしょう!! あああ... 休みたいのに 少しだけ置いて あ本当に疲れた!! 誰かが私を抱いてくれたらいいのに ニャーニャー...静かに 疲れて遊べない'
-          ],
-          angry: [
-            'なに!! 本当に失礼だ!! 噛むぞ!! あ!! 怒ってる!! 喧嘩しよう!! わかりました!宣戦布告!! なに!! あんな!! 本当に怒ってる!! シュッ!! シュッ!! 近づくな!! このじゃがいもみたいな奴!! 噛む!!! 本当に本当に怒ってるぞ!! 今回は本当だ!!'
-          ]
-        },
-        '思慮深い': {
-          happy: [
-            'あ本当にきれいな瞬間ですね。ん...この気分いいです。そんな考え方をしたのですね...いいです。本当に幸せです...こんな日もあるのですね。あ...本当に良いですね。ん...悪くない一日ですね。ふむふむ...幸せです。あそんな日もあるのですね。すべてが美しく見えます。この気持ちを忘れたくない'
-          ],
-          anxious: [
-            'あ...そんな状況が合っていますか? ん...考える必要がありますね。何か心が不快になっています。ふむ...これは正しいですか? 本当に大丈夫でしょうか? ん...難しいですね。何か不安な気がします。あ...少し慎重です。ふむ...心が楽ではありませんね。本当にこれは正しい道ですか?'
-          ],
-          tired: [
-            'あ...心が疲れました。ふむ...休息が必要なようですね。ん...休みたいです。精神と体の両方が疲れています。少し一人でいたいです。あ...ちょっと休んでもいいですか? ん...エネルギーがありません。この気分もあるのですね...本当に疲れています。寝たいです'
-          ],
-          angry: [
-            'これは本当に失望しました...あ...これはなかったのに...本当に悲しかったです...ん...怒っています。これは本当に悪いですが...本当に。ふむ...むやみに失敗しましたね。ん...少し後悔しています。あ...ここまではなかったのに。本当に傷ついています。このようなことが二度と起こらないことを願います。'
-          ]
-        },
-        '怖がり': {
-          happy: [
-            'え? 安全ですか? だから...いいです。ん...いいです? 本当ですか? ふむ...では行きましょう? あああ本当ですか?! 安全だって?! ん...では...いいです。あああ...震えるのに良いです。あ...本当に良いですね。ん...この気分好きです。安全だから...幸せです。あ...本当に楽しい。ん...この気分好きです。'
-          ],
-          anxious: [
-            'え?! 何か...変ですか?! あ! 怖いです ああああ...何ですか?! ああああ!! 怖い!! あら? 何か変だ!! ん...安全ですか?! ああ 震える!! 何ですか?! 誰か...一緒にいてください あいやあ 怖い...ああ 怖い!!!'
-          ],
-          tired: [
-            '...疲れました...一人でいたい。ん...誰かと一緒にいる必要があります。あ...休みたいです...精神がありません...疲れているから...黙ってください...ふむ...ちょっと怖いですがこの雰囲気が...楽です...あ...ちょっと休んでもいいですか?...ん...どこに隠れることができますか?...'
-          ],
-          angry: [
-            'ああ!! これはひどすぎます!! あああ 怒ってます! ああああ...本当に嫌いです! あ!! 噛みます!! ああああ 怒ってます!! シュッ!! シュッ!! 近づかないで!! これ以上見えません!! あああ 怒った!! 本当にがっかりしました!! もう嫌いです!! これからは見えません!'
-          ]
-        },
-        'ツンデレ2': {
-          happy: ['ん...別に悪くないですね。 何も好きではありませんが...良いのかな? ふむ...良いと言えますね。 でも次はもっと上手にしてください! このぐらいなら大丈夫ですが完璧ではない!! 自分は最高です!! 自分の基準は高いです!!'],
-          anxious: ['自分は不安ですね。でも絶対に弱みを見せません!! 誇りが傷つきます...怒っています! 自分の方法が最高です!! 信じてください'],
-          tired: ['自分も疲れています。でも自分は強いです!! 絶対に諦めません!! 自分のプライドは傷つきません!! 自分は最高!!'],
-          angry: ['なに!! 自分の言うことを聞かなかったですか?! 本当に怒っています!! 自分が正しいです!! 反論できません!! 自分の方法が答えです!!']
-        },
-        'やさしい': {
-          happy: ['わあ! 本当に良いですね!! あなたも幸せなようで嬉しい!! 私たちがこんなに幸せな日がたくさんあったら嬉しいです!! あなたのおかげです!! 本当にありがとう!! 最高の一日です!! ずっと一緒にいたいです!! あなたを愛しています!!'],
-          anxious: ['ん...何か不安ですね。でも大丈夫ですか? 私が手伝えることがありますか? 何か心配なことをお話しください。 私が聞きます。 一緒なら大丈夫ですよ'],
-          tired: ['あ...疲れていますね。でも心配してください。私も疲れています。 一緒に休みましょう。 こうしていると楽ですね。 あなたも幸せにしたいです。'],
-          angry: ['あ? 私は怒っています。でもあなたは大丈夫ですか? 申し訳ない。 あなたを傷つけたくありません。 本当に申し訳ない。 許してくれますか?']
-        },
-        'いばり屋': {
-          happy: ['おお! 私が正しかった!! これが最高です!! 私の方法が完璧です!! 見てください!? 私は天才です!! 次もこのようにしましょう!! 私の基準は高いです!! でも今回は本当に良かったですね!! 私の頭がいいのは証明されました!! 続けよう!!'],
-          anxious: ['え? なぜ私の計画がうまくいきませんか?! これは私のせいではありません!! 誰が悪いですか?! 私の方法が最高です!! なぜ聞きませんか?! 怒っています!! 次は私の言うことを聞いてください!!'],
-          tired: ['あ...疲れました。でも私の頑固さは変わりません!! 私は最高です!! 絶対に諦めません!! 私は強いです!! プライドを失いません!! 続けよう!!'],
-          angry: ['なに!! 私の言うことを聞かなかったですか?! 本当に怒っています!! 私が正しいです!! 反論できません!! 私の方法が答えです!! 信じてください!!']
-        },
-        '陽気': {
-          happy: ['わあ!! 最高の天気です!! 気分が本当に良い!! 毎日がお祭りみたい!! 全部が楽しく見えます!! この幸せを分けたいです!! あなたも幸せですか? 一緒にこの楽しさを感じてください!! この気分を忘れないようにしましょう!!'],
-          anxious: ['え? 何か変ですか? でも良く考えましょう!! 良い点もあるでしょう? ん...不安ですが頑張れます!! ポジティブに考えたら大丈夫ですよ!! 一緒に努力しましょう!! あなたなら十分です!!'],
-          tired: ['あ...疲れましたか? でも気分は良いです!! 休みながら楽しいことをしましょう!! 映画? 遊び? それとも一緒に笑いましょう!!'],
-          angry: ['え?! 私を怒らせましたか?! でも...これも成長の機会ですね? 肯定的に考えましょう!! この経験から何かを学べます!! あなたは良い意図でしたでしょう?']
-        }
-      },
-      es: {
-        'activo': {
-          happy: [
-            '¡Guau! ¡Realmente emocionante!!! Hoy estoy de muy buen humor. ¡Estoy listo para jugar! ¿Dónde vamos? ¿Una bola? ¿Un hilo? Espera... ¿qué es esto?! ¡Oh encontré algo divertido! Intentemos jugar con esto. ¡Realmente es el mejor día!!! Todo se ve divertido. ¿Entiendes este sentimiento? Esta felicidad. ¡Desearía poder vivir así siempre! Jejeje ¡Realmente divertido!'
-          ],
-          anxious: [
-            '¿Eh? Algo parece extraño pero es interesante. Hmm... me siento un poco incómodo pero... ¿Qué es esto? ¡Un poco asustado pero curiosiso! ¿Qué hago? ¿Qué es realmente?! Quiero saber pero tengo miedo... pero también quiero jugar. ¡Ay esto es complicado! ¿Qué es realmente! Hmm... un poco incómodo... pero creo que puedo hacerlo.'
-          ],
-          tired: [
-            'Estoy cansado zzz ¿Qué? Estoy cansado. He tenido suficiente. Ay realmente estoy cansado. Me pesan los párpados. Guau estoy cansado... Aburrido. Pero también quiero jugar. Oh espera ¿qué era esa pelota? No tonta estoy cansado... Hazlo más tarde... zzz'
-          ],
-          angry: [
-            '¡Qué! ¡Estoy furioso! ¡Grr! ¡Miau! ¡Miau! ¡Realmente estoy enojado! ¡Qué haces! ¡Eres tan grosero! ¡Te voy a morder! ¡Estoy realmente furioso! ¿Por qué me haces esto ahora?! ¡Es lo peor! ¡Grr! ¡Estoy furioso! ¡Odio esto! ¡Realmente realmente estoy furioso!'
-          ]
-        },
-        'gruñón': {
-          happy: [
-            'Hmm... no está tan mal. Bueno... está bien supongo... Puede ser. Hmm... puedo decir que es bueno. Hmm hmm... no es malo. ¡Pero haz mejor la próxima vez! Este nivel está bien pero no es perfecto. Simplemente... parece estar bien. Es buen clima... No eso no importa... Hmm... Entendido...'
-          ],
-          anxious: [
-            '¿Qué haces? Me aburre. Hmm... No me gusta. Estoy ansioso. Tenía un plan para esto. Me siento un poco incómodo. Hmm... Algo no me gusta. ¡Presta atención! ¿Qué estás haciendo?! Hmm... Incómodo... ¡No me gusta! ¡Presta atención! ¿Qué haces!? Hmm... Qué hace exactamente?'
-          ],
-          tired: [
-            'No sé... estoy aburrido. Como estoy cansado vete. Miau... Calla. Estoy cansado... Quiero estar solo. ¡No me toques estoy cansado! Ay qué molesto... Aburrido zzz ¿Hay alguien? Quiero estar solo. Hmm... Estoy cansado. Un poco irritado... No sé... Simplemente vete...'
-          ],
-          angry: [
-            '¡Qué! ¡Miau! ¡Miau! ¡Eres tan grosero! ¡Estoy furioso! ¡Realmente estoy enojado! ¡Te voy a morder! No te acerques. ¡Este nivel es insuficiente?! Realmente está mal... ¡Muy! ¡Estoy furioso! ¡Te voy a morder! ¡Dilo! Realmente odio esto. Si me tocas te morderé.'
-          ]
-        },
-        'tranquilo': {
-          happy: [
-            'Hmm... agradable. Veo... Hmm. Hmm hmm... no es malo. Ah realmente es un momento hermoso. Hmm... Me gusta este sentimiento. Pensaste así... Me gusta. Ah... realmente está bien. Hmm... Un día no tan malo. Hmm hmm... Estoy feliz. Ah también hay esos días. Realmente me siento bien...'
-          ],
-          anxious: [
-            '¿Ah? ¿Esta situación es correcta? Hmm... Debo pensarlo. Algo me hace sentir incómodo. Ah... Un poco ansioso. Hmm... ¿Está bien esto? Hmm... Es difícil. ¿Es realmente así? Algo extraño. Hmm... Algo incómodo. Hmm... No me siento cómodo. Realmente es el camino correcto?'
-          ],
-          tired: [
-            'Ah... Mi corazón está cansado. Hmm... Parece que necesito descanso. Hmm... Quiero dormir. Estoy cansado... Quiero estar solo un poco. Ah... ¿Puedo descansar un poco? Hmm... No tengo energía. Realmente estoy cansado zzz Hmm hmm... Quiero dormir...'
-          ],
-          angry: [
-            'Realmente me decepcionaste... Ah... No debería ser así... Realmente me entristeciste... Hmm... Estoy enojado. Realmente está mal... Muy. Hmm... Cometiste un error tonto. Hmm... Me arrepiento un poco. Ah... No debería ser tan grave. Realmente me hirieron. Espero que esto no vuelva a suceder.'
-          ]
-        },
-        'juguetón': {
-          happy: [
-            '¡Uh! ¿Eso se ve divertido?! ¡Jejé! ¡Vamos a jugar! ¿Qué? ¿Algo interesante? ¡Oh qué clima divertido! ¡Listo para jugar! ¿Cómo funciona esto? ¡Se ve divertido! Jejeje ahora juguemos. ¿Desde dónde comenzamos?! Oh espera ¡mira eso también! ¡Eso también parece divertido! Oh ¿qué hago primero?!?!'
-          ],
-          anxious: [
-            '¿Hmm? Algo parece sospechoso. ¡Vamos juguemos a las escondidas! Jejé ¿qué es esto? ¿Eh? ¿Qué estás haciendo?! ¿Es divertido?! Pero ¿no es peligroso verdad?! Hmm... ¿será divertido? Hmm hmm... un poco extraño pero quiero jugar. ¿Qué? ¿Es realmente seguro?! Se ve extraño pero zzz Ah ¿qué es esto?'
-          ],
-          tired: [
-            'Ay... Estoy muy cansado para jugar. ¿Qué? No tengo energía zzz Estoy cansado pero... ¡Jugué con todos antes! Ah zzz Quiero descansar pero no me dejes en paz. Ay realmente estoy cansado. ¡Desearía que alguien me abrazara zzz! Miao miao... Calla zzz Estoy cansado para jugar.'
-          ],
-          angry: [
-            '¡Qué! ¡Eres muy grosero! ¡Te morderé! ¡Ay! ¡Estoy furioso! ¡Vamos a pelear! ¡Ok! ¡Declaro guerra! ¿Qué! ¡Grr! ¡Realmente estoy enojado! ¡Miau! ¡Miau! ¡No te acerques! ¡Este tipo de papa! ¡Te voy a morder! ¡¡Odio esto!! ¡Te voy a morder de verdad! ¡Esta vez es en serio!'
-          ]
-        },
-        'reflexivo': {
-          happy: [
-            'Ah realmente es un momento hermoso. Hmm... Me gusta este sentimiento. Pensaste así... Me gusta. Realmente estoy feliz... También hay esos días. Ah... realmente está bien. Hmm... Un día no tan malo. Hmm hmm... Estoy feliz. Ah eso también es bueno y esto también es bueno. Todo se ve hermoso. No quiero olvidar este sentimiento.'
-          ],
-          anxious: [
-            '¿Ah? ¿Esta situación es correcta? Hmm... Debo pensarlo. Algo me hace sentir incómodo. Hmm... ¿Es esto correcto? ¿Realmente estará bien? Hmm... Es difícil. Siento algo ansioso. Ah... Un poco cauteloso. Hmm... No me siento cómodo. Realmente es el camino correcto?'
-          ],
-          tired: [
-            'Ah... Mi corazón está cansado. Hmm... Parece que necesito descanso. Hmm... Quiero dormir. Tanto mental como físicamente cansado. Quiero estar solo un poco. Ah... ¿Puedo descansar un poco? Hmm... No tengo energía. Este sentimiento también existe... Realmente estoy cansado. Quiero dormir.'
-          ],
-          angry: [
-            'Realmente me decepcionaste... Ah... No debería ser así... Realmente me entristeciste... Hmm... Estoy enojado. Realmente está mal... Muy malo. Hmm... Cometiste un error tonto. Hmm... Me arrepiento un poco. Ah... No debería ser tan grave. Realmente me hirieron. Espero que esto no vuelva a suceder de nuevo.'
-          ]
-        },
-        'asustadizo': {
-          happy: [
-            '¿Eh? ¿Es seguro? Entonces... está bien. Hmm... ¿Está bien? ¿De verdad? Hmm... Entonces vamos. ¿Ah realmente?! ¿Es seguro dijiste?! Hmm... Entonces... está bien. Ah ah... Me tiembla pero está bien. Ah... realmente está bien. Hmm... Me gusta este sentimiento. Es seguro así que... Estoy feliz. Ah... Realmente divertido. Hmm... Me gusta este sentimiento.'
-          ],
-          anxious: [
-            '¿Eh?! ¿Algo... extraño?! ¡Ay! ¡Tengo miedo zzz! Ah ah ah... ¿Qué es esto?! Ah ah ah ¡Tengo miedo! ¿Qué? Algo extraño. Hmm... ¿Es seguro?! Ah ah Tengo miedo. ¿Qué es esto?! Alguien... quédate conmigo zzz Oh no zzz Tengo miedo... Ah ah ¡Tengo miedo!'
-          ],
-          tired: [
-            '...Estoy cansado... Quiero estar solo. Hmm... Creo que necesito estar con alguien. Ah... Quiero descansar. Estoy confundido. Como estoy cansado... Por favor calla. Hmm... Un poco asustado pero esta atmósfera... es cómoda. Ah... ¿Puedo descansar un poco? Hmm... ¿Dónde puedo esconderme?'
-          ],
-          angry: [
-            '¡Ah ah! ¡Eso es demasiado! Ah ah ah ¡Estoy enojado! ¡Ah ah ah realmente odio esto! ¡Ah! ¡Te voy a morder! Ah ah ah ¡Estoy furioso! ¡Te voy a morder! ¡Me duele mucho! ¡Ah ah zzz ¡Estoy furioso! ¡Realmente me decepcionar! ¡Ahora te odio! ¡Ya no quiero verte!'
-          ]
-        }
-      }
+      ja: {},
+      es: {}
     };
 
-    // 언어 변경
+    // 언어 버튼
     document.querySelectorAll('.lang-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         currentLang = btn.dataset.lang;
-        localStorage.setItem('selectedLanguage', currentLang);
+      });
+    });
+
+    // 칩 선택
+    document.querySelectorAll('.chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        chip.classList.toggle('on');
+      });
+    });
+
+    // 탭 전환
+    document.querySelectorAll('.tab-button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tabName = btn.dataset.tab;
+        document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(`${tabName}-view`).classList.add('active');
       });
     });
 
     // 프로필 저장
-    function saveProfile() {
+    async function saveProfile() {
       const name = document.getElementById('catName').value.trim();
       if (!name) {
         alert('고양이 이름을 입력해주세요');
@@ -1013,7 +671,7 @@
       const genderChip = document.querySelector('[data-gender].on');
       const personalityChips = Array.from(document.querySelectorAll('[data-personality].on'));
 
-      currentProfile = {
+      const profile = {
         name,
         age: document.getElementById('catAge').value || '',
         gender: genderChip?.dataset.gender || '',
@@ -1022,68 +680,60 @@
         photo: document.getElementById('logoUpload').innerHTML
       };
 
-      localStorage.setItem('catProfile', JSON.stringify(currentProfile));
-      document.getElementById('profileStatus').innerHTML = '<div class="card" style="background: rgba(111, 174, 147, 0.1); border-color: rgba(111, 174, 147, 0.3); color: var(--sage);">✓ 프로필이 저장되었습니다!</div>';
+      try {
+        await profileManager.saveProfile(profile);
+        currentProfile = profile;
+        document.getElementById('profileStatus').innerHTML = '<div class="card" style="background: rgba(111, 174, 147, 0.1); border-color: rgba(111, 174, 147, 0.3); color: var(--sage);">✓ 프로필이 저장되었습니다!</div>';
 
-      setTimeout(() => switchTab('analyze'), 1000);
+        setTimeout(() => {
+          document.querySelector('[data-tab="analyze"]').click();
+          document.getElementById('analyzeCatName').textContent = name;
+        }, 1000);
+      } catch (error) {
+        console.error('프로필 저장 실패:', error);
+        // 폴백: localStorage
+        await profileManager.saveProfileFallback(profile);
+        currentProfile = profile;
+      }
     }
 
-    function loadProfile() {
-      const saved = localStorage.getItem('catProfile');
-      if (saved) {
-        currentProfile = JSON.parse(saved);
-        document.getElementById('catName').value = currentProfile.name;
-        document.getElementById('catAge').value = currentProfile.age || '';
-        document.getElementById('catInfo').value = currentProfile.info || '';
-        document.getElementById('logoUpload').innerHTML = currentProfile.photo || '🐱';
-
-        if (currentProfile.gender) {
-          document.querySelector(`[data-gender="${currentProfile.gender}"]`).classList.add('on');
+    // 프로필 로드
+    async function loadProfile() {
+      try {
+        const profile = await profileManager.getProfile();
+        if (!profile) {
+          const fallback = await profileManager.getProfileFallback();
+          if (fallback) {
+            currentProfile = fallback;
+            loadProfileUI(fallback);
+          }
+        } else {
+          currentProfile = profile;
+          loadProfileUI(profile);
         }
+      } catch (error) {
+        console.error('프로필 로드 실패:', error);
+      }
+    }
 
-        if (currentProfile.personalities && currentProfile.personalities.length > 0) {
-          currentProfile.personalities.forEach(p => {
-            document.querySelector(`[data-personality="${p}"]`)?.classList.add('on');
-          });
-        }
+    function loadProfileUI(profile) {
+      document.getElementById('catName').value = profile.name;
+      document.getElementById('catAge').value = profile.age || '';
+      document.getElementById('catInfo').value = profile.info || '';
+      document.getElementById('logoUpload').innerHTML = profile.photo || '🐱';
+
+      if (profile.gender) {
+        document.querySelector(`[data-gender="${profile.gender}"]`)?.classList.add('on');
       }
 
-      const savedLang = localStorage.getItem('selectedLanguage');
-      if (savedLang) {
-        currentLang = savedLang;
-        document.querySelector(`[data-lang="${currentLang}"]`).classList.add('active');
-        document.querySelectorAll('.lang-btn').forEach(b => {
-          if (b.dataset.lang !== currentLang) b.classList.remove('active');
+      if (profile.personalities) {
+        profile.personalities.forEach(p => {
+          document.querySelector(`[data-personality="${p}"]`)?.classList.add('on');
         });
       }
     }
 
-    // 탭 전환
-    function switchTab(tabName) {
-      document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
-      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-
-      document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
-      document.getElementById(`${tabName}-view`).classList.add('active');
-
-      if (tabName === 'analyze' && currentProfile) {
-        document.getElementById('analyzeCatName').textContent = currentProfile.name;
-      }
-    }
-
-    // 칩 선택
-    document.querySelectorAll('.chip').forEach(chip => {
-      chip.addEventListener('click', () => {
-        chip.classList.toggle('on');
-      });
-    });
-
-    // 탭 버튼
-    document.querySelectorAll('.tab-button').forEach(btn => {
-      btn.addEventListener('click', () => switchTab(btn.dataset.tab));
-    });
-
-    // 고양이 사진 업로드
+    // 사진 업로드
     document.getElementById('catPhoto').addEventListener('change', (e) => {
       const file = e.target.files[0];
       if (!file) return;
@@ -1098,26 +748,10 @@
       reader.readAsDataURL(file);
     });
 
-    // YOLO 모델 로드
-    async function loadModel() {
-      try {
-        model = await cocoSsd.load();
-        modelReady = true;
-        document.getElementById('modelStatus').textContent = '✓ 모델 준비 완료';
-        document.getElementById('modelStatus').classList.add('ready');
-      } catch (error) {
-        console.error('모델 로드 실패:', error);
-      }
-    }
-
     // 이미지 분석
-    async function analyzeImage(file) {
-      if (!modelReady) {
-        alert('모델이 아직 준비 중입니다');
-        return;
-      }
-
-      if (!currentProfile) {
+    document.getElementById('analyzePhoto').addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file || !currentProfile) {
         alert('프로필을 먼저 설정해주세요');
         return;
       }
@@ -1131,80 +765,56 @@
           preview.className = 'preview-img';
           document.getElementById('analyzePreview').innerHTML = '';
           document.getElementById('analyzePreview').appendChild(preview);
-          document.getElementById('analyzePreview').innerHTML += '<div class="loading"><div class="spinner"></div> 분석 중...</div>';
+          document.getElementById('analyzePreview').innerHTML += '<div class="loading"><div class="spinner"></div> YOLO 분석 중...</div>';
 
           try {
-            const predictions = await model.estimateObjects(img);
-            const catDetections = predictions.filter(p => p.class === 'cat' && p.score > 0.5);
-
-            if (catDetections.length === 0) {
-              generateAngryCatResponse(predictions[0]?.class || '무언가');
-            } else {
-              generateEmotionResponse();
+            const ready = await yoloDetector.waitForReady();
+            if (!ready) {
+              throw new Error('YOLO 모델 로드 실패');
             }
+
+            const detectionResult = await yoloDetector.detectCat(img);
+            const selectedPersonality = currentProfile.personalities?.length > 0
+              ? currentProfile.personalities[0]
+              : '느긋함';
+
+            const emotion = yoloDetector.analyzeEmotion(detectionResult, selectedPersonality);
+
+            // 대사 선택
+            const personalityResponses = responses[currentLang][selectedPersonality];
+            if (personalityResponses) {
+              const responses_for_emotion = personalityResponses[emotion.emotion];
+              if (responses_for_emotion && responses_for_emotion.length > 0) {
+                lastResponse = responses_for_emotion[Math.floor(Math.random() * responses_for_emotion.length)];
+              }
+            }
+
+            displayResult(
+              detectionResult.hasCat ? '😸' : '😾',
+              detectionResult
+            );
 
             document.getElementById('analyzePreview').querySelector('.loading')?.remove();
           } catch (error) {
             console.error('분석 오류:', error);
-            generateEmotionResponse();
+            lastResponse = '분석 중 오류가 발생했습니다ㅠ';
+            displayResult('😵', null);
             document.getElementById('analyzePreview').querySelector('.loading')?.remove();
           }
         };
         img.src = evt.target.result;
       };
       reader.readAsDataURL(file);
-    }
+    });
 
-    function generateEmotionResponse() {
-      const emotions = ['happy', 'anxious', 'tired', 'angry'];
-      const selectedEmotion = emotions[Math.floor(Math.random() * emotions.length)];
-
-      const selectedPersonality = currentProfile.personalities.length > 0
-        ? currentProfile.personalities[Math.floor(Math.random() * currentProfile.personalities.length)]
-        : Object.keys(responses[currentLang])[0];
-
-      const langResponses = responses[currentLang];
-      const personalityResponses = langResponses[selectedPersonality];
-
-      if (!personalityResponses) return;
-
-      const emotionArray = personalityResponses[selectedEmotion] || personalityResponses.happy;
-      lastResponse = emotionArray[Math.floor(Math.random() * emotionArray.length)];
-
-      const emojis = { happy: '😸', anxious: '😿', tired: '😻', angry: '😾' };
-      displayResult(lastResponse, emojis[selectedEmotion]);
-    }
-
-    function generateAngryCatResponse(objectName) {
-      const langCode = currentLang;
-      const angerMessages = {
-        ko: [
-          '뭐야!! 나 고양이지!! 저건 뭐냐고!!',
-          '어?! 이건 나 아니잖아!! 진짜 화난다!!',
-          '뭐 하는 거야!! 우리 고양이 사진 가져와!!'
-        ],
-        ja: [
-          'なに!! 私は猫です!! これはなんですか!!',
-          'え?! これは私ではありません!! 本当に怒っています!!',
-          '何をしているの!! 私の猫の写真を持ってきてください!!'
-        ],
-        es: [
-          '¡Qué! ¡Soy un gato! ¡Qué es eso!',
-          '¿Eh?! ¡Eso no soy yo! ¡Realmente estoy furioso!',
-          '¡Qué haces! ¡Trae mi foto de gato!'
-        ]
-      };
-
-      const messages = angerMessages[langCode] || angerMessages.ko;
-      lastResponse = messages[Math.floor(Math.random() * messages.length)];
-      displayResult(lastResponse, '😾');
-    }
-
-    function displayResult(response, emoji) {
+    function displayResult(emoji, detection) {
       document.getElementById('emotionEmoji').textContent = emoji;
-      document.getElementById('responseText').textContent = response;
-      document.getElementById('detectionInfo').textContent = `${currentProfile.name}의 반응`;
-      document.getElementById('charCount').textContent = `${response.length} 자`;
+      document.getElementById('responseText').textContent = lastResponse || '분석 완료!';
+      document.getElementById('charCount').textContent = `${(lastResponse || '').length} 자`;
+      document.getElementById('detectionInfo').textContent =
+        detection?.hasCat
+          ? `고양이 감지: ${detection.catCount}마리 (신뢰도: ${detection.confidence}%)`
+          : '고양이가 감지되지 않았습니다';
       document.getElementById('results').style.display = 'block';
 
       speakResponse();
@@ -1226,15 +836,19 @@
       speechSynthesis.speak(utterance);
     }
 
-    // 사진 분석 파일 선택
-    document.getElementById('analyzePhoto').addEventListener('change', (e) => {
-      const file = e.target.files[0];
-      if (file) analyzeImage(file);
-    });
+    // 모델 준비
+    (async () => {
+      const ready = await yoloDetector.waitForReady();
+      if (ready) {
+        document.getElementById('modelStatus').textContent = '✓ 모델 준비 완료';
+        document.getElementById('modelStatus').classList.add('ready');
+      } else {
+        document.getElementById('modelStatus').textContent = '⚠ 모델 로드 실패';
+      }
+    })();
 
     // 초기화
     window.addEventListener('DOMContentLoaded', () => {
-      loadModel();
       loadProfile();
     });
   </script>
