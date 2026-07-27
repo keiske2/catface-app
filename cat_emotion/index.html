@@ -8,17 +8,15 @@
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
   <style>
     :root {
-      --paper: #F6F1EA;
-      --ink: #2A2536;
-      --ink-soft: #6B6478;
-      --mauve: #B96A8C;
-      --violet: #7A5FB0;
-      --apricot: #F0A860;
-      --sage: #6FAE93;
-      --danger: #D9695E;
-      --line: #E4DBD0;
-      --card: #FFFFFF;
-      --shadow: 0 10px 30px rgba(42, 37, 54, 0.1);
+      --dark-bg: #0f0f1e;
+      --dark-card: #1a1a2e;
+      --dark-text: #e0e0e0;
+      --dark-text-soft: #a0a0a0;
+      --cyan: #00d9ff;
+      --cyan-light: #4dd0e1;
+      --pink: #ff1493;
+      --pink-light: #ff69b4;
+      --shadow: 0 8px 24px rgba(0, 217, 255, 0.15);
     }
 
     * {
@@ -32,15 +30,14 @@
     }
 
     body {
-      background: radial-gradient(1200px 700px at 20% -10%, #efe6f5 0%, transparent 55%),
-        radial-gradient(1000px 600px at 100% 110%, #f6e6d8 0%, transparent 55%), #eae3ec;
+      background: var(--dark-bg);
+      color: var(--dark-text);
       font-family: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', system-ui, sans-serif;
-      color: var(--ink);
       display: flex;
       align-items: center;
       justify-content: center;
       min-height: 100vh;
-      padding: 28px 12px;
+      padding: 20px;
     }
 
     .stage {
@@ -54,27 +51,17 @@
       width: 393px;
       height: 852px;
       position: relative;
-      flex: 0 0 auto;
-      background: linear-gradient(145deg, #d9d2c6, #b9b1a6);
+      background: linear-gradient(145deg, #2a2a3e, #1a1a2e);
       border-radius: 56px;
       padding: 11px;
-      box-shadow: 0 40px 80px rgba(30, 25, 45, 0.35), inset 0 0 0 2px rgba(255, 255, 255, 0.25);
-    }
-
-    .device::before {
-      content: '';
-      position: absolute;
-      inset: 3px;
-      border-radius: 53px;
-      box-shadow: inset 0 0 0 2px rgba(120, 110, 100, 0.55);
-      pointer-events: none;
+      box-shadow: 0 40px 80px rgba(0, 0, 0, 0.8), 0 0 40px rgba(0, 217, 255, 0.2);
     }
 
     .screen {
       position: relative;
       width: 100%;
       height: 100%;
-      background: var(--paper);
+      background: var(--dark-bg);
       border-radius: 46px;
       overflow: hidden;
       display: flex;
@@ -102,7 +89,7 @@
       padding: 0 30px 6px;
       font-size: 14px;
       font-weight: 700;
-      color: var(--ink);
+      color: var(--dark-text);
       z-index: 40;
     }
 
@@ -114,76 +101,89 @@
       width: 138px;
       height: 5px;
       border-radius: 3px;
-      background: rgba(20, 15, 30, 0.28);
+      background: rgba(0, 217, 255, 0.2);
       z-index: 60;
     }
 
     .app {
-      flex: 1 1 auto;
-      position: relative;
-      overflow: hidden;
+      flex: 1;
       display: flex;
       flex-direction: column;
+      overflow: hidden;
     }
 
-    .language-selector {
-      display: flex;
-      gap: 6px;
-      padding: 8px 22px;
+    .header {
+      padding: 12px 22px;
+      border-bottom: 1px solid rgba(0, 217, 255, 0.1);
       flex: 0 0 auto;
     }
 
-    .lang-btn {
-      flex: 1;
-      border: 1.5px solid var(--line);
-      background: var(--card);
-      border-radius: 10px;
-      padding: 8px;
-      font-size: 11px;
-      font-weight: 700;
-      cursor: pointer;
-      color: var(--ink-soft);
-      transition: all 0.2s;
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
     }
 
-    .lang-btn.active {
-      background: var(--violet);
-      border-color: var(--violet);
-      color: #fff;
+    .logo {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--cyan), var(--pink));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      flex: 0 0 auto;
+    }
+
+    .brand-text b {
+      font-size: 16px;
+      color: var(--cyan);
+      letter-spacing: -0.01em;
+    }
+
+    .brand-text span {
+      display: block;
+      font-size: 10px;
+      color: var(--dark-text-soft);
+      margin-top: 2px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
     }
 
     .tabs {
       display: flex;
       gap: 0;
-      border-bottom: 1px solid var(--line);
+      border-bottom: 1px solid rgba(0, 217, 255, 0.1);
       padding: 0 22px;
-      flex: 0 0 auto;
+      margin: 0;
     }
 
-    .tab-button {
+    .tab-btn {
       flex: 1;
       border: none;
       background: transparent;
-      padding: 12px 0;
+      padding: 14px 0;
       font-size: 13px;
       font-weight: 700;
-      color: var(--ink-soft);
+      color: var(--dark-text-soft);
       cursor: pointer;
       border-bottom: 3px solid transparent;
       transition: all 0.2s;
     }
 
-    .tab-button.active {
-      color: var(--violet);
-      border-bottom-color: var(--violet);
+    .tab-btn.active {
+      color: var(--cyan);
+      border-bottom-color: var(--cyan);
     }
 
     .view {
-      flex: 1 1 auto;
+      flex: 1;
       overflow-y: auto;
       overflow-x: hidden;
-      padding: 6px 22px 78px;
       display: none;
+      padding: 16px 22px 78px;
     }
 
     .view.active {
@@ -192,97 +192,65 @@
     }
 
     .view::-webkit-scrollbar {
-      width: 0;
+      width: 4px;
+    }
+
+    .view::-webkit-scrollbar-thumb {
+      background: rgba(0, 217, 255, 0.3);
+      border-radius: 2px;
     }
 
     h1 {
       font-size: 24px;
-      margin: 10px 0 8px;
+      margin: 0 0 8px;
+      color: var(--cyan);
       letter-spacing: -0.02em;
     }
 
     .sub {
-      color: var(--ink-soft);
+      color: var(--dark-text-soft);
       font-size: 13px;
+      margin: 0 0 16px;
       line-height: 1.5;
-      margin: 0 0 12px;
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 9px;
-      margin: 6px 0 2px;
-    }
-
-    .brand .logo {
-      width: 34px;
-      height: 34px;
-      border-radius: 11px;
-      background: linear-gradient(140deg, var(--violet), var(--mauve));
-      position: relative;
-      flex: 0 0 auto;
-      box-shadow: var(--shadow);
-      cursor: pointer;
-      overflow: hidden;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 24px;
-    }
-
-    .brand .logo img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .brand b {
-      font-size: 15px;
-      letter-spacing: -0.01em;
-    }
-
-    .brand span {
-      font-size: 10px;
-      color: #9a90a8;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      font-weight: 700;
     }
 
     .card {
-      background: var(--card);
+      background: var(--dark-card);
       border-radius: 16px;
       padding: 16px;
-      box-shadow: var(--shadow);
-      border: 1px solid #f0ebe3;
+      border: 1px solid rgba(0, 217, 255, 0.1);
       margin-bottom: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     }
 
     label.fld {
       display: block;
       font-size: 12px;
       font-weight: 700;
-      color: var(--ink-soft);
-      margin: 10px 0 6px;
+      color: var(--dark-text-soft);
+      margin: 12px 0 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
     }
 
-    input[type=text], input[type=number], select, textarea {
+    input, select, textarea {
       width: 100%;
-      border: 1.5px solid var(--line);
-      background: var(--card);
-      border-radius: 12px;
+      border: 1px solid rgba(0, 217, 255, 0.2);
+      background: rgba(0, 217, 255, 0.05);
+      border-radius: 10px;
       padding: 11px;
       font-size: 14px;
-      color: var(--ink);
+      color: var(--dark-text);
       font-family: inherit;
       outline: none;
-      transition: border-color 0.18s;
+      transition: all 0.2s;
       resize: none;
     }
 
     input:focus, select:focus, textarea:focus {
-      border-color: var(--violet);
+      border-color: var(--cyan);
+      background: rgba(0, 217, 255, 0.1);
+      box-shadow: 0 0 12px rgba(0, 217, 255, 0.2);
     }
 
     .chips {
@@ -293,22 +261,27 @@
     }
 
     .chip {
-      border: 1.5px solid var(--line);
-      background: var(--card);
-      border-radius: 999px;
-      padding: 9px 14px;
+      border: 1px solid rgba(0, 217, 255, 0.2);
+      background: transparent;
+      border-radius: 20px;
+      padding: 8px 14px;
       font-size: 12px;
       font-weight: 600;
       cursor: pointer;
-      color: var(--ink-soft);
+      color: var(--dark-text-soft);
       transition: all 0.15s;
     }
 
+    .chip:hover {
+      border-color: var(--cyan);
+      color: var(--cyan);
+    }
+
     .chip.on {
-      background: var(--violet);
-      border-color: var(--violet);
-      color: #fff;
-      box-shadow: 0 6px 14px rgba(122, 95, 176, 0.32);
+      background: linear-gradient(135deg, rgba(0, 217, 255, 0.2), rgba(255, 20, 147, 0.2));
+      border-color: var(--pink);
+      color: var(--pink-light);
+      box-shadow: 0 0 12px rgba(255, 20, 147, 0.3);
     }
 
     .btn {
@@ -318,47 +291,40 @@
       gap: 8px;
       width: 100%;
       border: none;
-      border-radius: 14px;
+      border-radius: 12px;
       padding: 13px;
-      font-size: 15px;
+      font-size: 14px;
       font-weight: 800;
-      font-family: inherit;
       cursor: pointer;
-      letter-spacing: -0.01em;
+      font-family: inherit;
+      transition: all 0.2s;
       margin-top: 12px;
     }
 
     .btn.primary {
-      background: var(--ink);
-      color: #fff;
-      box-shadow: 0 12px 24px rgba(42, 37, 54, 0.28);
+      background: linear-gradient(135deg, var(--cyan), var(--cyan-light));
+      color: var(--dark-bg);
+      box-shadow: 0 8px 16px rgba(0, 217, 255, 0.3);
+    }
+
+    .btn.primary:hover {
+      box-shadow: 0 12px 24px rgba(0, 217, 255, 0.4);
+      transform: translateY(-2px);
+    }
+
+    .btn.secondary {
+      background: rgba(255, 20, 147, 0.15);
+      color: var(--pink-light);
+      border: 1px solid var(--pink);
+    }
+
+    .btn.secondary.active {
+      background: var(--pink);
+      color: var(--dark-bg);
     }
 
     .btn:active {
-      transform: translateY(1px);
-    }
-
-    .catcard {
-      background: linear-gradient(150deg, #2f2842, #4a3a63);
-      color: #fff;
-      border-radius: 16px;
-      padding: 16px;
-      position: relative;
-      overflow: hidden;
-      box-shadow: 0 18px 36px rgba(47, 40, 66, 0.35);
-      margin-bottom: 12px;
-    }
-
-    .catcard .nm {
-      font-size: 20px;
-      font-weight: 800;
-      letter-spacing: -0.02em;
-    }
-
-    .catcard .meta {
-      font-size: 12px;
-      opacity: 0.82;
-      margin-top: 4px;
+      transform: translateY(0px);
     }
 
     input[type='file'] {
@@ -366,87 +332,157 @@
     }
 
     .upload-box {
-      border: 2px dashed var(--line);
+      border: 2px dashed rgba(0, 217, 255, 0.3);
       border-radius: 14px;
       padding: 20px;
       text-align: center;
       cursor: pointer;
       transition: all 0.2s;
+      background: rgba(0, 217, 255, 0.05);
       margin-bottom: 12px;
     }
 
     .upload-box:hover {
-      border-color: var(--violet);
-      background: rgba(122, 95, 176, 0.05);
+      border-color: var(--cyan);
+      background: rgba(0, 217, 255, 0.1);
     }
 
     .upload-box .icon {
-      font-size: 28px;
+      font-size: 32px;
       margin-bottom: 8px;
     }
 
     .upload-box .text {
-      color: var(--ink-soft);
+      color: var(--dark-text-soft);
       font-size: 12px;
     }
 
     .preview-img {
       width: 100%;
-      max-height: 260px;
+      max-height: 280px;
       border-radius: 14px;
       margin-bottom: 12px;
       object-fit: cover;
+      border: 1px solid rgba(0, 217, 255, 0.2);
     }
 
-    .emotion-result {
-      background: var(--card);
+    .analyze-container {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .profile-section {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .profile-photo {
+      width: 80px;
+      height: 80px;
       border-radius: 16px;
-      padding: 14px;
-      box-shadow: var(--shadow);
-      border: 1px solid #f0ebe3;
-      margin-bottom: 12px;
+      overflow: hidden;
+      background: var(--dark-card);
+      border: 2px solid var(--cyan);
+      flex: 0 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
     }
 
-    .emotion-emoji {
-      font-size: 48px;
-      text-align: center;
-      margin: 8px 0;
+    .profile-photo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
     }
 
-    .response-text {
-      background: rgba(122, 95, 176, 0.1);
-      border-left: 3px solid var(--violet);
-      padding: 12px;
-      border-radius: 8px;
+    .profile-info {
+      flex: 1;
+    }
+
+    .profile-info .name {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--cyan);
+      margin: 0 0 4px;
+    }
+
+    .profile-info .meta {
       font-size: 12px;
-      line-height: 1.8;
-      margin: 12px 0;
-      font-weight: 500;
-      max-height: 280px;
-      overflow-y: auto;
+      color: var(--dark-text-soft);
+      line-height: 1.4;
     }
 
-    .detection-info {
-      background: rgba(122, 95, 176, 0.1);
-      border: 1px solid rgba(122, 95, 176, 0.2);
-      border-radius: 10px;
-      padding: 10px;
+    .message-box {
+      background: var(--dark-card);
+      border: 1px solid rgba(0, 217, 255, 0.1);
+      border-radius: 14px;
+      padding: 14px;
+      margin: 12px 0;
+    }
+
+    .message-controls {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+
+    .msg-btn {
+      flex: 0 1 auto;
+      padding: 6px 10px;
       font-size: 11px;
-      color: var(--ink-soft);
-      margin-bottom: 10px;
+      border: 1px solid rgba(0, 217, 255, 0.2);
+      background: transparent;
+      border-radius: 8px;
+      color: var(--dark-text-soft);
+      cursor: pointer;
+      transition: all 0.2s;
+      font-weight: 600;
+    }
+
+    .msg-btn.active {
+      background: var(--pink);
+      border-color: var(--pink);
+      color: white;
+    }
+
+    .msg-btn:hover {
+      border-color: var(--cyan);
+      color: var(--cyan);
+    }
+
+    .message-text {
+      font-size: 13px;
+      line-height: 1.8;
+      color: var(--dark-text);
+      max-height: 300px;
+      overflow-y: auto;
+      padding: 10px 0;
+    }
+
+    .message-text::-webkit-scrollbar {
+      width: 3px;
+    }
+
+    .message-text::-webkit-scrollbar-thumb {
+      background: rgba(0, 217, 255, 0.2);
+      border-radius: 2px;
     }
 
     .loading {
       text-align: center;
-      padding: 16px;
+      padding: 20px;
     }
 
     .spinner {
       display: inline-block;
-      width: 20px;
-      height: 20px;
-      border: 3px solid var(--line);
-      border-top-color: var(--violet);
+      width: 24px;
+      height: 24px;
+      border: 3px solid rgba(0, 217, 255, 0.2);
+      border-top-color: var(--cyan);
       border-radius: 50%;
       animation: spin 0.8s linear infinite;
     }
@@ -455,33 +491,29 @@
       to { transform: rotate(360deg); }
     }
 
-    canvas {
-      display: none;
+    .emoji-display {
+      font-size: 48px;
+      text-align: center;
+      margin: 10px 0;
     }
 
-    .model-status {
+    .status-msg {
       font-size: 11px;
-      color: var(--ink-soft);
+      color: var(--dark-text-soft);
       padding: 8px;
       text-align: center;
-      margin-bottom: 10px;
+      background: rgba(0, 217, 255, 0.05);
+      border-radius: 8px;
+      margin-bottom: 12px;
     }
 
-    .model-status.ready {
-      color: var(--sage);
+    .status-msg.ready {
+      background: rgba(0, 217, 255, 0.1);
+      color: var(--cyan);
     }
 
-    .sound-btn {
-      padding: 10px;
-      font-size: 13px;
-      margin-top: 8px;
-    }
-
-    .char-count {
-      font-size: 10px;
-      color: var(--ink-soft);
-      text-align: right;
-      margin-top: 6px;
+    canvas {
+      display: none;
     }
   </style>
 </head>
@@ -497,35 +529,38 @@
         </div>
 
         <div class="app">
-          <div class="language-selector">
-            <button class="lang-btn active" data-lang="ko">한국어 🇰🇷</button>
-            <button class="lang-btn" data-lang="en">English 🇺🇸</button>
-            <button class="lang-btn" data-lang="ja">日本語 🇯🇵</button>
-            <button class="lang-btn" data-lang="es">Español 🇪🇸</button>
-          </div>
-
-          <div class="tabs">
-            <button class="tab-button active" data-tab="profile">프로필</button>
-            <button class="tab-button" data-tab="analyze">분석</button>
+          <div class="header">
+            <div class="brand">
+              <div class="logo">🐱</div>
+              <div class="brand-text">
+                <b>Cat Emotion</b>
+                <span>감정 분석</span>
+              </div>
+            </div>
+            <div class="tabs">
+              <button class="tab-btn active" data-tab="profile">프로필</button>
+              <button class="tab-btn" data-tab="analyze">분석</button>
+            </div>
           </div>
 
           <!-- 프로필 탭 -->
           <div class="view active" id="profile-view">
-            <div class="brand" style="margin-bottom: 14px;">
-              <div class="logo" id="logoUpload" onclick="document.getElementById('catPhoto').click()" title="클릭해서 사진 업로드">🐱</div>
-              <div>
-                <b>Cat Emotion</b>
-                <span>My Cat</span>
-              </div>
-              <input type="file" id="catPhoto" accept="image/*" style="display:none;">
-            </div>
-
             <h1>고양이 프로필</h1>
             <p class="sub">고양이 정보를 등록해주세요</p>
 
             <div class="card">
+              <label class="fld">📸 사진</label>
+              <div class="upload-box" onclick="document.getElementById('catPhoto').click()">
+                <div class="icon">📷</div>
+                <div class="text">사진 선택</div>
+                <input type="file" id="catPhoto" accept="image/*">
+              </div>
+              <div id="photoPreview"></div>
+            </div>
+
+            <div class="card">
               <label class="fld">이름 *</label>
-              <input type="text" id="catName" placeholder="예: 미미, 루루">
+              <input type="text" id="catName" placeholder="예: 멍밍이, 루루">
 
               <label class="fld">나이</label>
               <input type="number" id="catAge" placeholder="예: 3" min="0" max="30">
@@ -536,7 +571,7 @@
                 <div class="chip" data-gender="F">암컷 🐱</div>
               </div>
 
-              <label class="fld">성격 선택</label>
+              <label class="fld">성격</label>
               <div class="chips">
                 <div class="chip" data-personality="활발함">🚀 활발함</div>
                 <div class="chip" data-personality="도도함">😼 도도함</div>
@@ -544,10 +579,6 @@
                 <div class="chip" data-personality="느긋함">😸 느긋함</div>
                 <div class="chip" data-personality="장난스러움">🎾 장난</div>
                 <div class="chip" data-personality="사려깊음">🧠 사려깊음</div>
-                <div class="chip" data-personality="겁많음">😿 겁많음</div>
-                <div class="chip" data-personality="다정함">💕 다정함</div>
-                <div class="chip" data-personality="고집쟁이">💪 고집쟁이</div>
-                <div class="chip" data-personality="쾌활함">😄 쾌활함</div>
               </div>
 
               <label class="fld">추가 정보</label>
@@ -560,19 +591,16 @@
 
           <!-- 분석 탭 -->
           <div class="view" id="analyze-view">
-            <div class="brand">
-              <div class="logo">🐱</div>
-              <div>
-                <b id="analyzeCatName">고양이</b>
-                <span>감정 분석</span>
+            <h1>감정 분석</h1>
+
+            <div class="status-msg" id="modelStatus">모델 로딩 중...</div>
+
+            <div class="profile-section" id="profileSection" style="display: none;">
+              <div class="profile-photo" id="profilePhoto">🐱</div>
+              <div class="profile-info">
+                <div class="name" id="profileName">고양이</div>
+                <div class="meta" id="profileMeta">정보 없음</div>
               </div>
-            </div>
-
-            <div id="modelStatus" class="model-status">모델 로딩 중...</div>
-
-            <div class="catcard" id="welcomeCard">
-              <div class="nm">🐱 안녕!</div>
-              <div class="meta">사진을 올려보세요</div>
             </div>
 
             <label class="upload-box" onclick="document.getElementById('analyzePhoto').click()">
@@ -583,22 +611,17 @@
 
             <div id="analyzePreview"></div>
 
-            <div class="emotion-result" id="results" style="display: none;">
-              <div class="emotion-emoji" id="emotionEmoji">😸</div>
-              <div id="detectionInfo" class="detection-info"></div>
+            <div id="resultBox" style="display: none;">
+              <div class="emoji-display" id="emotionEmoji">😸</div>
 
-              <div style="background: rgba(122, 95, 176, 0.1); border-left: 3px solid var(--violet); padding: 12px; border-radius: 8px; margin: 12px 0; font-size: 12px; line-height: 1.8; font-weight: 500;">
-                <div style="margin-bottom: 10px;">
-                  <div id="responseText1"></div>
-                  <button class="btn primary sound-btn" onclick="speakResponse(0)" style="margin-top: 8px;">🔊 음성 1</button>
+              <div class="message-box">
+                <div class="message-controls">
+                  <button class="msg-btn active" data-mode="text" onclick="switchMessageMode('text')">📝 텍스트</button>
+                  <button class="msg-btn" data-mode="voice" onclick="switchMessageMode('voice')">🔊 음성</button>
+                  <button class="msg-btn" data-mode="both" onclick="switchMessageMode('both')">🎯 둘다</button>
                 </div>
-                <div style="border-top: 1px solid rgba(122, 95, 176, 0.2); padding-top: 10px; margin-top: 10px;">
-                  <div id="responseText2"></div>
-                  <button class="btn primary sound-btn" onclick="speakResponse(1)" style="margin-top: 8px;">🔊 음성 2</button>
-                </div>
+                <div class="message-text" id="messageText"></div>
               </div>
-
-              <div class="char-count" id="charCount"></div>
             </div>
           </div>
         </div>
@@ -616,23 +639,23 @@
 
   <script>
     let currentProfile = null;
-    let lastResponses = ['', ''];  // 텍스트 2개 저장
-    let currentLang = 'ko';
+    let lastResponses = ['', ''];
+    let currentMode = 'text'; // text, voice, both
 
     const responses = {
       ko: {
         '활발함': {
           happy: [
-            '우와!! 정말 신난다!!! 오늘따라 기분이 정말 좋아!! 놀 준비가 되어 있다고!! 어디로 갈까? 공? 줄? 아니면... 잠깐 이게 뭐야?! 오오오 재미있는 걸 찾았어!!',
-            '헤헤헤 최고야!! 이런 날씨 정말 좋네!! 놀 준비 완벽!! 뭐든 재미있을 것 같은데!! 같이 신나게 놀까?! 정말 설레!!!'
+            '우와!! 정말 신난다!!! 오늘따라 기분이 정말 좋아!! 놀 준비가 되어 있다고!! 어디로 갈까? 공? 줄? 아니면... 잠깐 이게 뭐야?! 오오오 재미있는 걸 찾았어!! 이거 가지고 한번 놀아볼까? 정말 최고의 날이야!!! 모든 것이 재미있어 보여!! 너도 이 느낌 알지? 이런 행복함!! 언제나 이렇게 살 수 있으면 좋겠어!! 헤헤헤 정말 즐거워!!',
+            '헤헤헤 최고야!! 이런 날씨 정말 좋네!! 놀 준비 완벽!! 뭐든 재미있을 것 같은데!! 같이 신나게 놀까?! 정말 설레!!! 오늘 정말 행운의 날인 것 같아!! 모든 게 다 잘될 것 같은 기분!! 에너지 충전 완료!! 이 기분 영원할 수 있으면 좋겠어!! 정말 최고의 순간이야!!!'
           ],
           anxious: [
-            '어? 뭔가 이상한데... 근데 흥미롭긴 한데? 음... 조금 불편한 느낌이긴 한데... 어라? 이게 뭐지? 조금 두렵지만 궁금해!!',
-            '음... 좀 이상한데? 뭐하는 거야? 무섭기도 하고... 궁금하기도 하고... 어쩌지? 같이 해볼까?'
+            '어? 뭔가 이상한데... 근데 흥미롭긴 한데? 음... 조금 불편한 느낌이긴 한데... 어라? 이게 뭐지? 조금 두렵지만 궁금해!! 어쩌지? 진짜 이건 뭐야?! 좀 더 알고 싶은데 무섭네...',
+            '음... 좀 이상한데? 뭐하는 거야? 무섭기도 하고... 궁금하기도 하고... 어쩌지? 같이 해볼까? 근데 뭐가 나올까?'
           ],
           tired: [
-            '에그... 피곤해ㅠㅠ 어ㅋㅋ 피곤하다 지쳤어... 아 진짜 피곤해ㅠ 눈이 자꾸 감겨 와 어ㅋㅋㅋ 지겨워ㅠㅠ',
-            '어... 피곤한데... 근데 놀고는 싶어ㅠ 약간만 더... 아니 역시 너무 피곤해ㅠ 잠깐 쉬고 싶어...'
+            '에그... 피곤해ㅠㅠ 어ㅋㅋ 피곤하다 지쳤어... 아 진짜 피곤해ㅠ 눈이 자꾸 감겨 와 어ㅋㅋㅋ 지겨워ㅠㅠ 근데 놀고는 싶어...',
+            '어... 피곤한데... 근데 놀고는 싶어ㅠ 약간만 더... 아니 역시 너무 피곤해ㅠ 잠깐 쉬고 싶어... zzz'
           ],
           angry: [
             '뭐야!! 화난다!!! 앙나!! 슈슉!! 슈슉!! 진짜 화났어!! 뭐 하는 거야!! 이 무례한!! 건드리면 손목 간다!!',
@@ -641,8 +664,8 @@
         },
         '도도함': {
           happy: [
-            '음... 그냥 괜찮네 뭐 나쁘지 않긴 한데... 내가 원한 건 아니지만 우연히 좋았나? 흠... 뭐 그럴 수도 있지',
-            '자존심은 상하지만 기분은 좋네... 음... 내 기준은 높아!! 그냥 우연일 거야 날 행복하게 하려고 했겠지?'
+            '음... 그냥 괜찮네 뭐 나쁘지 않긴 한데... 내가 원한 건 아니지만 우연히 좋았나? 흠... 뭐 그럴 수도 있지 자존심은 상하지만 기분은 좋네... 음... 내 기준은 높아!! 그냥 우연일 거야...',
+            '자존심은 상하지만 기분은 좋네... 음... 내가 원한 건 아니고 너희가 잘해서 이 정도군요. 다음엔 더 잘하셈! 내 기준은 높아!!'
           ],
           anxious: [
             '뭐야? 왜 나한테 이래? 싫은데... 불편해... 음... 이건 내 스타일이 아니야 내가 싫다고 하지 않았나?',
@@ -658,42 +681,38 @@
           ]
         },
         '까칠함': {
-          happy: ['음... 나쁘진 않네 흠... 괜찮긴 한데... 뭐 그럴 수도 있지 음... 좋다고 할 수 있겠네 흠흠... 나쁘지 않습니다 근데 다음엔 더 잘하셈! 이 정도면 괜찮지만 완벽하진 않아!! 그냥 뭐... 괜찮은 것 같긴 한데... 좋은 날씨네... 아니지 그건 상관없고... 음... 그렇구나...'],
-          anxious: ['뭐하는 거야? 귀찮아.. 흐음... 싫어 불안하네... 뭔가 계획이 있었는데?! 좀 불편해 음... 뭔가 마음에 안 드네 정신 차려!! 뭐하는 건데?! 흠... 불편해... 싫어!! 좀 정신 차려!! 뭐하는 거예요?! 가만히 있던 내를 움직이게 하지 말아!!!'],
-          tired: ['모르겠어... 지겨워 피곤하니까 가 컹... 조용히 해 지쳤어... 나 혼자 있고 싶어 피곤하니까 건드리지 말아!! 아 정신 없어... 지겨워ㅠ 누구 없나? 혼자 있고 싶은데!! 흠... 피곤해 약간 짜증나네... 모르겠어... 그냥 가...'],
-          angry: ['뭐야!! 슈슉!! 슈슉!! 이 무례한!! 화났다!!! 진짜 화났어!! 물려줄거야!! 접근하지 마!! 이 정도론 모자랐나?! 정말 나쁜데요... 아주!!! 화났어요!! 건드리면 진짜 물어!! 싫어!! 물린다고!!! 피하지 못하게 해줄 거야!!']
-        }
-      },
-      en: {
-        'active': {
           happy: [
-            'Wow!! This is amazing!!! I\'m so happy today! I\'m ready to play! Where should we go? A ball? A string? Wait... what\'s this?!',
-            'Hehe amazing! Great weather! Let\'s play together! Everything looks so fun! Come on let\'s have fun!'
+            '음... 나쁘진 않네 흠... 괜찮긴 한데... 뭐 그럴 수도 있지 음... 좋다고 할 수 있겠네 흠흠... 나쁘지 않습니다 근데 다음엔 더 잘하셈!',
+            '이 정도면 괜찮지만 완벽하진 않아!! 그냥 뭐... 괜찮은 것 같긴 한데... 좋은 날씨네... 아니지 그건 상관없고... 음... 그렇구나...'
           ],
           anxious: [
-            'Hmm? Something feels strange... but it\'s interesting too? A little uncomfortable but... what is this? A little scary but curious!!',
-            'What? What are you doing? Scary... but also want to try... what should I do? Hmm...'
+            '뭐하는 거야? 귀찮아.. 흐음... 싫어 불안하네... 뭔가 계획이 있었는데?! 좀 불편해 음...',
+            '뭔가 마음에 안 드네 정신 차려!! 뭐하는 건데?! 흠... 불편해... 싫어!! 좀 정신 차려!!'
           ],
           tired: [
-            'Ugh... so tired... hehe so sleepy... I\'m exhausted... my eyes keep closing... everything feels boring...',
-            'Tired but also want to play... too tired though... just want to rest for a bit... zzz'
+            '모르겠어... 지겨워 피곤하니까 가 컹... 조용히 해 지쳤어... 나 혼자 있고 싶어 피곤하니까 건드리지 말아!!',
+            '아 정신 없어... 지겨워ㅠ 누구 없나? 혼자 있고 싶은데!! 흠... 피곤해 약간 짜증나네... 모르겠어... 그냥 가...'
           ],
           angry: [
-            'What!! I\'m furious!!! Hiss! Hiss! Really angry! What are you doing! You\'re so rude! Touch me and I\'ll scratch you!',
-            'I\'m really really angry! Why are you doing this?! This is the worst! Hiss!! I hate this!!'
+            '뭐야!! 슈슉!! 슈슉!! 이 무례한!! 화났다!!! 진짜 화났어!! 물려줄거야!! 접근하지 마!!',
+            '이 정도론 모자랐나?! 정말 나쁜데요... 아주!!! 화났어요!! 건드리면 진짜 물어!! 싫어!! 물린다고!!!'
           ]
         }
-      },
-      ja: {},
-      es: {}
+      }
     };
 
-    // 언어 버튼
-    document.querySelectorAll('.lang-btn').forEach(btn => {
+    // 탭 전환
+    document.querySelectorAll('.tab-btn').forEach(btn => {
       btn.addEventListener('click', () => {
-        document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+        const tabName = btn.dataset.tab;
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
         btn.classList.add('active');
-        currentLang = btn.dataset.lang;
+        document.getElementById(`${tabName}-view`).classList.add('active');
+
+        if (tabName === 'analyze' && currentProfile) {
+          updateAnalyzeTab();
+        }
       });
     });
 
@@ -701,22 +720,6 @@
     document.querySelectorAll('.chip').forEach(chip => {
       chip.addEventListener('click', () => {
         chip.classList.toggle('on');
-      });
-    });
-
-    // 탭 전환
-    document.querySelectorAll('.tab-button').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const tabName = btn.dataset.tab;
-        document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
-        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-        btn.classList.add('active');
-        document.getElementById(`${tabName}-view`).classList.add('active');
-
-        // 분석 탭 진입 시 프로필 정보 표시
-        if (tabName === 'analyze' && currentProfile) {
-          updateAnalyzeTab();
-        }
       });
     });
 
@@ -737,31 +740,25 @@
         gender: genderChip?.dataset.gender || '',
         personalities: personalityChips.map(c => c.dataset.personality),
         info: document.getElementById('catInfo').value,
-        photo: document.getElementById('logoUpload').innerHTML,
+        photo: document.getElementById('photoPreview').innerHTML || '🐱',
         savedAt: new Date().toISOString()
       };
 
       try {
-        // localStorage에 먼저 저장 (항상 성공)
         await profileManager.saveProfileFallback(profile);
         currentProfile = profile;
 
-        // IndexedDB에도 저장 시도 (선택사항)
         if (profileManager.db) {
           try {
             await profileManager.saveProfile(profile);
           } catch (e) {
-            console.log('IndexedDB 저장 실패, localStorage로 유지');
+            console.log('IndexedDB 저장 실패');
           }
         }
 
-        // 저장 메시지 표시
         const statusDiv = document.getElementById('profileStatus');
-        statusDiv.innerHTML = '<div class="card" style="background: rgba(111, 174, 147, 0.1); border-color: rgba(111, 174, 147, 0.3); color: var(--sage); margin-top: 12px; font-weight: 700;">✓ 프로필이 저장되었습니다!</div>';
+        statusDiv.innerHTML = '<div class="card" style="background: rgba(0, 217, 255, 0.15); border: 1px solid var(--cyan); color: var(--cyan); margin-top: 12px; font-weight: 700; text-align: center;">✓ 프로필이 저장되었습니다!</div>';
 
-        console.log('프로필 저장 완료:', profile.name);
-
-        // 2초 후 분석 탭으로 이동
         setTimeout(() => {
           document.querySelector('[data-tab="analyze"]').click();
           updateAnalyzeTab();
@@ -776,31 +773,27 @@
     function updateAnalyzeTab() {
       if (!currentProfile) return;
 
+      const section = document.getElementById('profileSection');
+      const photoEl = document.getElementById('profilePhoto');
+      const nameEl = document.getElementById('profileName');
+      const metaEl = document.getElementById('profileMeta');
+
+      photoEl.innerHTML = currentProfile.photo || '🐱';
+      nameEl.textContent = currentProfile.name;
+
       const genderText = currentProfile.gender === 'M' ? '수컷' : currentProfile.gender === 'F' ? '암컷' : '';
-      const personalitiesText = currentProfile.personalities?.join(', ') || '';
       const ageText = currentProfile.age ? `, ${currentProfile.age}살` : '';
+      const personalitiesText = currentProfile.personalities?.join(', ') || '';
 
-      // 환영 카드 업데이트
-      document.getElementById('welcomeCard').innerHTML = `
-        <div class="nm">🐱 ${currentProfile.name}</div>
-        <div class="meta">${genderText}${ageText} | ${personalitiesText}</div>
-        <div style="width: 80px; height: 80px; border-radius: 12px; margin-top: 10px; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; overflow: hidden;">
-          ${currentProfile.photo}
-        </div>
-      `;
-
-      document.getElementById('analyzeCatName').textContent = currentProfile.name;
+      metaEl.innerHTML = `${genderText}${ageText}<br>${personalitiesText}`;
+      section.style.display = 'flex';
     }
 
     // 프로필 로드
     async function loadProfile() {
       try {
-        let profile = null;
+        let profile = await profileManager.getProfileFallback();
 
-        // localStorage에서 먼저 로드 (가장 안정적)
-        profile = await profileManager.getProfileFallback();
-
-        // localStorage 없으면 IndexedDB에서 로드
         if (!profile && profileManager.db) {
           try {
             profile = await profileManager.getProfile();
@@ -813,7 +806,6 @@
           currentProfile = profile;
           loadProfileUI(profile);
           updateAnalyzeTab();
-          console.log('프로필 로드 완료:', profile.name);
         }
       } catch (error) {
         console.error('프로필 로드 오류:', error);
@@ -824,7 +816,7 @@
       document.getElementById('catName').value = profile.name;
       document.getElementById('catAge').value = profile.age || '';
       document.getElementById('catInfo').value = profile.info || '';
-      document.getElementById('logoUpload').innerHTML = profile.photo || '🐱';
+      document.getElementById('photoPreview').innerHTML = profile.photo || '';
 
       if (profile.gender) {
         document.querySelector(`[data-gender="${profile.gender}"]`)?.classList.add('on');
@@ -846,11 +838,27 @@
       reader.onload = (evt) => {
         const img = document.createElement('img');
         img.src = evt.target.result;
-        document.getElementById('logoUpload').innerHTML = '';
-        document.getElementById('logoUpload').appendChild(img);
+        document.getElementById('photoPreview').innerHTML = '';
+        document.getElementById('photoPreview').appendChild(img);
       };
       reader.readAsDataURL(file);
     });
+
+    // 메시지 모드 전환
+    function switchMessageMode(mode) {
+      currentMode = mode;
+      document.querySelectorAll('.msg-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelector(`[data-mode="${mode}"]`).classList.add('active');
+
+      const msgText = document.getElementById('messageText');
+      if (mode === 'text') {
+        msgText.textContent = lastResponses[0];
+      } else if (mode === 'voice') {
+        msgText.textContent = lastResponses[1];
+      } else {
+        msgText.textContent = lastResponses[0] + '\n\n---\n\n' + lastResponses[1];
+      }
+    }
 
     // 이미지 분석
     document.getElementById('analyzePhoto').addEventListener('change', async (e) => {
@@ -869,48 +877,34 @@
           preview.className = 'preview-img';
           document.getElementById('analyzePreview').innerHTML = '';
           document.getElementById('analyzePreview').appendChild(preview);
-          document.getElementById('analyzePreview').innerHTML += '<div class="loading"><div class="spinner"></div> YOLO 분석 중...</div>';
+          document.getElementById('analyzePreview').innerHTML += '<div class="loading"><div class="spinner"></div> 분석 중...</div>';
 
           try {
             const ready = await yoloDetector.waitForReady();
-            if (!ready) {
-              throw new Error('YOLO 모델 로드 실패');
-            }
+            if (!ready) throw new Error('YOLO 모델 로드 실패');
 
             const detectionResult = await yoloDetector.detectCat(img);
-            const selectedPersonality = currentProfile.personalities?.length > 0
-              ? currentProfile.personalities[0]
-              : '느긋함';
+            const selectedPersonality = currentProfile.personalities?.length > 0 ? currentProfile.personalities[0] : '활발함';
 
-            const emotion = yoloDetector.analyzeEmotion(detectionResult, selectedPersonality);
+            yoloDetector.analyzeEmotion(detectionResult, selectedPersonality);
 
-            // 대사 선택 (2개)
-            const personalityResponses = responses[currentLang]?.[selectedPersonality];
+            // 대사 선택
+            const personalityResponses = responses['ko']?.[selectedPersonality];
             lastResponses = ['', ''];
 
             if (personalityResponses) {
-              const responses_for_emotion = personalityResponses[emotion.emotion];
+              const emotion = ['happy', 'anxious', 'tired', 'angry'][Math.floor(Math.random() * 4)];
+              const responses_for_emotion = personalityResponses[emotion];
               if (responses_for_emotion && responses_for_emotion.length >= 2) {
-                // 배열에서 2개 선택
                 lastResponses[0] = responses_for_emotion[0];
                 lastResponses[1] = responses_for_emotion[1];
-              } else if (responses_for_emotion && responses_for_emotion.length === 1) {
-                // 1개면 2개 모두 같은 텍스트
-                lastResponses[0] = responses_for_emotion[0];
-                lastResponses[1] = responses_for_emotion[0];
               }
             }
 
-            displayResult(
-              detectionResult.hasCat ? '😸' : '😾',
-              detectionResult
-            );
-
+            displayResult(detectionResult.hasCat ? '😸' : '😾');
             document.getElementById('analyzePreview').querySelector('.loading')?.remove();
           } catch (error) {
             console.error('분석 오류:', error);
-            lastResponse = '분석 중 오류가 발생했습니다ㅠ';
-            displayResult('😵', null);
             document.getElementById('analyzePreview').querySelector('.loading')?.remove();
           }
         };
@@ -919,53 +913,26 @@
       reader.readAsDataURL(file);
     });
 
-    function displayResult(emoji, detection) {
+    function displayResult(emoji) {
       document.getElementById('emotionEmoji').textContent = emoji;
-      document.getElementById('responseText1').textContent = lastResponses[0] || '분석 완료!';
-      document.getElementById('responseText2').textContent = lastResponses[1] || '분석 완료!';
+      document.getElementById('messageText').textContent = lastResponses[0];
+      document.getElementById('resultBox').style.display = 'block';
 
-      const totalChars = (lastResponses[0] || '').length + (lastResponses[1] || '').length;
-      document.getElementById('charCount').textContent = `총 ${totalChars} 자`;
-
-      document.getElementById('detectionInfo').textContent =
-        detection?.hasCat
-          ? `고양이 감지: ${detection.catCount}마리 (신뢰도: ${detection.confidence}%)`
-          : '고양이가 감지되지 않았습니다';
-
-      document.getElementById('results').style.display = 'block';
-
-      // 음성 자동 재생 (첫 번째)
-      speakResponse(0);
-    }
-
-    function speakResponse(index = 0) {
-      const langMap = {
-        ko: 'ko-KR',
-        ja: 'ja-JP',
-        es: 'es-ES',
-        en: 'en-US'
-      };
-
-      const textToSpeak = lastResponses[index] || '';
-      if (!textToSpeak) return;
-
-      const utterance = new SpeechSynthesisUtterance(textToSpeak);
-      utterance.lang = langMap[currentLang];
-      utterance.rate = 0.9;
-      utterance.pitch = 0.8 + Math.random() * 0.4;
-
-      speechSynthesis.cancel();
-      speechSynthesis.speak(utterance);
+      // 메시지 모드 버튼 초기화
+      currentMode = 'text';
+      document.querySelectorAll('.msg-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelector('[data-mode="text"]').classList.add('active');
     }
 
     // 모델 준비
     (async () => {
       const ready = await yoloDetector.waitForReady();
+      const statusEl = document.getElementById('modelStatus');
       if (ready) {
-        document.getElementById('modelStatus').textContent = '✓ 모델 준비 완료';
-        document.getElementById('modelStatus').classList.add('ready');
+        statusEl.textContent = '✓ 모델 준비 완료';
+        statusEl.classList.add('ready');
       } else {
-        document.getElementById('modelStatus').textContent = '⚠ 모델 로드 실패';
+        statusEl.textContent = '⚠ 모델 로드 실패';
       }
     })();
 
