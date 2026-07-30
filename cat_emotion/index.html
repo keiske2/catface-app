@@ -540,6 +540,7 @@
             <div class="tabs">
               <button class="tab-btn active" data-tab="profile">프로필</button>
               <button class="tab-btn" data-tab="analyze">분석</button>
+              <button class="tab-btn" data-tab="settings">설정</button>
             </div>
           </div>
 
@@ -624,6 +625,54 @@
               </div>
             </div>
           </div>
+
+          <!-- 설정 탭 -->
+          <div class="view" id="settings-view">
+            <h1>설정</h1>
+            <p class="sub">앱 설정을 커스터마이징하세요</p>
+
+            <div class="card">
+              <label class="fld">🌐 언어</label>
+              <div class="chips">
+                <div class="chip" data-lang="ko">한국어 🇰🇷</div>
+                <div class="chip" data-lang="en">English 🇺🇸</div>
+                <div class="chip" data-lang="ja">日本語 🇯🇵</div>
+                <div class="chip" data-lang="es">Español 🇪🇸</div>
+              </div>
+            </div>
+
+            <div class="card">
+              <label class="fld">🎨 테마</label>
+              <div class="chips">
+                <div class="chip" data-theme="dark">🌙 다크 모드</div>
+                <div class="chip" data-theme="light">☀️라이트 모드</div>
+              </div>
+            </div>
+
+            <div class="card">
+              <label class="fld">🎚️ 음성 속도</label>
+              <input type="range" id="voiceSpeed" min="0.5" max="2" step="0.1" value="1" style="width: 100%; cursor: pointer;">
+              <div style="font-size: 12px; color: var(--dark-text-soft); margin-top: 6px; text-align: center;">
+                <span id="speedValue">1.0x</span>
+              </div>
+            </div>
+
+            <div class="card">
+              <label class="fld">📊 앱 정보</label>
+              <div style="font-size: 13px; line-height: 1.6; color: var(--dark-text);">
+                <div style="margin-bottom: 8px;">
+                  <strong>Cat Emotion</strong><br>
+                  고양이 감정 분석 AI
+                </div>
+                <div style="font-size: 12px; color: var(--dark-text-soft);">
+                  버전: 1.0.0<br>
+                  YOLO 기반 고양이 감지
+                </div>
+              </div>
+            </div>
+
+            <button class="btn primary" onclick="clearAllData()" style="background: linear-gradient(135deg, #ff6b6b, #ff8787);">🗑️ 모든 데이터 삭제</button>
+          </div>
         </div>
 
         <div class="home-indicator"></div>
@@ -641,6 +690,8 @@
     let currentProfile = null;
     let lastResponses = ['', ''];
     let currentMode = 'text'; // text, voice, both
+    let currentLang = 'ko';
+    let currentTheme = 'dark';
 
     const responses = {
       ko: {
@@ -716,11 +767,38 @@
       });
     });
 
-    // 칩 선택
-    document.querySelectorAll('.chip').forEach(chip => {
+    // 칩 선택 (프로필/분석)
+    document.querySelectorAll('#profile-view .chip, #analyze-view .chip').forEach(chip => {
       chip.addEventListener('click', () => {
         chip.classList.toggle('on');
       });
+    });
+
+    // 설정 칩 선택 (단일 선택)
+    document.querySelectorAll('[data-lang]').forEach(chip => {
+      chip.addEventListener('click', () => {
+        document.querySelectorAll('[data-lang]').forEach(c => c.classList.remove('on'));
+        chip.classList.add('on');
+        currentLang = chip.dataset.lang;
+        localStorage.setItem('selectedLanguage', currentLang);
+      });
+    });
+
+    document.querySelectorAll('[data-theme]').forEach(chip => {
+      chip.addEventListener('click', () => {
+        document.querySelectorAll('[data-theme]').forEach(c => c.classList.remove('on'));
+        chip.classList.add('on');
+        currentTheme = chip.dataset.theme;
+        localStorage.setItem('selectedTheme', currentTheme);
+        applyTheme(currentTheme);
+      });
+    });
+
+    // 음성 속도 조절
+    document.getElementById('voiceSpeed').addEventListener('input', (e) => {
+      const speed = parseFloat(e.target.value);
+      document.getElementById('speedValue').textContent = speed.toFixed(1) + 'x';
+      localStorage.setItem('voiceSpeed', speed);
     });
 
     // 프로필 저장
@@ -936,8 +1014,49 @@
       }
     })();
 
+    // 테마 적용
+    function applyTheme(theme) {
+      if (theme === 'light') {
+        document.documentElement.style.setProperty('--dark-bg', '#f5f5f5');
+        document.documentElement.style.setProperty('--dark-card', '#ffffff');
+        document.documentElement.style.setProperty('--dark-text', '#000000');
+        document.documentElement.style.setProperty('--dark-text-soft', '#666666');
+      } else {
+        document.documentElement.style.setProperty('--dark-bg', '#0f0f1e');
+        document.documentElement.style.setProperty('--dark-card', '#1a1a2e');
+        document.documentElement.style.setProperty('--dark-text', '#e0e0e0');
+        document.documentElement.style.setProperty('--dark-text-soft', '#a0a0a0');
+      }
+    }
+
+    // 설정 로드
+    function loadSettings() {
+      const savedLang = localStorage.getItem('selectedLanguage') || 'ko';
+      const savedTheme = localStorage.getItem('selectedTheme') || 'dark';
+      const savedSpeed = parseFloat(localStorage.getItem('voiceSpeed') || '1');
+
+      currentLang = savedLang;
+      currentTheme = savedTheme;
+
+      document.querySelector(`[data-lang="${savedLang}"]`)?.classList.add('on');
+      document.querySelector(`[data-theme="${savedTheme}"]`)?.classList.add('on');
+      document.getElementById('voiceSpeed').value = savedSpeed;
+      document.getElementById('speedValue').textContent = savedSpeed.toFixed(1) + 'x';
+
+      applyTheme(savedTheme);
+    }
+
+    // 모든 데이터 삭제
+    function clearAllData() {
+      if (confirm('모든 데이터를 삭제하시겠습니까?\n(프로필, 설정이 초기화됩니다)')) {
+        localStorage.clear();
+        location.reload();
+      }
+    }
+
     // 초기화
     window.addEventListener('DOMContentLoaded', () => {
+      loadSettings();
       loadProfile();
     });
   </script>
