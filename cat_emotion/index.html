@@ -551,12 +551,14 @@
 
             <div class="card">
               <label class="fld">📸 사진</label>
-              <div class="upload-box" onclick="document.getElementById('catPhoto').click()">
+              <div class="upload-box" id="uploadBox" onclick="document.getElementById('catPhoto').click()">
                 <div class="icon">📷</div>
                 <div class="text">사진 선택</div>
                 <input type="file" id="catPhoto" accept="image/*">
               </div>
-              <div id="photoPreview"></div>
+              <div id="photoPreview" style="margin-top: 12px; display: none;">
+                <img id="photoPreviewImg" style="width: 120px; height: 120px; border-radius: 12px; object-fit: cover; border: 2px solid var(--cyan);">
+              </div>
             </div>
 
             <div class="card">
@@ -812,13 +814,15 @@
       const genderChip = document.querySelector('[data-gender].on');
       const personalityChips = Array.from(document.querySelectorAll('[data-personality].on'));
 
+      const photoHTML = document.getElementById('photoPreviewHTML')?.innerHTML || document.getElementById('photoPreviewImg').src || '🐱';
+
       const profile = {
         name,
         age: document.getElementById('catAge').value || '',
         gender: genderChip?.dataset.gender || '',
         personalities: personalityChips.map(c => c.dataset.personality),
         info: document.getElementById('catInfo').value,
-        photo: document.getElementById('photoPreview').innerHTML || '🐱',
+        photo: photoHTML,
         savedAt: new Date().toISOString()
       };
 
@@ -894,7 +898,21 @@
       document.getElementById('catName').value = profile.name;
       document.getElementById('catAge').value = profile.age || '';
       document.getElementById('catInfo').value = profile.info || '';
-      document.getElementById('photoPreview').innerHTML = profile.photo || '';
+
+      // 사진 복원
+      if (profile.photo && profile.photo !== '🐱') {
+        if (profile.photo.startsWith('<img')) {
+          // HTML 형식
+          document.getElementById('photoPreview').innerHTML = profile.photo;
+          document.getElementById('photoPreview').style.display = 'block';
+          document.getElementById('uploadBox').style.display = 'none';
+        } else if (profile.photo.startsWith('data:')) {
+          // Base64 형식
+          document.getElementById('photoPreviewImg').src = profile.photo;
+          document.getElementById('photoPreview').style.display = 'block';
+          document.getElementById('uploadBox').style.display = 'none';
+        }
+      }
 
       if (profile.gender) {
         document.querySelector(`[data-gender="${profile.gender}"]`)?.classList.add('on');
@@ -914,10 +932,24 @@
 
       const reader = new FileReader();
       reader.onload = (evt) => {
+        // 이미지 미리보기 표시
+        document.getElementById('photoPreviewImg').src = evt.target.result;
+        document.getElementById('photoPreview').style.display = 'block';
+
+        // 업로드 박스 숨기기
+        document.getElementById('uploadBox').style.display = 'none';
+
+        // photoPreview에 원본 이미지 HTML 저장 (프로필 저장용)
         const img = document.createElement('img');
         img.src = evt.target.result;
-        document.getElementById('photoPreview').innerHTML = '';
-        document.getElementById('photoPreview').appendChild(img);
+        img.style.cssText = 'width: 100%; height: 100%; object-fit: cover; border-radius: 12px;';
+
+        // 숨겨진 요소에 저장
+        const hidden = document.createElement('div');
+        hidden.id = 'photoPreviewHTML';
+        hidden.innerHTML = img.outerHTML;
+        hidden.style.display = 'none';
+        document.querySelector('#profile-view .card:first-of-type').appendChild(hidden);
       };
       reader.readAsDataURL(file);
     });
