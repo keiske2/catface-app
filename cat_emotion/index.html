@@ -3,393 +3,386 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cat Emotion - 고양이 감정 분석</title>
+  <title>Cat Emotion - 고양이 감정 분석 AI</title>
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
   <style>
-    :root {
-      --dark-bg: #0f0f1e;
-      --dark-card: #1a1a2e;
-      --dark-text: #e0e0e0;
-      --dark-text-soft: #a0a0a0;
-      --cyan: #00d9ff;
-      --cyan-light: #4dd0e1;
-      --pink: #ff1493;
-      --pink-light: #ff69b4;
-      --shadow: 0 8px 24px rgba(0, 217, 255, 0.15);
-    }
-
     * {
+      margin: 0;
+      padding: 0;
       box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
     }
 
-    html, body {
-      margin: 0;
-      height: 100%;
+    :root {
+      --primary: #00d9ff;
+      --primary-dark: #00a8cc;
+      --secondary: #ff1493;
+      --bg: #0f1419;
+      --bg-light: #1a1f2e;
+      --text: #ffffff;
+      --text-soft: #b0bec5;
+      --border: #2d3748;
+      --shadow: 0 4px 20px rgba(0, 217, 255, 0.12);
+      --shadow-lg: 0 20px 40px rgba(0, 217, 255, 0.15);
     }
 
     body {
-      background: var(--dark-bg);
-      color: var(--dark-text);
-      font-family: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', system-ui, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
+      background: #000000;
+      color: var(--text);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    .container {
+      width: 393px;
+      height: 852px;
+      margin: 0 auto;
+      padding: 0;
+      border: 1px solid var(--border);
+      border-radius: 40px;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
       display: flex;
-      align-items: center;
+      flex-direction: column;
+      background: white;
+    }
+
+    body {
+      display: flex;
       justify-content: center;
+      align-items: center;
       min-height: 100vh;
       padding: 20px;
     }
 
-    .stage {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 14px;
-    }
-
-    .device {
-      width: 393px;
-      height: 852px;
-      position: relative;
-      background: linear-gradient(145deg, #2a2a3e, #1a1a2e);
-      border-radius: 56px;
-      padding: 11px;
-      box-shadow: 0 40px 80px rgba(0, 0, 0, 0.8), 0 0 40px rgba(0, 217, 255, 0.2);
-    }
-
-    .screen {
-      position: relative;
-      width: 100%;
-      height: 100%;
-      background: var(--dark-bg);
-      border-radius: 46px;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .island {
-      position: absolute;
-      top: 11px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 126px;
-      height: 36px;
-      background: #0c0b10;
-      border-radius: 20px;
-      z-index: 60;
-    }
-
-    .statusbar {
-      height: 54px;
-      flex: 0 0 auto;
-      display: flex;
-      align-items: flex-end;
-      justify-content: space-between;
-      padding: 0 30px 6px;
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--dark-text);
-      z-index: 40;
-    }
-
-    .home-indicator {
-      position: absolute;
-      bottom: 8px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 138px;
-      height: 5px;
-      border-radius: 3px;
-      background: rgba(0, 217, 255, 0.2);
-      z-index: 60;
-    }
-
-    .app {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
-
+    /* Header */
     .header {
-      padding: 12px 22px;
-      border-bottom: 1px solid rgba(0, 217, 255, 0.1);
-      flex: 0 0 auto;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+      color: white;
+      padding: 20px;
+      border-radius: 0;
+      margin-bottom: 0;
+      box-shadow: none;
+      flex-shrink: 0;
     }
 
-    .brand {
+    .header-content {
       display: flex;
       align-items: center;
-      gap: 10px;
-      margin-bottom: 12px;
+      gap: 12px;
     }
 
     .logo {
-      width: 36px;
-      height: 36px;
-      border-radius: 10px;
-      background: linear-gradient(135deg, var(--cyan), var(--pink));
+      font-size: 48px;
+      animation: bounce 2s infinite;
+      width: 52px;
+      height: 52px;
       display: flex;
       align-items: center;
       justify-content: center;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.2);
+      cursor: pointer;
+      transition: all 0.3s;
+      overflow: hidden;
+    }
+
+    .logo:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: scale(1.05);
+    }
+
+    .logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .header h1 {
       font-size: 20px;
-      flex: 0 0 auto;
-    }
-
-    .brand-text b {
-      font-size: 16px;
-      color: var(--cyan);
-      letter-spacing: -0.01em;
-    }
-
-    .brand-text span {
-      display: block;
-      font-size: 10px;
-      color: var(--dark-text-soft);
-      margin-top: 2px;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-    }
-
-    .tabs {
-      display: flex;
-      gap: 0;
-      border-bottom: 1px solid rgba(0, 217, 255, 0.1);
-      padding: 0 22px;
+      font-weight: 700;
       margin: 0;
     }
 
+    .header p {
+      font-size: 11px;
+      opacity: 0.9;
+      margin: 2px 0 0;
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 0;
+      background: white;
+      padding: 8px;
+      border-radius: 0;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      flex-wrap: nowrap;
+      flex-shrink: 0;
+      overflow-x: auto;
+    }
+
     .tab-btn {
-      flex: 1;
+      flex: 0 0 auto;
+      min-width: 80px;
+      padding: 8px 12px;
       border: none;
       background: transparent;
-      padding: 14px 0;
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--dark-text-soft);
+      border-radius: 10px;
       cursor: pointer;
-      border-bottom: 3px solid transparent;
-      transition: all 0.2s;
+      font-weight: 600;
+      font-size: 11px;
+      color: var(--text-soft);
+      transition: all 0.3s;
+      white-space: nowrap;
     }
 
     .tab-btn.active {
-      color: var(--cyan);
-      border-bottom-color: var(--cyan);
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      box-shadow: var(--shadow);
     }
 
-    .view {
+    .tab-btn:hover {
+      background: var(--border);
+      color: var(--text);
+    }
+
+    /* Content */
+    .content {
+      display: none;
+      animation: fadeIn 0.3s;
+    }
+
+    .content.active {
+      display: block;
+    }
+
+    .scroll-container {
       flex: 1;
       overflow-y: auto;
       overflow-x: hidden;
-      display: none;
-      padding: 16px 22px 78px;
-    }
-
-    .view.active {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .view::-webkit-scrollbar {
-      width: 4px;
-    }
-
-    .view::-webkit-scrollbar-thumb {
-      background: rgba(0, 217, 255, 0.3);
-      border-radius: 2px;
-    }
-
-    h1 {
-      font-size: 24px;
-      margin: 0 0 8px;
-      color: var(--cyan);
-      letter-spacing: -0.02em;
-    }
-
-    .sub {
-      color: var(--dark-text-soft);
-      font-size: 13px;
-      margin: 0 0 16px;
-      line-height: 1.5;
-    }
-
-    .card {
-      background: var(--dark-card);
-      border-radius: 16px;
       padding: 16px;
-      border: 1px solid rgba(0, 217, 255, 0.1);
-      margin-bottom: 12px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     }
 
-    label.fld {
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Cards */
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+      transition: all 0.3s;
+    }
+
+    .card:hover {
+      box-shadow: var(--shadow);
+      transform: translateY(-2px);
+    }
+
+    .card h2 {
+      font-size: 18px;
+      margin-bottom: 16px;
+      color: var(--primary);
+    }
+
+    .card p {
+      color: var(--text-soft);
+      margin-bottom: 16px;
+    }
+
+    /* Forms */
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    label {
       display: block;
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--dark-text-soft);
-      margin: 12px 0 6px;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: var(--text);
+      font-size: 14px;
     }
 
     input, select, textarea {
       width: 100%;
-      border: 1px solid rgba(0, 217, 255, 0.2);
-      background: rgba(0, 217, 255, 0.05);
+      padding: 12px;
+      border: 2px solid var(--border);
       border-radius: 10px;
-      padding: 11px;
-      font-size: 14px;
-      color: var(--dark-text);
       font-family: inherit;
-      outline: none;
-      transition: all 0.2s;
-      resize: none;
+      font-size: 14px;
+      transition: all 0.3s;
     }
 
     input:focus, select:focus, textarea:focus {
-      border-color: var(--cyan);
-      background: rgba(0, 217, 255, 0.1);
-      box-shadow: 0 0 12px rgba(0, 217, 255, 0.2);
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
     }
 
+    textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    /* Chips */
     .chips {
       display: flex;
       flex-wrap: wrap;
       gap: 8px;
-      margin-top: 8px;
+      margin-bottom: 16px;
     }
 
     .chip {
-      border: 1px solid rgba(0, 217, 255, 0.2);
-      background: transparent;
+      padding: 8px 16px;
+      border: 2px solid var(--border);
+      background: white;
       border-radius: 20px;
-      padding: 8px 14px;
-      font-size: 12px;
-      font-weight: 600;
       cursor: pointer;
-      color: var(--dark-text-soft);
-      transition: all 0.15s;
+      font-size: 14px;
+      font-weight: 600;
+      transition: all 0.3s;
+      color: var(--text-soft);
     }
 
     .chip:hover {
-      border-color: var(--cyan);
-      color: var(--cyan);
+      border-color: var(--primary);
+      color: var(--primary);
     }
 
-    .chip.on {
-      background: linear-gradient(135deg, rgba(0, 217, 255, 0.2), rgba(255, 20, 147, 0.2));
-      border-color: var(--pink);
-      color: var(--pink-light);
-      box-shadow: 0 0 12px rgba(255, 20, 147, 0.3);
+    .chip.active {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      border-color: transparent;
+      color: white;
+      box-shadow: var(--shadow);
     }
 
+    /* Buttons */
     .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+      transition: all 0.3s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      box-shadow: var(--shadow);
+      width: 100%;
+      justify-content: center;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .btn-secondary {
+      background: white;
+      color: var(--primary);
+      border: 2px solid var(--primary);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(14, 165, 233, 0.1);
+    }
+
+    /* Photo Preview */
+    .photo-preview {
+      width: 140px;
+      height: 140px;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 3px solid var(--primary);
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
+      font-size: 64px;
+      background: linear-gradient(135deg, rgba(14, 165, 233, 0.1), rgba(236, 72, 153, 0.1));
+      margin: 16px 0;
+    }
+
+    .photo-preview img {
       width: 100%;
-      border: none;
-      border-radius: 12px;
-      padding: 13px;
-      font-size: 14px;
-      font-weight: 800;
-      cursor: pointer;
-      font-family: inherit;
-      transition: all 0.2s;
-      margin-top: 12px;
+      height: 100%;
+      object-fit: cover;
     }
 
-    .btn.primary {
-      background: linear-gradient(135deg, var(--cyan), var(--cyan-light));
-      color: var(--dark-bg);
-      box-shadow: 0 8px 16px rgba(0, 217, 255, 0.3);
-    }
-
-    .btn.primary:hover {
-      box-shadow: 0 12px 24px rgba(0, 217, 255, 0.4);
-      transform: translateY(-2px);
-    }
-
-    .btn.secondary {
-      background: rgba(255, 20, 147, 0.15);
-      color: var(--pink-light);
-      border: 1px solid var(--pink);
-    }
-
-    .btn.secondary.active {
-      background: var(--pink);
-      color: var(--dark-bg);
-    }
-
-    .btn:active {
-      transform: translateY(0px);
-    }
-
-    input[type='file'] {
-      display: none;
-    }
-
+    /* Upload Box */
     .upload-box {
-      border: 2px dashed rgba(0, 217, 255, 0.3);
-      border-radius: 14px;
-      padding: 20px;
+      border: 2px dashed var(--border);
+      border-radius: 16px;
+      padding: 40px;
       text-align: center;
       cursor: pointer;
-      transition: all 0.2s;
-      background: rgba(0, 217, 255, 0.05);
-      margin-bottom: 12px;
+      transition: all 0.3s;
+      background: rgba(14, 165, 233, 0.05);
     }
 
     .upload-box:hover {
-      border-color: var(--cyan);
-      background: rgba(0, 217, 255, 0.1);
+      border-color: var(--primary);
+      background: rgba(14, 165, 233, 0.1);
     }
 
     .upload-box .icon {
-      font-size: 32px;
-      margin-bottom: 8px;
+      font-size: 48px;
+      margin-bottom: 12px;
     }
 
     .upload-box .text {
-      color: var(--dark-text-soft);
-      font-size: 12px;
+      color: var(--text-soft);
+      font-size: 14px;
     }
 
-    .preview-img {
-      width: 100%;
-      max-height: 280px;
-      border-radius: 14px;
-      margin-bottom: 12px;
-      object-fit: cover;
-      border: 1px solid rgba(0, 217, 255, 0.2);
+    input[type="file"] {
+      display: none;
     }
 
-    .analyze-container {
+    /* Profile Section */
+    .profile-card {
       display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .profile-section {
-      display: flex;
-      gap: 12px;
-      align-items: flex-start;
+      gap: 20px;
+      align-items: center;
+      padding: 20px;
+      background: linear-gradient(135deg, rgba(14, 165, 233, 0.1), rgba(236, 72, 153, 0.1));
+      border-radius: 16px;
+      margin-bottom: 20px;
     }
 
     .profile-photo {
-      width: 80px;
-      height: 80px;
+      width: 100px;
+      height: 100px;
       border-radius: 16px;
       overflow: hidden;
-      background: var(--dark-card);
-      border: 2px solid var(--cyan);
-      flex: 0 0 auto;
+      border: 3px solid var(--primary);
+      flex-shrink: 0;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 40px;
+      font-size: 48px;
+      background: white;
     }
 
     .profile-photo img {
@@ -398,91 +391,113 @@
       object-fit: cover;
     }
 
-    .profile-info {
-      flex: 1;
+    .profile-info h3 {
+      font-size: 20px;
+      margin-bottom: 4px;
+      color: var(--primary);
     }
 
-    .profile-info .name {
-      font-size: 18px;
-      font-weight: 800;
-      color: var(--cyan);
-      margin: 0 0 4px;
+    .profile-info p {
+      color: var(--text-soft);
+      font-size: 13px;
+      margin: 0;
     }
 
-    .profile-info .meta {
-      font-size: 12px;
-      color: var(--dark-text-soft);
-      line-height: 1.4;
+    /* Analysis Results */
+    .emotion-display {
+      font-size: 64px;
+      text-align: center;
+      margin: 20px 0;
+      animation: pulse 1s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
     }
 
     .message-box {
-      background: var(--dark-card);
-      border: 1px solid rgba(0, 217, 255, 0.1);
-      border-radius: 14px;
-      padding: 14px;
-      margin: 12px 0;
+      background: linear-gradient(135deg, rgba(14, 165, 233, 0.05), rgba(236, 72, 153, 0.05));
+      border: 2px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+      margin: 20px 0;
     }
 
     .message-controls {
       display: flex;
       gap: 6px;
-      margin-bottom: 12px;
+      margin-bottom: 16px;
       flex-wrap: wrap;
     }
 
     .msg-btn {
-      flex: 0 1 auto;
-      padding: 6px 10px;
-      font-size: 11px;
-      border: 1px solid rgba(0, 217, 255, 0.2);
-      background: transparent;
-      border-radius: 8px;
-      color: var(--dark-text-soft);
+      padding: 8px 14px;
+      border: 2px solid var(--border);
+      background: white;
+      border-radius: 10px;
       cursor: pointer;
-      transition: all 0.2s;
       font-weight: 600;
+      font-size: 13px;
+      transition: all 0.3s;
+      color: var(--text-soft);
     }
 
     .msg-btn.active {
-      background: var(--pink);
-      border-color: var(--pink);
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      border-color: transparent;
       color: white;
-    }
-
-    .msg-btn:hover {
-      border-color: var(--cyan);
-      color: var(--cyan);
+      box-shadow: var(--shadow);
     }
 
     .message-text {
-      font-size: 13px;
+      color: var(--text);
       line-height: 1.8;
-      color: var(--dark-text);
-      max-height: 300px;
+      max-height: 400px;
       overflow-y: auto;
-      padding: 10px 0;
+      padding: 12px 0;
     }
 
-    .message-text::-webkit-scrollbar {
-      width: 3px;
+    /* Statistics */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 16px;
+      margin-bottom: 20px;
     }
 
-    .message-text::-webkit-scrollbar-thumb {
-      background: rgba(0, 217, 255, 0.2);
-      border-radius: 2px;
+    .stat-item {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+      color: white;
+      padding: 20px;
+      border-radius: 16px;
+      text-align: center;
+      box-shadow: var(--shadow);
     }
 
+    .stat-item .number {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .stat-item .label {
+      font-size: 12px;
+      opacity: 0.9;
+    }
+
+    /* Loading */
     .loading {
       text-align: center;
-      padding: 20px;
+      padding: 40px 20px;
     }
 
     .spinner {
       display: inline-block;
-      width: 24px;
-      height: 24px;
-      border: 3px solid rgba(0, 217, 255, 0.2);
-      border-top-color: var(--cyan);
+      width: 40px;
+      height: 40px;
+      border: 4px solid var(--border);
+      border-top-color: var(--primary);
       border-radius: 50%;
       animation: spin 0.8s linear infinite;
     }
@@ -491,319 +506,412 @@
       to { transform: rotate(360deg); }
     }
 
-    .emoji-display {
-      font-size: 48px;
-      text-align: center;
-      margin: 10px 0;
+    /* Status */
+    .status-message {
+      padding: 12px 16px;
+      border-radius: 10px;
+      margin-bottom: 16px;
+      font-size: 13px;
+      font-weight: 600;
     }
 
-    .status-msg {
-      font-size: 11px;
-      color: var(--dark-text-soft);
-      padding: 8px;
-      text-align: center;
-      background: rgba(0, 217, 255, 0.05);
-      border-radius: 8px;
-      margin-bottom: 12px;
+    .status-success {
+      background: rgba(34, 197, 94, 0.15);
+      color: #16a34a;
+      border: 1px solid rgba(34, 197, 94, 0.3);
     }
 
-    .status-msg.ready {
-      background: rgba(0, 217, 255, 0.1);
-      color: var(--cyan);
+    .status-ready {
+      background: rgba(14, 165, 233, 0.15);
+      color: var(--primary);
+      border: 1px solid rgba(14, 165, 233, 0.3);
     }
 
-    canvas {
-      display: none;
+    /* Responsive */
+    @media (max-width: 768px) {
+      .header {
+        padding: 30px 16px;
+      }
+
+      .header h1 {
+        font-size: 24px;
+      }
+
+      .card {
+        padding: 16px;
+      }
+
+      .tabs {
+        padding: 8px;
+      }
+
+      .tab-btn {
+        padding: 10px 12px;
+        font-size: 12px;
+      }
+
+      .profile-card {
+        flex-direction: column;
+        text-align: center;
+      }
     }
   </style>
 </head>
 
 <body>
-  <div class="stage">
-    <div class="device">
-      <div class="screen">
-        <div class="island"></div>
-        <div class="statusbar">
-          <span>9:41</span>
-          <span>●●●●●</span>
+  <div class="container">
+    <div class="header">
+      <div class="header-content">
+        <div class="logo" id="catLogoPhoto">🐱</div>
+        <div>
+          <h1>Cat Emotion</h1>
+          <p>고양이 감정 분석</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="profile">📋 프로필</button>
+      <button class="tab-btn" data-tab="analyze">🔍 분석</button>
+      <button class="tab-btn" data-tab="history">📊 히스토리</button>
+      <button class="tab-btn" data-tab="settings">⚙️ 설정</button>
+    </div>
+
+    <div class="scroll-container">
+      <!-- Profile Tab -->
+      <div class="content active" id="profile">
+      <div class="card">
+        <h2>고양이 프로필 등록</h2>
+        <p>당신의 고양이 정보를 입력해주세요</p>
+
+        <div id="photoPreview" style="display: none;"></div>
+        <input type="file" id="catPhoto" accept="image/*" style="display: none;">
+
+        <div class="form-group">
+          <label>이름 *</label>
+          <input type="text" id="catName" placeholder="예: 멍밍이, 루루">
         </div>
 
-        <div class="app">
-          <div class="header">
-            <div class="brand">
-              <div class="logo">🐱</div>
-              <div class="brand-text">
-                <b>Cat Emotion</b>
-                <span>감정 분석</span>
-              </div>
-            </div>
-            <div class="tabs">
-              <button class="tab-btn active" data-tab="profile">프로필</button>
-              <button class="tab-btn" data-tab="analyze">분석</button>
-              <button class="tab-btn" data-tab="settings">설정</button>
-            </div>
-          </div>
+        <div class="form-group">
+          <label>나이</label>
+          <input type="number" id="catAge" placeholder="예: 3" min="0" max="30">
+        </div>
 
-          <!-- 프로필 탭 -->
-          <div class="view active" id="profile-view">
-            <h1>고양이 프로필</h1>
-            <p class="sub">고양이 정보를 등록해주세요</p>
-
-            <div class="card">
-              <label class="fld">📸 사진</label>
-              <div class="upload-box" id="uploadBox" onclick="document.getElementById('catPhoto').click()">
-                <div class="icon">📷</div>
-                <div class="text">사진 선택</div>
-                <input type="file" id="catPhoto" accept="image/*">
-              </div>
-              <div id="photoPreview" style="margin-top: 12px; display: none;">
-                <img id="photoPreviewImg" style="width: 120px; height: 120px; border-radius: 12px; object-fit: cover; border: 2px solid var(--cyan);">
-              </div>
-            </div>
-
-            <div class="card">
-              <label class="fld">이름 *</label>
-              <input type="text" id="catName" placeholder="예: 멍밍이, 루루">
-
-              <label class="fld">나이</label>
-              <input type="number" id="catAge" placeholder="예: 3" min="0" max="30">
-
-              <label class="fld">성별</label>
-              <div class="chips">
-                <div class="chip" data-gender="M">수컷 🐱</div>
-                <div class="chip" data-gender="F">암컷 🐱</div>
-              </div>
-
-              <label class="fld">성격</label>
-              <div class="chips">
-                <div class="chip" data-personality="활발함">🚀 활발함</div>
-                <div class="chip" data-personality="도도함">😼 도도함</div>
-                <div class="chip" data-personality="까칠함">😾 까칠함</div>
-                <div class="chip" data-personality="느긋함">😸 느긋함</div>
-                <div class="chip" data-personality="장난스러움">🎾 장난</div>
-                <div class="chip" data-personality="사려깊음">🧠 사려깊음</div>
-              </div>
-
-              <label class="fld">추가 정보</label>
-              <textarea id="catInfo" placeholder="특징이나 습관..." style="height: 70px;"></textarea>
-            </div>
-
-            <button class="btn primary" onclick="saveProfile()">프로필 저장</button>
-            <div id="profileStatus"></div>
-          </div>
-
-          <!-- 분석 탭 -->
-          <div class="view" id="analyze-view">
-            <h1>감정 분석</h1>
-
-            <div class="status-msg" id="modelStatus">모델 로딩 중...</div>
-
-            <div class="profile-section" id="profileSection" style="display: none;">
-              <div class="profile-photo" id="profilePhoto">🐱</div>
-              <div class="profile-info">
-                <div class="name" id="profileName">고양이</div>
-                <div class="meta" id="profileMeta">정보 없음</div>
-              </div>
-            </div>
-
-            <label class="upload-box" onclick="document.getElementById('analyzePhoto').click()">
-              <div class="icon">📸</div>
-              <div class="text">사진 선택</div>
-              <input type="file" id="analyzePhoto" accept="image/*">
-            </label>
-
-            <div id="analyzePreview"></div>
-
-            <div id="resultBox" style="display: none;">
-              <div class="emoji-display" id="emotionEmoji">😸</div>
-
-              <div class="message-box">
-                <div class="message-controls">
-                  <button class="msg-btn active" data-mode="text" onclick="switchMessageMode('text')">📝 텍스트</button>
-                  <button class="msg-btn" data-mode="voice" onclick="switchMessageMode('voice')">🔊 음성</button>
-                  <button class="msg-btn" data-mode="both" onclick="switchMessageMode('both')">🎯 둘다</button>
-                </div>
-                <div class="message-text" id="messageText"></div>
-              </div>
-            </div>
-          </div>
-
-          <!-- 설정 탭 -->
-          <div class="view" id="settings-view">
-            <h1>설정</h1>
-            <p class="sub">앱 설정을 커스터마이징하세요</p>
-
-            <div class="card">
-              <label class="fld">🌐 언어</label>
-              <div class="chips">
-                <div class="chip" data-lang="ko">한국어 🇰🇷</div>
-                <div class="chip" data-lang="en">English 🇺🇸</div>
-                <div class="chip" data-lang="ja">日本語 🇯🇵</div>
-                <div class="chip" data-lang="es">Español 🇪🇸</div>
-              </div>
-            </div>
-
-            <div class="card">
-              <label class="fld">🎨 테마</label>
-              <div class="chips">
-                <div class="chip" data-theme="dark">🌙 다크 모드</div>
-                <div class="chip" data-theme="light">☀️라이트 모드</div>
-              </div>
-            </div>
-
-            <div class="card">
-              <label class="fld">🎚️ 음성 속도</label>
-              <input type="range" id="voiceSpeed" min="0.5" max="2" step="0.1" value="1" style="width: 100%; cursor: pointer;">
-              <div style="font-size: 12px; color: var(--dark-text-soft); margin-top: 6px; text-align: center;">
-                <span id="speedValue">1.0x</span>
-              </div>
-            </div>
-
-            <div class="card">
-              <label class="fld">📊 앱 정보</label>
-              <div style="font-size: 13px; line-height: 1.6; color: var(--dark-text);">
-                <div style="margin-bottom: 8px;">
-                  <strong>Cat Emotion</strong><br>
-                  고양이 감정 분석 AI
-                </div>
-                <div style="font-size: 12px; color: var(--dark-text-soft);">
-                  버전: 1.0.0<br>
-                  YOLO 기반 고양이 감지
-                </div>
-              </div>
-            </div>
-
-            <button class="btn primary" onclick="clearAllData()" style="background: linear-gradient(135deg, #ff6b6b, #ff8787);">🗑️ 모든 데이터 삭제</button>
+        <div class="form-group">
+          <label>성별</label>
+          <div class="chips">
+            <div class="chip" data-gender="M">수컷 🐱</div>
+            <div class="chip" data-gender="F">암컷 🐱</div>
           </div>
         </div>
 
-        <div class="home-indicator"></div>
+        <div class="form-group">
+          <label>🎭 성격 (중복 선택 가능)</label>
+          <div class="chips">
+            <div class="chip" data-personality="활발함">🚀 활발함</div>
+            <div class="chip" data-personality="도도함">😼 도도함</div>
+            <div class="chip" data-personality="까칠함">😾 까칠함</div>
+            <div class="chip" data-personality="느긋함">😸 느긋함</div>
+            <div class="chip" data-personality="장난스러움">🎾 장난</div>
+            <div class="chip" data-personality="사려깊음">🧠 사려깊음</div>
+            <div class="chip" data-personality="겁쟁이">😨 겁쟁이</div>
+            <div class="chip" data-personality="냉정함">❄️ 냉정함</div>
+            <div class="chip" data-personality="고집쟁이">💪 고집쟁이</div>
+            <div class="chip" data-personality="그루밍광">✨ 그루밍광</div>
+            <div class="chip" data-personality="사귀기좋은">💕 사귀기좋은</div>
+            <div class="chip" data-personality="신비로움">🌙 신비로움</div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>💊 현재 상태</label>
+          <div class="chips">
+            <div class="chip" data-status="건강함">😸 건강함</div>
+            <div class="chip" data-status="약간아픔">😿 약간 아파함</div>
+            <div class="chip" data-status="많이아픔">😾 많이 아파함</div>
+            <div class="chip" data-status="졸린상태">😴 졸린 상태</div>
+            <div class="chip" data-status="흥분함">😻 신나함</div>
+            <div class="chip" data-status="기분좋음">😸 기분 좋음</div>
+            <div class="chip" data-status="화남">😾 화남</div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>🍖 간식 선호도</label>
+          <div class="chips">
+            <div class="chip" data-snack="많이좋아">🤤 매우 좋아함</div>
+            <div class="chip" data-snack="조금좋아">😋 좋아함</div>
+            <div class="chip" data-snack="무관심">😐 무관심</div>
+            <div class="chip" data-snack="싫어함">🙅 싫어함</div>
+            <div class="chip" data-snack="제멋대로">💭 제멋대로</div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>🎯 활동 수준</label>
+          <div class="chips">
+            <div class="chip" data-activity="매우활동적">⚡ 매우 활동적</div>
+            <div class="chip" data-activity="활동적">🏃 활동적</div>
+            <div class="chip" data-activity="중간">😺 중간</div>
+            <div class="chip" data-activity="조용함">🧘 조용함</div>
+            <div class="chip" data-activity="거의활동안함">💤 거의 안 움직임</div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>👥 사람과의 상호작용</label>
+          <div class="chips">
+            <div class="chip" data-interaction="매우친절">💖 매우 친절</div>
+            <div class="chip" data-interaction="친절">😸 친절</div>
+            <div class="chip" data-interaction="중립">😼 중립적</div>
+            <div class="chip" data-interaction="거리두김">😼 거리 두기</div>
+            <div class="chip" data-interaction="혼자좋아">🐱 혼자가 최고</div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>📝 추가 정보</label>
+          <textarea id="catInfo" placeholder="특징, 습관, 좋아하는 장난감 등..."></textarea>
+        </div>
+
+        <button class="btn btn-primary" onclick="saveProfile()">💾 프로필 저장</button>
+        <div id="profileStatus"></div>
+      </div>
+    </div>
+
+    <!-- Analyze Tab -->
+    <div class="content" id="analyze">
+      <div class="card">
+        <h2>감정 분석</h2>
+        <div class="status-message status-ready" id="modelStatus">🔄 모델 로딩 중...</div>
+
+        <div id="profileSection" style="display: none;">
+          <div class="profile-card">
+            <div class="profile-photo" id="profilePhoto">🐱</div>
+            <div class="profile-info">
+              <h3 id="profileName">고양이</h3>
+              <p id="profileMeta">정보 없음</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>사진 선택</label>
+          <div class="upload-box" onclick="document.getElementById('analyzePhoto').click()">
+            <div class="icon">📸</div>
+            <div class="text">분석할 사진을 선택하세요</div>
+            <input type="file" id="analyzePhoto" accept="image/*">
+          </div>
+        </div>
+
+        <div id="analyzePreview"></div>
+
+        <div id="resultBox" style="display: none;">
+          <div class="emotion-display" id="emotionEmoji">😸</div>
+
+          <div class="message-box">
+            <div class="message-controls">
+              <button class="msg-btn active" data-mode="text" onclick="switchMessageMode('text')">📝 텍스트</button>
+              <button class="msg-btn" data-mode="voice" onclick="switchMessageMode('voice')">🔊 음성</button>
+              <button class="msg-btn" data-mode="both" onclick="switchMessageMode('both')">🎯 둘다</button>
+            </div>
+            <div class="message-text" id="messageText"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- History Tab -->
+    <div class="content" id="history">
+      <div class="card">
+        <h2>분석 히스토리</h2>
+        <p>최근 분석 기록</p>
+
+        <div class="stats-grid">
+          <div class="stat-item">
+            <div class="number" id="totalAnalysis">0</div>
+            <div class="label">총 분석 수</div>
+          </div>
+          <div class="stat-item">
+            <div class="number" id="topEmotion">😸</div>
+            <div class="label">가장 많은 감정</div>
+          </div>
+          <div class="stat-item">
+            <div class="number" id="thisWeek">0</div>
+            <div class="label">이번주 분석</div>
+          </div>
+        </div>
+
+        <div style="height: 300px; margin: 20px 0;">
+          <canvas id="emotionChart"></canvas>
+        </div>
+
+        <div id="historyList"></div>
+      </div>
+    </div>
+
+    <!-- Settings Tab -->
+    <div class="content" id="settings">
+      <div class="card">
+        <h2>설정</h2>
+
+        <div class="form-group">
+          <label>🌐 언어</label>
+          <div class="chips">
+            <div class="chip active" data-lang="ko">한국어 🇰🇷</div>
+            <div class="chip" data-lang="en">English 🇺🇸</div>
+            <div class="chip" data-lang="ja">日本語 🇯🇵</div>
+            <div class="chip" data-lang="es">Español 🇪🇸</div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>🎨 테마</label>
+          <div class="chips">
+            <div class="chip" data-theme="light">☀️ 라이트 모드</div>
+            <div class="chip active" data-theme="dark">🌙 다크 모드</div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>🎚️ 음성 속도</label>
+          <input type="range" id="voiceSpeed" min="0.5" max="2" step="0.1" value="1" style="width: 100%; cursor: pointer;">
+          <div style="text-align: center; color: var(--text-soft); font-size: 12px; margin-top: 8px;">
+            <span id="speedValue">1.0x</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>📊 앱 정보</label>
+          <div style="color: var(--text-soft); font-size: 14px; line-height: 1.6;">
+            <strong>Cat Emotion v1.0.0</strong><br>
+            고양이 감정 분석 AI<br>
+            YOLO + TensorFlow.js 기반
+          </div>
+        </div>
+
+        <button class="btn btn-secondary" onclick="clearAllData()" style="background: rgba(220, 38, 38, 0.15); border-color: #dc2626; color: #dc2626; width: 100%;">🗑️ 모든 데이터 삭제</button>
+      </div>
       </div>
     </div>
   </div>
 
-  <canvas id="canvas"></canvas>
-
-  <!-- 모듈 로드 -->
   <script src="js/profile-manager.js"></script>
   <script src="js/yolo-detector.js"></script>
 
   <script>
     let currentProfile = null;
     let lastResponses = ['', ''];
-    let currentMode = 'text'; // text, voice, both
-    let currentLang = 'ko';
-    let currentTheme = 'dark';
+    let currentMode = 'text';
+    let analysisHistory = [];
 
     const responses = {
       ko: {
         '활발함': {
-          happy: [
-            '우와!! 정말 신난다!!! 오늘따라 기분이 정말 좋아!! 놀 준비가 되어 있다고!! 어디로 갈까? 공? 줄? 아니면... 잠깐 이게 뭐야?! 오오오 재미있는 걸 찾았어!! 이거 가지고 한번 놀아볼까? 정말 최고의 날이야!!! 모든 것이 재미있어 보여!! 너도 이 느낌 알지? 이런 행복함!! 언제나 이렇게 살 수 있으면 좋겠어!! 헤헤헤 정말 즐거워!!',
-            '헤헤헤 최고야!! 이런 날씨 정말 좋네!! 놀 준비 완벽!! 뭐든 재미있을 것 같은데!! 같이 신나게 놀까?! 정말 설레!!! 오늘 정말 행운의 날인 것 같아!! 모든 게 다 잘될 것 같은 기분!! 에너지 충전 완료!! 이 기분 영원할 수 있으면 좋겠어!! 정말 최고의 순간이야!!!'
-          ],
-          anxious: [
-            '어? 뭔가 이상한데... 근데 흥미롭긴 한데? 음... 조금 불편한 느낌이긴 한데... 어라? 이게 뭐지? 조금 두렵지만 궁금해!! 어쩌지? 진짜 이건 뭐야?! 좀 더 알고 싶은데 무섭네...',
-            '음... 좀 이상한데? 뭐하는 거야? 무섭기도 하고... 궁금하기도 하고... 어쩌지? 같이 해볼까? 근데 뭐가 나올까?'
-          ],
-          tired: [
-            '에그... 피곤해ㅠㅠ 어ㅋㅋ 피곤하다 지쳤어... 아 진짜 피곤해ㅠ 눈이 자꾸 감겨 와 어ㅋㅋㅋ 지겨워ㅠㅠ 근데 놀고는 싶어...',
-            '어... 피곤한데... 근데 놀고는 싶어ㅠ 약간만 더... 아니 역시 너무 피곤해ㅠ 잠깐 쉬고 싶어... zzz'
-          ],
-          angry: [
-            '뭐야!! 화난다!!! 앙나!! 슈슉!! 슈슉!! 진짜 화났어!! 뭐 하는 거야!! 이 무례한!! 건드리면 손목 간다!!',
-            '진짜 화났다고!! 왜 이럴 때 나한테 이럼?! 최악이야!! 앙!! 화난다!!! 싫어!!! 진짜 진짜 화났어!!'
-          ]
-        },
-        '도도함': {
-          happy: [
-            '음... 그냥 괜찮네 뭐 나쁘지 않긴 한데... 내가 원한 건 아니지만 우연히 좋았나? 흠... 뭐 그럴 수도 있지 자존심은 상하지만 기분은 좋네... 음... 내 기준은 높아!! 그냥 우연일 거야...',
-            '자존심은 상하지만 기분은 좋네... 음... 내가 원한 건 아니고 너희가 잘해서 이 정도군요. 다음엔 더 잘하셈! 내 기준은 높아!!'
-          ],
-          anxious: [
-            '뭐야? 왜 나한테 이래? 싫은데... 불편해... 음... 이건 내 스타일이 아니야 내가 싫다고 하지 않았나?',
-            '귀 안 들리니? 음... 내가 원한 건 아닌데... 왜 이럴까? 자존심 상해... 화난다! 정신 차려!'
-          ],
-          tired: [
-            '나 피곤해 괜히 건드리지 마 음... 지겨워... 내가 휴식할 시간이라고 했잖아 피곤하니까 말 거는 거 싫어...',
-            '혼자 있고 싶어 내 개인 시간 방해하지 말아! 음... 자존심도 상했고 피곤하네 정신 없어 나 쉬고 있어!'
-          ],
-          angry: [
-            '이게 뭐냐고!! 내 자존심이 상했다!! 진짜 화났어!! 내가 뭐라고 했는데 안 들었어?! 정신 차려!!',
-            '절대 용서 안 해!! 내가 얼마나 소중한데 이 따위로 대해?! 최악이야!! 진짜 진짜 화났다!'
-          ]
-        },
-        '까칠함': {
-          happy: [
-            '음... 나쁘진 않네 흠... 괜찮긴 한데... 뭐 그럴 수도 있지 음... 좋다고 할 수 있겠네 흠흠... 나쁘지 않습니다 근데 다음엔 더 잘하셈!',
-            '이 정도면 괜찮지만 완벽하진 않아!! 그냥 뭐... 괜찮은 것 같긴 한데... 좋은 날씨네... 아니지 그건 상관없고... 음... 그렇구나...'
-          ],
-          anxious: [
-            '뭐하는 거야? 귀찮아.. 흐음... 싫어 불안하네... 뭔가 계획이 있었는데?! 좀 불편해 음...',
-            '뭔가 마음에 안 드네 정신 차려!! 뭐하는 건데?! 흠... 불편해... 싫어!! 좀 정신 차려!!'
-          ],
-          tired: [
-            '모르겠어... 지겨워 피곤하니까 가 컹... 조용히 해 지쳤어... 나 혼자 있고 싶어 피곤하니까 건드리지 말아!!',
-            '아 정신 없어... 지겨워ㅠ 누구 없나? 혼자 있고 싶은데!! 흠... 피곤해 약간 짜증나네... 모르겠어... 그냥 가...'
-          ],
-          angry: [
-            '뭐야!! 슈슉!! 슈슉!! 이 무례한!! 화났다!!! 진짜 화났어!! 물려줄거야!! 접근하지 마!!',
-            '이 정도론 모자랐나?! 정말 나쁜데요... 아주!!! 화났어요!! 건드리면 진짜 물어!! 싫어!! 물린다고!!!'
-          ]
+          happy: ['우와!! 정말 신난다!!! 오늘따라 기분이 정말 좋아!! 놀 준비가 되어 있다고!!', '헤헤헤 최고야!! 이런 날씨 정말 좋네!!'],
+          anxious: ['어? 뭔가 이상한데...', '음... 좀 이상한데? 뭐하는 거야?'],
+          tired: ['에그... 피곤해ㅠㅠ', '어... 피곤한데...'],
+          angry: ['뭐야!! 화난다!!!', '진짜 화났다고!!']
         }
       }
     };
 
-    // 탭 전환
+    // Tab Navigation
     document.querySelectorAll('.tab-btn').forEach(btn => {
       btn.addEventListener('click', () => {
-        const tabName = btn.dataset.tab;
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-        btn.classList.add('active');
-        document.getElementById(`${tabName}-view`).classList.add('active');
+        document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
 
-        if (tabName === 'analyze' && currentProfile) {
+        btn.classList.add('active');
+        const tabId = btn.dataset.tab;
+        document.getElementById(tabId).classList.add('active');
+
+        if (tabId === 'analyze' && currentProfile) {
           updateAnalyzeTab();
         }
       });
     });
 
-    // 칩 선택 (프로필/분석)
-    document.querySelectorAll('#profile-view .chip, #analyze-view .chip').forEach(chip => {
+    // Chip Selection
+    document.querySelectorAll('#profile .chip, #analyze .chip').forEach(chip => {
       chip.addEventListener('click', () => {
-        chip.classList.toggle('on');
+        chip.classList.toggle('active');
       });
     });
 
-    // 설정 칩 선택 (단일 선택)
+    // Settings Chips
     document.querySelectorAll('[data-lang]').forEach(chip => {
       chip.addEventListener('click', () => {
-        document.querySelectorAll('[data-lang]').forEach(c => c.classList.remove('on'));
-        chip.classList.add('on');
-        currentLang = chip.dataset.lang;
-        localStorage.setItem('selectedLanguage', currentLang);
+        document.querySelectorAll('[data-lang]').forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        localStorage.setItem('selectedLanguage', chip.dataset.lang);
       });
     });
 
     document.querySelectorAll('[data-theme]').forEach(chip => {
       chip.addEventListener('click', () => {
-        document.querySelectorAll('[data-theme]').forEach(c => c.classList.remove('on'));
-        chip.classList.add('on');
-        currentTheme = chip.dataset.theme;
-        localStorage.setItem('selectedTheme', currentTheme);
-        applyTheme(currentTheme);
+        document.querySelectorAll('[data-theme]').forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        const theme = chip.dataset.theme;
+        localStorage.setItem('selectedTheme', theme);
+        applyTheme(theme);
       });
     });
 
-    // 음성 속도 조절
-    document.getElementById('voiceSpeed').addEventListener('input', (e) => {
-      const speed = parseFloat(e.target.value);
-      document.getElementById('speedValue').textContent = speed.toFixed(1) + 'x';
-      localStorage.setItem('voiceSpeed', speed);
+    function applyTheme(theme) {
+      const root = document.documentElement;
+      if (theme === 'dark') {
+        root.style.setProperty('--primary', '#00d9ff');
+        root.style.setProperty('--primary-dark', '#00a8cc');
+        root.style.setProperty('--secondary', '#ff1493');
+        root.style.setProperty('--bg', '#0f1419');
+        root.style.setProperty('--bg-light', '#1a1f2e');
+        root.style.setProperty('--text', '#ffffff');
+        root.style.setProperty('--text-soft', '#b0bec5');
+        root.style.setProperty('--border', '#2d3748');
+      } else {
+        root.style.setProperty('--primary', '#0ea5e9');
+        root.style.setProperty('--primary-dark', '#0284c7');
+        root.style.setProperty('--secondary', '#ec4899');
+        root.style.setProperty('--bg', '#f8f9fa');
+        root.style.setProperty('--bg-light', '#ffffff');
+        root.style.setProperty('--text', '#1a1a1a');
+        root.style.setProperty('--text-soft', '#6b7280');
+        root.style.setProperty('--border', '#e5e7eb');
+      }
+    }
+
+    // Logo Click to Upload
+    document.getElementById('catLogoPhoto').addEventListener('click', () => {
+      document.getElementById('catPhoto').click();
     });
 
-    // 프로필 저장
+    // Photo Upload
+    document.getElementById('catPhoto').addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        const img = document.createElement('img');
+        img.src = evt.target.result;
+        img.style.cssText = 'width: 140px; height: 140px; border-radius: 12px; object-fit: cover; border: 3px solid var(--primary);';
+
+        document.getElementById('photoPreview').innerHTML = '';
+        document.getElementById('photoPreview').appendChild(img);
+
+        // Update header logo in real-time
+        const logoImg = document.createElement('img');
+        logoImg.src = evt.target.result;
+        logoImg.style.cssText = 'width: 100%; height: 100%; object-fit: cover; border-radius: 8px;';
+        document.getElementById('catLogoPhoto').innerHTML = '';
+        document.getElementById('catLogoPhoto').appendChild(logoImg);
+      };
+      reader.readAsDataURL(file);
+    });
+
+    // Save Profile
     async function saveProfile() {
       const name = document.getElementById('catName').value.trim();
       if (!name) {
@@ -811,47 +919,86 @@
         return;
       }
 
-      const genderChip = document.querySelector('[data-gender].on');
-      const personalityChips = Array.from(document.querySelectorAll('[data-personality].on'));
-
-      const photoHTML = document.getElementById('photoPreviewHTML')?.innerHTML || document.getElementById('photoPreviewImg').src || '🐱';
-
       const profile = {
         name,
         age: document.getElementById('catAge').value || '',
-        gender: genderChip?.dataset.gender || '',
-        personalities: personalityChips.map(c => c.dataset.personality),
+        gender: document.querySelector('[data-gender].active')?.dataset.gender || '',
+        personalities: Array.from(document.querySelectorAll('#profile [data-personality].active')).map(c => c.dataset.personality),
+        status: document.querySelector('[data-status].active')?.dataset.status || '건강함',
+        snack: document.querySelector('[data-snack].active')?.dataset.snack || '무관심',
+        activity: document.querySelector('[data-activity].active')?.dataset.activity || '중간',
+        interaction: document.querySelector('[data-interaction].active')?.dataset.interaction || '중립',
         info: document.getElementById('catInfo').value,
-        photo: photoHTML,
+        photo: document.getElementById('photoPreview').innerHTML || '🐱',
+        photoData: document.getElementById('catPhoto').value,
         savedAt: new Date().toISOString()
       };
 
-      try {
-        await profileManager.saveProfileFallback(profile);
-        currentProfile = profile;
+      localStorage.setItem('catProfile', JSON.stringify(profile));
+      currentProfile = profile;
 
-        if (profileManager.db) {
-          try {
-            await profileManager.saveProfile(profile);
-          } catch (e) {
-            console.log('IndexedDB 저장 실패');
-          }
-        }
+      // Update header logo with photo
+      updateHeaderLogo(profile);
 
-        const statusDiv = document.getElementById('profileStatus');
-        statusDiv.innerHTML = '<div class="card" style="background: rgba(0, 217, 255, 0.15); border: 1px solid var(--cyan); color: var(--cyan); margin-top: 12px; font-weight: 700; text-align: center;">✓ 프로필이 저장되었습니다!</div>';
+      const statusDiv = document.getElementById('profileStatus');
+      statusDiv.innerHTML = '<div class="status-message status-success">✓ 프로필이 저장되었습니다!</div>';
 
-        setTimeout(() => {
-          document.querySelector('[data-tab="analyze"]').click();
-          updateAnalyzeTab();
-        }, 2000);
-      } catch (error) {
-        console.error('프로필 저장 오류:', error);
-        alert('프로필 저장 중 오류가 발생했습니다');
+      setTimeout(() => {
+        document.querySelector('[data-tab="analyze"]').click();
+      }, 1500);
+    }
+
+    // Update Header Logo
+    function updateHeaderLogo(profile) {
+      const logo = document.getElementById('catLogoPhoto');
+      if (profile.photo && profile.photo !== '🐱') {
+        logo.innerHTML = profile.photo;
+      } else {
+        logo.textContent = '🐱';
       }
     }
 
-    // 분석 탭 업데이트
+    // Load Profile
+    function loadProfile() {
+      const saved = localStorage.getItem('catProfile');
+      if (saved) {
+        currentProfile = JSON.parse(saved);
+        document.getElementById('catName').value = currentProfile.name;
+        document.getElementById('catAge').value = currentProfile.age || '';
+        document.getElementById('catInfo').value = currentProfile.info || '';
+        document.getElementById('photoPreview').innerHTML = currentProfile.photo || '';
+
+        updateHeaderLogo(currentProfile);
+
+        if (currentProfile.gender) {
+          document.querySelector(`[data-gender="${currentProfile.gender}"]`)?.classList.add('active');
+        }
+
+        if (currentProfile.personalities) {
+          currentProfile.personalities.forEach(p => {
+            document.querySelector(`#profile [data-personality="${p}"]`)?.classList.add('active');
+          });
+        }
+
+        if (currentProfile.status) {
+          document.querySelector(`[data-status="${currentProfile.status}"]`)?.classList.add('active');
+        }
+
+        if (currentProfile.snack) {
+          document.querySelector(`[data-snack="${currentProfile.snack}"]`)?.classList.add('active');
+        }
+
+        if (currentProfile.activity) {
+          document.querySelector(`[data-activity="${currentProfile.activity}"]`)?.classList.add('active');
+        }
+
+        if (currentProfile.interaction) {
+          document.querySelector(`[data-interaction="${currentProfile.interaction}"]`)?.classList.add('active');
+        }
+      }
+    }
+
+    // Update Analyze Tab
     function updateAnalyzeTab() {
       if (!currentProfile) return;
 
@@ -863,114 +1010,22 @@
       photoEl.innerHTML = currentProfile.photo || '🐱';
       nameEl.textContent = currentProfile.name;
 
-      const genderText = currentProfile.gender === 'M' ? '수컷' : currentProfile.gender === 'F' ? '암컷' : '';
+      const genderText = currentProfile.gender === 'M' ? '수컷 🐱' : currentProfile.gender === 'F' ? '암컷 🐱' : '';
       const ageText = currentProfile.age ? `, ${currentProfile.age}살` : '';
       const personalitiesText = currentProfile.personalities?.join(', ') || '';
+      const statusText = currentProfile.status || '건강함';
+      const snackText = currentProfile.snack === '많이좋아' ? '간식🍖 매우 좋아함' :
+                        currentProfile.snack === '조금좋아' ? '간식 좋아함' :
+                        currentProfile.snack === '무관심' ? '간식 무관심' :
+                        currentProfile.snack === '싫어함' ? '간식 싫어함' : '간식 제멋대로';
+      const activityText = currentProfile.activity ? `활동: ${currentProfile.activity}` : '';
+      const interactionText = currentProfile.interaction ? `상호작용: ${currentProfile.interaction}` : '';
 
-      metaEl.innerHTML = `${genderText}${ageText}<br>${personalitiesText}`;
-      section.style.display = 'flex';
+      metaEl.innerHTML = `${genderText}${ageText}<br>${personalitiesText}<br>📊 상태: ${statusText}<br>${snackText}<br>${activityText}<br>${interactionText}`;
+      section.style.display = 'block';
     }
 
-    // 프로필 로드
-    async function loadProfile() {
-      try {
-        let profile = await profileManager.getProfileFallback();
-
-        if (!profile && profileManager.db) {
-          try {
-            profile = await profileManager.getProfile();
-          } catch (e) {
-            console.log('IndexedDB 로드 실패');
-          }
-        }
-
-        if (profile) {
-          currentProfile = profile;
-          loadProfileUI(profile);
-          updateAnalyzeTab();
-        }
-      } catch (error) {
-        console.error('프로필 로드 오류:', error);
-      }
-    }
-
-    function loadProfileUI(profile) {
-      document.getElementById('catName').value = profile.name;
-      document.getElementById('catAge').value = profile.age || '';
-      document.getElementById('catInfo').value = profile.info || '';
-
-      // 사진 복원
-      if (profile.photo && profile.photo !== '🐱') {
-        if (profile.photo.startsWith('<img')) {
-          // HTML 형식
-          document.getElementById('photoPreview').innerHTML = profile.photo;
-          document.getElementById('photoPreview').style.display = 'block';
-          document.getElementById('uploadBox').style.display = 'none';
-        } else if (profile.photo.startsWith('data:')) {
-          // Base64 형식
-          document.getElementById('photoPreviewImg').src = profile.photo;
-          document.getElementById('photoPreview').style.display = 'block';
-          document.getElementById('uploadBox').style.display = 'none';
-        }
-      }
-
-      if (profile.gender) {
-        document.querySelector(`[data-gender="${profile.gender}"]`)?.classList.add('on');
-      }
-
-      if (profile.personalities) {
-        profile.personalities.forEach(p => {
-          document.querySelector(`[data-personality="${p}"]`)?.classList.add('on');
-        });
-      }
-    }
-
-    // 사진 업로드
-    document.getElementById('catPhoto').addEventListener('change', (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-
-      const reader = new FileReader();
-      reader.onload = (evt) => {
-        // 이미지 미리보기 표시
-        document.getElementById('photoPreviewImg').src = evt.target.result;
-        document.getElementById('photoPreview').style.display = 'block';
-
-        // 업로드 박스 숨기기
-        document.getElementById('uploadBox').style.display = 'none';
-
-        // photoPreview에 원본 이미지 HTML 저장 (프로필 저장용)
-        const img = document.createElement('img');
-        img.src = evt.target.result;
-        img.style.cssText = 'width: 100%; height: 100%; object-fit: cover; border-radius: 12px;';
-
-        // 숨겨진 요소에 저장
-        const hidden = document.createElement('div');
-        hidden.id = 'photoPreviewHTML';
-        hidden.innerHTML = img.outerHTML;
-        hidden.style.display = 'none';
-        document.querySelector('#profile-view .card:first-of-type').appendChild(hidden);
-      };
-      reader.readAsDataURL(file);
-    });
-
-    // 메시지 모드 전환
-    function switchMessageMode(mode) {
-      currentMode = mode;
-      document.querySelectorAll('.msg-btn').forEach(btn => btn.classList.remove('active'));
-      document.querySelector(`[data-mode="${mode}"]`).classList.add('active');
-
-      const msgText = document.getElementById('messageText');
-      if (mode === 'text') {
-        msgText.textContent = lastResponses[0];
-      } else if (mode === 'voice') {
-        msgText.textContent = lastResponses[1];
-      } else {
-        msgText.textContent = lastResponses[0] + '\n\n---\n\n' + lastResponses[1];
-      }
-    }
-
-    // 이미지 분석
+    // Analyze Photo
     document.getElementById('analyzePhoto').addEventListener('change', async (e) => {
       const file = e.target.files[0];
       if (!file || !currentProfile) {
@@ -985,20 +1040,20 @@
           const preview = document.createElement('img');
           preview.src = img.src;
           preview.className = 'preview-img';
+          preview.style.cssText = 'width: 100%; max-height: 280px; border-radius: 12px; margin-bottom: 12px; object-fit: cover;';
+
           document.getElementById('analyzePreview').innerHTML = '';
           document.getElementById('analyzePreview').appendChild(preview);
-          document.getElementById('analyzePreview').innerHTML += '<div class="loading"><div class="spinner"></div> 분석 중...</div>';
 
           try {
             const ready = await yoloDetector.waitForReady();
             if (!ready) throw new Error('YOLO 모델 로드 실패');
 
             const detectionResult = await yoloDetector.detectCat(img);
-            const selectedPersonality = currentProfile.personalities?.length > 0 ? currentProfile.personalities[0] : '활발함';
+            const selectedPersonality = currentProfile.personalities?.[0] || '활발함';
 
             yoloDetector.analyzeEmotion(detectionResult, selectedPersonality);
 
-            // 대사 선택
             const personalityResponses = responses['ko']?.[selectedPersonality];
             lastResponses = ['', ''];
 
@@ -1012,10 +1067,17 @@
             }
 
             displayResult(detectionResult.hasCat ? '😸' : '😾');
-            document.getElementById('analyzePreview').querySelector('.loading')?.remove();
+
+            // Add to history
+            analysisHistory.unshift({
+              date: new Date(),
+              emotion: lastResponses[0],
+              catName: currentProfile.name
+            });
+            localStorage.setItem('analysisHistory', JSON.stringify(analysisHistory));
+
           } catch (error) {
             console.error('분석 오류:', error);
-            document.getElementById('analyzePreview').querySelector('.loading')?.remove();
           }
         };
         img.src = evt.target.result;
@@ -1028,68 +1090,75 @@
       document.getElementById('messageText').textContent = lastResponses[0];
       document.getElementById('resultBox').style.display = 'block';
 
-      // 메시지 모드 버튼 초기화
       currentMode = 'text';
       document.querySelectorAll('.msg-btn').forEach(btn => btn.classList.remove('active'));
       document.querySelector('[data-mode="text"]').classList.add('active');
     }
 
-    // 모델 준비
+    function switchMessageMode(mode) {
+      currentMode = mode;
+      document.querySelectorAll('.msg-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelector(`[data-mode="${mode}"]`).classList.add('active');
+
+      if (mode === 'text') {
+        document.getElementById('messageText').textContent = lastResponses[0];
+      } else if (mode === 'voice') {
+        document.getElementById('messageText').textContent = lastResponses[1];
+      } else {
+        document.getElementById('messageText').textContent = lastResponses[0] + '\n\n---\n\n' + lastResponses[1];
+      }
+    }
+
+    // Model Init
     (async () => {
-      const ready = await yoloDetector.waitForReady();
+      // 최대 12초 대기
+      const timeoutPromise = new Promise(resolve => {
+        setTimeout(() => resolve(true), 12000);
+      });
+
+      const readyPromise = yoloDetector.waitForReady();
+      await Promise.race([readyPromise, timeoutPromise]);
+
       const statusEl = document.getElementById('modelStatus');
-      if (ready) {
-        statusEl.textContent = '✓ 모델 준비 완료';
-        statusEl.classList.add('ready');
+      if (yoloDetector.isReady) {
+        if (yoloDetector.isDummy) {
+          statusEl.innerHTML = '✓ 분석 준비 완료 (오프라인 모드)';
+        } else {
+          statusEl.innerHTML = '✓ AI 모델 준비 완료';
+        }
+        statusEl.classList.remove('status-ready');
+        statusEl.classList.add('status-success');
       } else {
         statusEl.textContent = '⚠ 모델 로드 실패';
       }
     })();
 
-    // 테마 적용
-    function applyTheme(theme) {
-      if (theme === 'light') {
-        document.documentElement.style.setProperty('--dark-bg', '#f5f5f5');
-        document.documentElement.style.setProperty('--dark-card', '#ffffff');
-        document.documentElement.style.setProperty('--dark-text', '#000000');
-        document.documentElement.style.setProperty('--dark-text-soft', '#666666');
-      } else {
-        document.documentElement.style.setProperty('--dark-bg', '#0f0f1e');
-        document.documentElement.style.setProperty('--dark-card', '#1a1a2e');
-        document.documentElement.style.setProperty('--dark-text', '#e0e0e0');
-        document.documentElement.style.setProperty('--dark-text-soft', '#a0a0a0');
-      }
-    }
-
-    // 설정 로드
-    function loadSettings() {
-      const savedLang = localStorage.getItem('selectedLanguage') || 'ko';
-      const savedTheme = localStorage.getItem('selectedTheme') || 'dark';
-      const savedSpeed = parseFloat(localStorage.getItem('voiceSpeed') || '1');
-
-      currentLang = savedLang;
-      currentTheme = savedTheme;
-
-      document.querySelector(`[data-lang="${savedLang}"]`)?.classList.add('on');
-      document.querySelector(`[data-theme="${savedTheme}"]`)?.classList.add('on');
-      document.getElementById('voiceSpeed').value = savedSpeed;
-      document.getElementById('speedValue').textContent = savedSpeed.toFixed(1) + 'x';
-
-      applyTheme(savedTheme);
-    }
-
-    // 모든 데이터 삭제
+    // Clear Data
     function clearAllData() {
-      if (confirm('모든 데이터를 삭제하시겠습니까?\n(프로필, 설정이 초기화됩니다)')) {
+      if (confirm('모든 데이터를 삭제하시겠습니까?')) {
         localStorage.clear();
         location.reload();
       }
     }
 
-    // 초기화
+    // Load on start
     window.addEventListener('DOMContentLoaded', () => {
-      loadSettings();
+      // Load saved theme or default to dark
+      const savedTheme = localStorage.getItem('selectedTheme') || 'dark';
+      applyTheme(savedTheme);
+      document.querySelectorAll(`[data-theme="${savedTheme}"]`).forEach(c => c.classList.add('active'));
+      document.querySelectorAll(`[data-theme]:not([data-theme="${savedTheme}"])`).forEach(c => c.classList.remove('active'));
+
       loadProfile();
+      const saved = localStorage.getItem('analysisHistory');
+      if (saved) analysisHistory = JSON.parse(saved);
+    });
+
+    // Voice speed
+    document.getElementById('voiceSpeed').addEventListener('input', (e) => {
+      const speed = parseFloat(e.target.value);
+      document.getElementById('speedValue').textContent = speed.toFixed(1) + 'x';
+      localStorage.setItem('voiceSpeed', speed);
     });
   </script>
 </body>
