@@ -716,6 +716,14 @@
         </div>
 
         <div class="form-group">
+          <label>🌈 무지개 다리</label>
+          <div class="chips">
+            <div class="chip" data-rainbow="함께">😸 함께 있어요</div>
+            <div class="chip" data-rainbow="그리움">🌈 무지개 다리를 건넜어요</div>
+          </div>
+        </div>
+
+        <div class="form-group">
           <label>📝 추가 정보</label>
           <textarea id="catInfo" placeholder="특징, 습관, 좋아하는 장난감 등..."></textarea>
         </div>
@@ -730,16 +738,6 @@
       <div class="card">
         <h2>감정 분석</h2>
         <div class="status-message status-ready" id="modelStatus">🔄 모델 로딩 중...</div>
-
-        <div id="profileSection" style="display: none;">
-          <div class="profile-card">
-            <div class="profile-photo" id="profilePhoto">🐱</div>
-            <div class="profile-info">
-              <h3 id="profileName">고양이</h3>
-              <p id="profileMeta">정보 없음</p>
-            </div>
-          </div>
-        </div>
 
         <div class="form-group">
           <label>사진 선택</label>
@@ -906,24 +904,26 @@
 
     function applyTheme(theme) {
       const root = document.documentElement;
+      const container = document.querySelector('.container');
+
       if (theme === 'dark') {
         root.style.setProperty('--primary', '#00d9ff');
         root.style.setProperty('--primary-dark', '#00a8cc');
         root.style.setProperty('--secondary', '#ff1493');
-        root.style.setProperty('--bg', '#0f1419');
         root.style.setProperty('--bg-light', '#1a1f2e');
         root.style.setProperty('--text', '#ffffff');
         root.style.setProperty('--text-soft', '#b0bec5');
         root.style.setProperty('--border', '#2d3748');
+        if (container) container.style.background = '#0f1419';
       } else {
         root.style.setProperty('--primary', '#0ea5e9');
         root.style.setProperty('--primary-dark', '#0284c7');
         root.style.setProperty('--secondary', '#ec4899');
-        root.style.setProperty('--bg', '#f8f9fa');
         root.style.setProperty('--bg-light', '#ffffff');
         root.style.setProperty('--text', '#1a1a1a');
         root.style.setProperty('--text-soft', '#6b7280');
         root.style.setProperty('--border', '#e5e7eb');
+        if (container) container.style.background = '#ffffff';
       }
     }
 
@@ -973,6 +973,7 @@
         snack: document.querySelector('[data-snack].active')?.dataset.snack || '무관심',
         activity: document.querySelector('[data-activity].active')?.dataset.activity || '중간',
         interaction: document.querySelector('[data-interaction].active')?.dataset.interaction || '중립',
+        rainbow: document.querySelector('[data-rainbow].active')?.dataset.rainbow || '함께',
         info: document.getElementById('catInfo').value,
         photo: document.getElementById('photoPreview').innerHTML || '🐱',
         photoData: document.getElementById('catPhoto').value,
@@ -1040,34 +1041,16 @@
         if (currentProfile.interaction) {
           document.querySelector(`[data-interaction="${currentProfile.interaction}"]`)?.classList.add('active');
         }
+
+        if (currentProfile.rainbow) {
+          document.querySelector(`[data-rainbow="${currentProfile.rainbow}"]`)?.classList.add('active');
+        }
       }
     }
 
     // Update Analyze Tab
     function updateAnalyzeTab() {
-      if (!currentProfile) return;
-
-      const section = document.getElementById('profileSection');
-      const photoEl = document.getElementById('profilePhoto');
-      const nameEl = document.getElementById('profileName');
-      const metaEl = document.getElementById('profileMeta');
-
-      photoEl.innerHTML = currentProfile.photo || '🐱';
-      nameEl.textContent = currentProfile.name;
-
-      const genderText = currentProfile.gender === 'M' ? '수컷 🐱' : currentProfile.gender === 'F' ? '암컷 🐱' : '';
-      const ageText = currentProfile.age ? `, ${currentProfile.age}살` : '';
-      const personalitiesText = currentProfile.personalities?.join(', ') || '';
-      const statusText = currentProfile.status || '건강함';
-      const snackText = currentProfile.snack === '많이좋아' ? '간식🍖 매우 좋아함' :
-                        currentProfile.snack === '조금좋아' ? '간식 좋아함' :
-                        currentProfile.snack === '무관심' ? '간식 무관심' :
-                        currentProfile.snack === '싫어함' ? '간식 싫어함' : '간식 제멋대로';
-      const activityText = currentProfile.activity ? `활동: ${currentProfile.activity}` : '';
-      const interactionText = currentProfile.interaction ? `상호작용: ${currentProfile.interaction}` : '';
-
-      metaEl.innerHTML = `${genderText}${ageText}<br>${personalitiesText}<br>📊 상태: ${statusText}<br>${snackText}<br>${activityText}<br>${interactionText}`;
-      section.style.display = 'block';
+      // 프로필 섹션 제거 - 이제 사진만 표시
     }
 
     // Analyze Photo
@@ -1131,13 +1114,70 @@
     });
 
     function displayResult(emoji) {
+      let messageText = lastResponses[0];
+
+      // 무지개 다리 상태 확인 - 그리움 메시지 추가
+      if (currentProfile?.rainbow === '그리움') {
+        const rainbowMessages = {
+          '활발함': '넌 정말 밝고 활발했어. 우리 함께했던 그 신나던 순간들... 그리워.',
+          '도도함': '그 도도함이 참 사랑스러웠어. 지금도 자주 생각해.',
+          '까칠함': '겉으로는 까칠했지만, 넌 정말 소중했어. 그리워 진짜.',
+          '느긋함': '네 느긋한 모습이 그리워. 함께했던 조용한 시간들...',
+          '장난스러움': '우리가 함께 놀던 시간들이 제일 그리워.',
+          '사려깊음': '넌 정말 착했어. 그런 넌 지금도 내 마음속에 있어.',
+          '겁쟁이': '약했지만 그 모습이 사랑스러웠어. 정말 그리워.',
+          '냉정함': '차갑지만 진실한 넌 특별했어.',
+          '고집쟁이': '고집도 센 너를 정말 그리워해.',
+          '그루밍광': '깨끗하던 그 모습이 지금도 생각나.',
+          '사귀기좋은': '넘 좋았는데... 많이 그리워.',
+          '신비로움': '신비로운 그 눈빛이 자꾸 떠올라.'
+        };
+
+        const personality = currentProfile.personalities?.[0] || '활발함';
+        const rainbowMsg = rainbowMessages[personality] || '그리워... 정말 많이.';
+        messageText = `${rainbowMsg}\n\n---\n\n${messageText}`;
+      }
+
       document.getElementById('emotionEmoji').textContent = emoji;
-      document.getElementById('messageText').textContent = lastResponses[0];
+      document.getElementById('messageText').textContent = messageText;
       document.getElementById('resultBox').style.display = 'block';
 
       currentMode = 'text';
       document.querySelectorAll('.msg-btn').forEach(btn => btn.classList.remove('active'));
       document.querySelector('[data-mode="text"]').classList.add('active');
+
+      // 사진 클릭 시 상호작용 추가
+      const analyzeImg = document.querySelector('#analyzePreview img');
+      if (analyzeImg) {
+        analyzeImg.style.cursor = 'pointer';
+        analyzeImg.addEventListener('click', () => {
+          interactWithCat();
+        });
+      }
+    }
+
+    function interactWithCat() {
+      const interactions = [
+        '야옹~',
+        '~닥닥닥',
+        '꿈뭉뭉',
+        '어?',
+        '뭐야?',
+        '냐냐냐',
+        '음음음',
+        '야아악!',
+        '흠냥',
+        '헉!'
+      ];
+
+      const randomInteraction = interactions[Math.floor(Math.random() * interactions.length)];
+      const messageEl = document.getElementById('messageText');
+      messageEl.textContent = randomInteraction;
+
+      // 2초 후 원래 메시지로 복원
+      setTimeout(() => {
+        messageEl.textContent = lastResponses[0];
+      }, 2000);
     }
 
     function switchMessageMode(mode) {
