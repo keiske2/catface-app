@@ -15,16 +15,17 @@
     }
 
     :root {
+      /* 다크 모드 기본값 */
       --primary: #00d9ff;
       --primary-dark: #00a8cc;
-      --secondary: #ff1493;
-      --bg: #0f1419;
-      --bg-light: #1a1f2e;
-      --text: #ffffff;
-      --text-soft: #b0bec5;
-      --border: #2d3748;
-      --shadow: 0 4px 20px rgba(0, 217, 255, 0.12);
-      --shadow-lg: 0 20px 40px rgba(0, 217, 255, 0.15);
+      --secondary: #b344ff;
+      --bg: #0a0e27;
+      --bg-light: #151b3d;
+      --text: #e0e7ff;
+      --text-soft: #a5b4fc;
+      --border: #2d3e6f;
+      --shadow: 0 4px 20px rgba(0, 217, 255, 0.15);
+      --shadow-lg: 0 20px 40px rgba(0, 217, 255, 0.2);
     }
 
     body {
@@ -812,8 +813,8 @@
         <div class="form-group">
           <label>🎨 테마</label>
           <div class="chips">
-            <div class="chip" data-theme="light">☀️ 라이트 모드</div>
-            <div class="chip active" data-theme="dark">🌙 다크 모드</div>
+            <div class="chip" data-theme="light">☀️ 따뜻한 라이트</div>
+            <div class="chip active" data-theme="dark">🌙 신비로운 다크</div>
           </div>
         </div>
 
@@ -905,25 +906,36 @@
     function applyTheme(theme) {
       const root = document.documentElement;
       const container = document.querySelector('.container');
+      const header = document.querySelector('.header');
 
       if (theme === 'dark') {
+        // 신비로운 다크 모드
         root.style.setProperty('--primary', '#00d9ff');
         root.style.setProperty('--primary-dark', '#00a8cc');
-        root.style.setProperty('--secondary', '#ff1493');
-        root.style.setProperty('--bg-light', '#1a1f2e');
-        root.style.setProperty('--text', '#ffffff');
-        root.style.setProperty('--text-soft', '#b0bec5');
-        root.style.setProperty('--border', '#2d3748');
-        if (container) container.style.background = '#0f1419';
+        root.style.setProperty('--secondary', '#b344ff');
+        root.style.setProperty('--bg-light', '#151b3d');
+        root.style.setProperty('--text', '#e0e7ff');
+        root.style.setProperty('--text-soft', '#a5b4fc');
+        root.style.setProperty('--border', '#2d3e6f');
+        root.style.setProperty('--shadow', '0 4px 20px rgba(0, 217, 255, 0.15)');
+        root.style.setProperty('--shadow-lg', '0 20px 40px rgba(0, 217, 255, 0.2)');
+        if (container) container.style.background = '#0a0e27';
+        if (header) header.style.background = 'linear-gradient(135deg, #00d9ff 0%, #b344ff 100%)';
+        document.body.style.background = '#000000';
       } else {
-        root.style.setProperty('--primary', '#0ea5e9');
-        root.style.setProperty('--primary-dark', '#0284c7');
-        root.style.setProperty('--secondary', '#ec4899');
+        // 따뜻하고 친근한 라이트 모드
+        root.style.setProperty('--primary', '#ff8c42');
+        root.style.setProperty('--primary-dark', '#ff6b35');
+        root.style.setProperty('--secondary', '#ff6b9d');
         root.style.setProperty('--bg-light', '#ffffff');
-        root.style.setProperty('--text', '#1a1a1a');
-        root.style.setProperty('--text-soft', '#6b7280');
-        root.style.setProperty('--border', '#e5e7eb');
-        if (container) container.style.background = '#ffffff';
+        root.style.setProperty('--text', '#2d1b3d');
+        root.style.setProperty('--text-soft', '#6b5870');
+        root.style.setProperty('--border', '#f0e6f6');
+        root.style.setProperty('--shadow', '0 4px 20px rgba(255, 140, 66, 0.12)');
+        root.style.setProperty('--shadow-lg', '0 20px 40px rgba(255, 140, 66, 0.15)');
+        if (container) container.style.background = '#fff8f3';
+        if (header) header.style.background = 'linear-gradient(135deg, #ff8c42 0%, #ff6b9d 100%)';
+        document.body.style.background = '#fef5f0';
       }
     }
 
