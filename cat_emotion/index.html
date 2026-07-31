@@ -849,14 +849,34 @@
     let lastResponses = ['', ''];
     let currentMode = 'text';
     let analysisHistory = [];
+    let voiceSynthesis = null;
+    let isPlayingVoice = false;
 
     const responses = {
       ko: {
         '활발함': {
-          happy: ['우와!! 정말 신난다!!! 오늘따라 기분이 정말 좋아!! 놀 준비가 되어 있다고!!', '헤헤헤 최고야!! 이런 날씨 정말 좋네!!'],
-          anxious: ['어? 뭔가 이상한데...', '음... 좀 이상한데? 뭐하는 거야?'],
-          tired: ['에그... 피곤해ㅠㅠ', '어... 피곤한데...'],
-          angry: ['뭐야!! 화난다!!!', '진짜 화났다고!!']
+          happy: '우와!! 정말 신난다!!! 오늘따라 기분이 정말 좋아!! 이 에너지 좀 봐요!! 음냥냥냥!! 세상이 정말 아름다워 보이고, 놀 준비가 완벽하게 되어 있단 말이에요! 모든 게 장난감처럼 보이고, 생명력 넘쳐요!! 야옹~!! 이렇게 행복한 날은 정말 드물거든요. 인생이 이렇게 즐거울 수가 없다니까! 어디든 뛰어다니고 싶고, 뭐든 해보고 싶어요. 당신도 이 신나는 기분 느껴봤어요? 진짜 최고의 순간이에요!! 더 놀아야 해, 더 뛰어야 해, 더 활동해야 해!! 이게 진정한 고양이의 삶이라고 생각해요!!',
+          anxious: '어? 뭔가 이상한데... 이 느낌 뭐지? 불안한 기분이 계속 들어요. 뭔가 놓친 게 있는 것 같고, 마음이 자꾸 흔들려요. 이상하지 않아요? 음... 조심스러운 마음이 자꾸 생겨요. 뭔가 일이 터질 것 같은 불길한 느낌말이에요. 하지만 난 약하지 않아! 이 불안감을 이겨내야지! 혹시 뭔가 잘못되고 있는 건 아닐까? 마음이 철렁하네요.',
+          tired: '에그... 정말 피곤해ㅠㅠ 이렇게 힘들 수가 있나요? 에너지가 바닥인 것 같아요. 하려던 모든 게 싫어지는 이 기분... 정말 힘들어요. 누워만 있고 싶은 마음뿐이에요. 이 무기력함이 날 짓누르는군요. 어... 눈도 감기고 싶고... 정말 피곤한데요.',
+          angry: '뭐야!! 화난다!!! 진짜 화났다고!! 도대체 뭐하는 거야?! 이 따위 상황 참을 수 없어!! 어흥!! 톱니발톱까지 드러내고 싶은 심정이야!! 이 분노를 어디다 풀어야 할까? 정말 화나! 심장이 철렁거려! 이건 정말 못 참는다고!!'
+        },
+        '도도함': {
+          happy: '흠... 그래, 기분이 좋긴 한데. 뭐, 내가 행복하기는 한 거지. 하지만 너무 열심히 표현하고 싶진 않아. 자존심도 있고 말이야. 그냥 오늘따라 마음이 좀 가벼울 뿐이야. 넌 날 좋아하니? 그건 좋은데, 난 적당한 거리를 유지하고 싶어. 나한테 집착하지 마. 난 독립적이거든. 하지만 가끔은 인정해야겠다... 오늘은 정말 기분이 좀 낫긴 해.',
+          anxious: '뭔가 불편해. 이게 뭐지? 마음이 계속 가만히 있질 않네. 뭔가 불안정한 느낌이 자꾸만 드는 거야. 이래서 난 다른 고양이들을 믿을 수가 없어. 혼자가 제일 편한데... 이 불안감은 뭐지? 뭔가 변할 것 같은 느낌이 자꾸 든다니까.',
+          tired: '아... 지쳤다. 정말 지쳤어. 모든 게 귀찮아. 일어날 생각도 안 한다니까. 그냥 혼자 있고 싶어. 누구도 나한테 말 걸지 마. 난 지금 혼자고 싶거든. 이 무거운 기분... 정말 싫어.',
+          angry: '뭐하는 거야?! 정말 화난다! 내 공간 침범하지 마! 나한테 이러면 안 돼! 너희들은 정말 답답해! 내 물건 함부로 건드리지 말고, 나한테 간섭하지 마! 이건 완전 무례한 거야!'
+        },
+        '까칠함': {
+          happy: '뭐, 기분이 괜찮긴 한데. 왜 그걸 자꾸만 물어봐? 난 단지 오늘 기분이 좀 낫다는 거지. 크크크... 정말 드문 경우지만, 오늘은 할 게 좀 있긴 해. 넌 왜 자꾸 내 기분을 캐물으려 해? 귀찮은데. 그냥 놔둬. 하지만 인정하자면, 오늘은 좀 낫네.',
+          anxious: '뭔가 이상해. 불안하네. 마음이 계속 왔다갔다 하는 게 정말 거슬려. 이 불안감이 언제까지 계속될 거야? 정말 지겨워. 뭔가 위험한 냄새도 나는데... 조심해야 할 것 같아. 마음이 자꾸 불안정해지네.',
+          tired: '피곤하다. 정말 피곤해. 모든 게 귀찮아 죽겠어. 일어나기도 싫고, 움직이기도 싫어. 이 피로감... 정말 견딜 수 없네. 혼자 있고만 싶다니까.',
+          angry: '정말 화난다!! 너희들 정말 못됐어! 왜 자꾸 날 건드려?! 내가 뭘 했다고?! 정말 열받아! 이런 식으로 날 대하면 안 돼! 톱니발톱 준비 끝났어!! 조심해!!'
+        },
+        '느긋함': {
+          happy: '음... 기분이 좋긴 한데. 뭐, 그렇게 좋을 것까진 없지만. 오늘따라 마음이 편하네. 평화로운 느낌이 좋아. 모든 게 느리지만 정확하게 진행되는 것 같아. 이런 게 진정한 행복인 것 같아. 빨리 서둘러야 한다고? 아니야. 우린 느리게 살아야 해. 그게 맞는 거야.',
+          anxious: '음... 뭔가 불안하긴 한데. 하지만 너무 걱정하진 않아. 이것도 지나갈 거야. 시간이 모든 걸 해결해주니까. 차분히 기다리자. 불안해도 괜찮아. 그냥 흘러가게 두자.',
+          tired: '아... 피곤하네. 하지만 괜찮아. 이것도 자연스러운 일이야. 쉬자. 편하게 쉬면 되지. 모든 게 느리지만 그게 좋아. 시간은 충분하니까.',
+          angry: '음... 좀 화나긴 한데. 하지만 화낼 만한 것도 아니야. 그냥 넘어가자. 시간이 지나면 다 괜찮아질 거야. 느리게 살자.'
         }
       }
     };
@@ -1077,13 +1097,20 @@
       reader.onload = async (evt) => {
         const img = new Image();
         img.onload = async () => {
+          // 즉시 이미지 표시 (트리거)
           const preview = document.createElement('img');
           preview.src = img.src;
           preview.className = 'preview-img';
-          preview.style.cssText = 'width: 100%; max-height: 280px; border-radius: 12px; margin-bottom: 12px; object-fit: cover;';
+          preview.style.cssText = 'width: 100%; max-height: 280px; border-radius: 12px; margin-bottom: 12px; object-fit: cover; cursor: pointer;';
+          preview.id = 'analyzeImage';
 
           document.getElementById('analyzePreview').innerHTML = '';
           document.getElementById('analyzePreview').appendChild(preview);
+
+          // 로딩 표시
+          const messageEl = document.getElementById('messageText');
+          messageEl.textContent = '🔄 사진을 분석 중입니다...';
+          document.getElementById('resultBox').style.display = 'block';
 
           try {
             const ready = await yoloDetector.waitForReady();
@@ -1091,33 +1118,49 @@
 
             const detectionResult = await yoloDetector.detectCat(img);
             const selectedPersonality = currentProfile.personalities?.[0] || '활발함';
+            const emotionAnalysis = yoloDetector.analyzeEmotion(detectionResult, selectedPersonality);
 
-            yoloDetector.analyzeEmotion(detectionResult, selectedPersonality);
-
+            // 감정에 따른 응답 생성
             const personalityResponses = responses['ko']?.[selectedPersonality];
-            lastResponses = ['', ''];
+            let responseText = '';
 
             if (personalityResponses) {
-              const emotion = ['happy', 'anxious', 'tired', 'angry'][Math.floor(Math.random() * 4)];
-              const responses_for_emotion = personalityResponses[emotion];
-              if (responses_for_emotion && responses_for_emotion.length >= 2) {
-                lastResponses[0] = responses_for_emotion[0];
-                lastResponses[1] = responses_for_emotion[1];
-              }
+              const emotion = emotionAnalysis.emotion || 'happy';
+              responseText = personalityResponses[emotion] || '뭐하는 거야?';
             }
 
-            displayResult(detectionResult.hasCat ? '😸' : '😾');
+            // 무지개 다리 상태 확인
+            if (currentProfile?.rainbow === '그리움') {
+              const rainbowMessages = {
+                '활발함': '넌 정말 밝고 활발했어. 우리 함께했던 그 신나던 순간들... 그리워.',
+                '도도함': '그 도도함이 참 사랑스러웠어. 지금도 자주 생각해.',
+                '까칠함': '겉으로는 까칠했지만, 넌 정말 소중했어.',
+                '느긋함': '네 느긋한 모습이 그리워. 함께했던 조용한 시간들...',
+                '장난스러움': '우리가 함께 놀던 시간들이 제일 그리워.',
+                '사려깊음': '넌 정말 착했어. 그런 넌 지금도 내 마음속에 있어.'
+              };
+              const personality = currentProfile.personalities?.[0] || '활발함';
+              const rainbowMsg = rainbowMessages[personality] || '그리워... 정말 많이.';
+              responseText = `${rainbowMsg}\n\n---\n\n${responseText}`;
+            }
 
-            // Add to history
+            lastResponses[0] = responseText;
+            lastResponses[1] = responseText; // 음성도 같은 텍스트 사용
+
+            // 결과 표시 및 음성 재생
+            displayResult(detectionResult.hasCat ? '😸' : '😾', true);
+
+            // 히스토리에 추가
             analysisHistory.unshift({
               date: new Date(),
-              emotion: lastResponses[0],
+              emotion: responseText.substring(0, 100),
               catName: currentProfile.name
             });
             localStorage.setItem('analysisHistory', JSON.stringify(analysisHistory));
 
           } catch (error) {
             console.error('분석 오류:', error);
+            messageEl.textContent = '분석에 실패했습니다. 다시 시도해주세요.';
           }
         };
         img.src = evt.target.result;
@@ -1125,30 +1168,8 @@
       reader.readAsDataURL(file);
     });
 
-    function displayResult(emoji) {
-      let messageText = lastResponses[0];
-
-      // 무지개 다리 상태 확인 - 그리움 메시지 추가
-      if (currentProfile?.rainbow === '그리움') {
-        const rainbowMessages = {
-          '활발함': '넌 정말 밝고 활발했어. 우리 함께했던 그 신나던 순간들... 그리워.',
-          '도도함': '그 도도함이 참 사랑스러웠어. 지금도 자주 생각해.',
-          '까칠함': '겉으로는 까칠했지만, 넌 정말 소중했어. 그리워 진짜.',
-          '느긋함': '네 느긋한 모습이 그리워. 함께했던 조용한 시간들...',
-          '장난스러움': '우리가 함께 놀던 시간들이 제일 그리워.',
-          '사려깊음': '넌 정말 착했어. 그런 넌 지금도 내 마음속에 있어.',
-          '겁쟁이': '약했지만 그 모습이 사랑스러웠어. 정말 그리워.',
-          '냉정함': '차갑지만 진실한 넌 특별했어.',
-          '고집쟁이': '고집도 센 너를 정말 그리워해.',
-          '그루밍광': '깨끗하던 그 모습이 지금도 생각나.',
-          '사귀기좋은': '넘 좋았는데... 많이 그리워.',
-          '신비로움': '신비로운 그 눈빛이 자꾸 떠올라.'
-        };
-
-        const personality = currentProfile.personalities?.[0] || '활발함';
-        const rainbowMsg = rainbowMessages[personality] || '그리워... 정말 많이.';
-        messageText = `${rainbowMsg}\n\n---\n\n${messageText}`;
-      }
+    function displayResult(emoji, autoVoice = false) {
+      const messageText = lastResponses[0];
 
       document.getElementById('emotionEmoji').textContent = emoji;
       document.getElementById('messageText').textContent = messageText;
@@ -1158,9 +1179,17 @@
       document.querySelectorAll('.msg-btn').forEach(btn => btn.classList.remove('active'));
       document.querySelector('[data-mode="text"]').classList.add('active');
 
+      // 음성 모드가 활성화되어 있으면 자동 재생
+      if (autoVoice) {
+        setTimeout(() => {
+          playVoice(messageText);
+        }, 300);
+      }
+
       // 사진 클릭 시 상호작용 추가
-      const analyzeImg = document.querySelector('#analyzePreview img');
-      if (analyzeImg) {
+      const analyzeImg = document.getElementById('analyzeImage');
+      if (analyzeImg && !analyzeImg.hasListener) {
+        analyzeImg.hasListener = true;
         analyzeImg.style.cursor = 'pointer';
         analyzeImg.addEventListener('click', () => {
           interactWithCat();
@@ -1197,13 +1226,46 @@
       document.querySelectorAll('.msg-btn').forEach(btn => btn.classList.remove('active'));
       document.querySelector(`[data-mode="${mode}"]`).classList.add('active');
 
+      // 음성 재생 중이면 중지
+      if (window.speechSynthesis.speaking) {
+        window.speechSynthesis.cancel();
+        isPlayingVoice = false;
+      }
+
       if (mode === 'text') {
         document.getElementById('messageText').textContent = lastResponses[0];
       } else if (mode === 'voice') {
         document.getElementById('messageText').textContent = lastResponses[1];
+        playVoice(lastResponses[1]);
       } else {
         document.getElementById('messageText').textContent = lastResponses[0] + '\n\n---\n\n' + lastResponses[1];
+        playVoice(lastResponses[0] + ' ... ' + lastResponses[1]);
       }
+    }
+
+    function playVoice(text) {
+      if (isPlayingVoice) {
+        window.speechSynthesis.cancel();
+        isPlayingVoice = false;
+        return;
+      }
+
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'ko-KR';
+      const voiceSpeed = parseFloat(localStorage.getItem('voiceSpeed')) || 1;
+      utterance.rate = voiceSpeed;
+      utterance.pitch = 1.2;
+      utterance.volume = 1;
+
+      utterance.onstart = () => {
+        isPlayingVoice = true;
+      };
+
+      utterance.onend = () => {
+        isPlayingVoice = false;
+      };
+
+      window.speechSynthesis.speak(utterance);
     }
 
     // Model Init
