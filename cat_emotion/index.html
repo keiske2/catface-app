@@ -1199,11 +1199,19 @@
 
             const detectionResult = await yoloDetector.detectCat(img);
             const selectedPersonality = currentProfile.personalities?.[0] || '활발함';
-            const emotionAnalysis = yoloDetector.analyzeEmotion(detectionResult, selectedPersonality);
 
-            // 감정에 따른 응답 생성 (Chat 모델 사용)
-            currentEmotion = emotionAnalysis.emotion || 'happy';
-            const responseText = catChatModel.getResponse(selectedPersonality, currentEmotion);
+            let responseText = '';
+
+            // 고양이가 아니면 화를 냄
+            if (!detectionResult.hasCat) {
+              currentEmotion = 'angry';
+              responseText = catChatModel.generateNonCatResponse(selectedPersonality);
+            } else {
+              // 감정에 따른 응답 생성 (Chat 모델 사용)
+              const emotionAnalysis = yoloDetector.analyzeEmotion(detectionResult, selectedPersonality);
+              currentEmotion = emotionAnalysis.emotion || 'happy';
+              responseText = catChatModel.getResponse(selectedPersonality, currentEmotion);
+            }
 
             // 무지개 다리 상태 확인
             if (currentProfile?.rainbow === '그리움') {
