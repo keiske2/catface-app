@@ -680,6 +680,7 @@
             <div class="chip" data-status="흥분함">😻 신나함</div>
             <div class="chip" data-status="기분좋음">😸 기분 좋음</div>
             <div class="chip" data-status="화남">😾 화남</div>
+            <div class="chip" data-status="무지개다리">🌈 무지개다리를 건넘</div>
           </div>
         </div>
 
@@ -1213,19 +1214,11 @@
               responseText = catChatModel.getResponse(selectedPersonality, currentEmotion);
             }
 
-            // 무지개 다리 상태 확인
-            if (currentProfile?.rainbow === '그리움') {
-              const rainbowMessages = {
-                '활발함': '넌 정말 밝고 활발했어. 우리 함께했던 그 신나던 순간들... 그리워.',
-                '도도함': '그 도도함이 참 사랑스러웠어. 지금도 자주 생각해.',
-                '까칠함': '겉으로는 까칠했지만, 넌 정말 소중했어.',
-                '느긋함': '네 느긋한 모습이 그리워. 함께했던 조용한 시간들...',
-                '장난스러움': '우리가 함께 놀던 시간들이 제일 그리워.',
-                '사려깊음': '넌 정말 착했어. 그런 넌 지금도 내 마음속에 있어.'
-              };
-              const personality = currentProfile.personalities?.[0] || '활발함';
-              const rainbowMsg = rainbowMessages[personality] || '그리워... 정말 많이.';
-              responseText = `${rainbowMsg}\n\n---\n\n${responseText}`;
+            // 무지개 다리 상태 확인 (memorial mode)
+            if (currentProfile?.status === '무지개다리') {
+              const personality = currentProfile.personalities?.[0] || '느긋함';
+              const memorialMsg = catChatModel.generateMemorialResponse(personality, currentEmotion, currentProfile.name);
+              responseText = memorialMsg;
             }
 
             lastResponses[0] = responseText;
