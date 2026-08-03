@@ -21,8 +21,8 @@
       --secondary: #b344ff;
       --bg: #0a0e27;
       --bg-light: #151b3d;
-      --text: #e0e7ff;
-      --text-soft: #a5b4fc;
+      --text: #ffffff;
+      --text-soft: #e0e7ff;
       --border: #2d3e6f;
       --shadow: 0 4px 20px rgba(0, 217, 255, 0.15);
       --shadow-lg: 0 20px 40px rgba(0, 217, 255, 0.2);
@@ -256,9 +256,9 @@
 
     label {
       display: block;
-      font-weight: 600;
+      font-weight: 700;
       margin-bottom: 8px;
-      color: var(--text);
+      color: #000000;
       font-size: 14px;
     }
 
@@ -270,6 +270,11 @@
       font-family: inherit;
       font-size: 14px;
       transition: all 0.3s;
+      color: #666666;
+    }
+
+    input::placeholder {
+      color: #999999;
     }
 
     input:focus, select:focus, textarea:focus {
@@ -460,7 +465,7 @@
     }
 
     .message-box {
-      background: linear-gradient(135deg, rgba(14, 165, 233, 0.05), rgba(236, 72, 153, 0.05));
+      background: rgba(10, 14, 39, 0.95);
       border: 2px solid var(--border);
       border-radius: 16px;
       padding: 20px;
@@ -499,6 +504,53 @@
       max-height: 400px;
       overflow-y: auto;
       padding: 12px 0;
+      font-weight: 500;
+    }
+
+    /* Toggle Switch */
+    .toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 60px;
+      height: 32px;
+    }
+
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      transition: 0.4s;
+      border-radius: 32px;
+    }
+
+    .toggle-slider:before {
+      position: absolute;
+      content: "";
+      height: 26px;
+      width: 26px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: 0.4s;
+      border-radius: 50%;
+    }
+
+    input:checked + .toggle-slider {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+    }
+
+    input:checked + .toggle-slider:before {
+      transform: translateX(28px);
     }
 
     /* Statistics */
@@ -624,6 +676,12 @@
       <button class="tab-btn" data-tab="settings">⚙️ 설정</button>
     </div>
 
+    <!-- Profile Info Bar -->
+    <div id="profileBar" style="display: none; background: linear-gradient(135deg, rgba(0,217,255,0.4), rgba(179,68,255,0.4)); padding: 18px 16px; border-top: 3px solid var(--primary); font-size: 14px; text-align: center; color: white; font-weight: 900; box-shadow: var(--shadow); letter-spacing: 0.5px;">
+      <strong id="profileBarName" style="font-size: 18px; font-weight: 900;"></strong> | <span id="profileBarGender" style="font-weight: 800;"></span> | <span id="profileBarAge" style="font-weight: 800;"></span>
+      <span id="profileBarStatus" style="display: block; margin-top: 8px; font-size: 13px; opacity: 1; font-weight: 800;"></span>
+    </div>
+
     <div class="scroll-container">
       <!-- Profile Tab -->
       <div class="content active" id="profile">
@@ -673,14 +731,13 @@
         <div class="form-group">
           <label>💊 현재 상태</label>
           <div class="chips">
-            <div class="chip" data-status="건강함">😸 건강함</div>
-            <div class="chip" data-status="약간아픔">😿 약간 아파함</div>
-            <div class="chip" data-status="많이아픔">😾 많이 아파함</div>
-            <div class="chip" data-status="졸린상태">😴 졸린 상태</div>
-            <div class="chip" data-status="흥분함">😻 신나함</div>
-            <div class="chip" data-status="기분좋음">😸 기분 좋음</div>
-            <div class="chip" data-status="화남">😾 화남</div>
-            <div class="chip" data-status="무지개다리">🌈 무지개다리를 건넘</div>
+            <div class="chip" data-status="건강함">건강함</div>
+            <div class="chip" data-status="약간아픔">약간 아파함</div>
+            <div class="chip" data-status="많이아픔">많이 아파함</div>
+            <div class="chip" data-status="졸린상태">졸린 상태</div>
+            <div class="chip" data-status="흥분함">신나함</div>
+            <div class="chip" data-status="기분좋음">기분 좋음</div>
+            <div class="chip" data-status="화남">화남</div>
           </div>
         </div>
 
@@ -719,9 +776,15 @@
 
         <div class="form-group">
           <label>🌈 무지개 다리</label>
-          <div class="chips">
-            <div class="chip" data-rainbow="함께">😸 함께 있어요</div>
-            <div class="chip" data-rainbow="그리움">🌈 무지개 다리를 건넜어요</div>
+          <div style="display: flex; align-items: center; gap: 16px; justify-content: center; margin: 12px 0;">
+            <span id="rainbowText1" style="color: var(--text); font-weight: 600; transition: all 0.3s; opacity: 1;">함께 있어요</span>
+            <label class="toggle-switch" id="rainbowToggle">
+              <input type="checkbox" id="rainbowToggleInput">
+              <span class="toggle-slider"></span>
+            </label>
+            <span id="rainbowText2" style="color: var(--text); font-weight: 600; transition: all 0.3s; opacity: 0.5;">무지개 다리를 건넴</span>
+          </div>
+            
           </div>
         </div>
 
@@ -739,6 +802,9 @@
     <div class="content" id="analyze">
       <div class="card">
         <h2>감정 분석</h2>
+        <div id="analyzeProfileInfo" style="background: linear-gradient(135deg, rgba(0,217,255,0.15), rgba(179,68,255,0.15)); padding: 12px; border-radius: 10px; margin-bottom: 16px; font-size: 12px; color: var(--text-soft); display: none;">
+          📋 <strong id="analyzeProfileName"></strong> 분석 중
+        </div>
         <div class="status-message status-ready" id="modelStatus">🔄 모델 로딩 중...</div>
 
         <div class="form-group">
@@ -949,12 +1015,134 @@
       });
     });
 
-    // Chip Selection
+    // 무지개다리 토글 이벤트
+    document.getElementById('rainbowToggleInput').addEventListener('change', (e) => {
+      updateRainbowText(); // 텍스트 강조 업데이트
+      updateHealthStatusState();
+    });
+
+    // 무지개다리 텍스트 강조
+    function updateRainbowText() {
+      const toggle = document.getElementById('rainbowToggleInput').checked;
+      const text1 = document.getElementById('rainbowText1');
+      const text2 = document.getElementById('rainbowText2');
+
+      if (toggle) {
+        // 오른쪽 ON (무지개다리 건넴)
+        text1.style.opacity = '0.5';
+        text1.style.color = 'var(--text-soft)';
+        text2.style.opacity = '1';
+        text2.style.color = '#00d9ff';
+        text2.style.textShadow = '0 0 10px rgba(0, 217, 255, 0.8)';
+        text2.style.fontWeight = '700';
+      } else {
+        // 왼쪽 OFF (함께 있어요)
+        text1.style.opacity = '1';
+        text1.style.color = '#00d9ff';
+        text1.style.textShadow = '0 0 10px rgba(0, 217, 255, 0.8)';
+        text1.style.fontWeight = '700';
+        text2.style.opacity = '0.5';
+        text2.style.color = 'var(--text-soft)';
+        text2.style.textShadow = 'none';
+        text2.style.fontWeight = '600';
+      }
+    }
+
+    // 상태 관리 함수
+    function updateHealthStatusState() {
+      const rainbowToggle = document.getElementById('rainbowToggleInput').checked;
+      const statusChips = document.querySelectorAll('[data-status]');
+
+      if (rainbowToggle) {
+        // 토글 ON (무지개다리를 건넴) - 건강상태 모두 비활성화
+        statusChips.forEach(s => {
+          s.classList.remove('active');
+          s.style.opacity = '0.3';
+          s.style.pointerEvents = 'none';
+          s.style.cursor = 'not-allowed';
+        });
+      } else {
+        // 토글 OFF (함께 있어요) - 건강상태 모두 활성화
+        statusChips.forEach(s => {
+          s.style.opacity = '1';
+          s.style.pointerEvents = 'auto';
+          s.style.cursor = 'pointer';
+        });
+      }
+    }
+
+    // Chip Selection - 완벽한 상호배제
     document.querySelectorAll('#profile .chip, #analyze .chip').forEach(chip => {
-      chip.addEventListener('click', () => {
+      chip.addEventListener('click', (e) => {
+        e.preventDefault();
+
+        // ===== 무지개다리 칩 선택 (토글 - 하나만 선택 가능) =====
+        if (chip.dataset.rainbow !== undefined) {
+          // 다른 무지개다리 옵션은 해제
+          document.querySelectorAll('[data-rainbow]').forEach(c => {
+            if (c !== chip) {
+              c.classList.remove('active');
+            }
+          });
+          // 현재 클릭한 칩 토글
+          chip.classList.toggle('active');
+          updateHealthStatusState(); // 상태 업데이트
+          return;
+        }
+
+        // ===== 건강상태 칩 선택 (토글 - "함께" 상태일 때만, 아무것도 선택 안 해도 됨) =====
+        if (chip.dataset.status !== undefined) {
+          const rainbowPass = document.querySelector('[data-rainbow="건넘"].active');
+          if (rainbowPass) {
+            // 무지개다리 "건넘" 상태 - 선택 차단
+            alert('무지개다리를 건넸으므로 건강상태를 선택할 수 없습니다. 먼저 "함께 있어요"를 선택해주세요.');
+            return;
+          }
+          // "함께" 상태 - 토글 (선택/해제 가능, 아무것도 안 해도 됨)
+          // "함께" 상태 - 라디오 (하나만 선택, 중복 선택 금지)
+          document.querySelectorAll('[data-status]').forEach(c => c.classList.remove('active'));
+          chip.classList.add('active');
+          return;
+        }
+
+        // ===== 간식 선호도 (라디오) =====
+        if (chip.dataset.snack !== undefined) {
+          document.querySelectorAll('[data-snack]').forEach(c => c.classList.remove('active'));
+          chip.classList.add('active');
+          return;
+        }
+
+        // ===== 활동 수준 (라디오) =====
+        if (chip.dataset.activity !== undefined) {
+          document.querySelectorAll('[data-activity]').forEach(c => c.classList.remove('active'));
+          chip.classList.add('active');
+          return;
+        }
+
+        // ===== 사람과의 상호작용 (라디오) =====
+        if (chip.dataset.interaction !== undefined) {
+          document.querySelectorAll('[data-interaction]').forEach(c => c.classList.remove('active'));
+          chip.classList.add('active');
+          return;
+        }
+
+        // ===== 성별 (라디오) =====
+        if (chip.dataset.gender !== undefined) {
+          document.querySelectorAll('[data-gender]').forEach(c => c.classList.remove('active'));
+          chip.classList.add('active');
+          return;
+        }
+
+        // ===== 성격 (다중선택 허용) =====
         chip.classList.toggle('active');
       });
     });
+
+    // 초기 상태 설정 함수
+    function initializeChipStates() {
+      updateRainbowText(); // 무지개다리 텍스트 강조 초기화
+      updateHealthStatusState();
+    }
 
     // Settings Chips
     document.querySelectorAll('[data-lang]').forEach(chip => {
@@ -1000,14 +1188,17 @@
         root.style.setProperty('--primary-dark', '#ff6b35');
         root.style.setProperty('--secondary', '#ff6b9d');
         root.style.setProperty('--bg-light', '#ffffff');
-        root.style.setProperty('--text', '#2d1b3d');
-        root.style.setProperty('--text-soft', '#6b5870');
-        root.style.setProperty('--border', '#f0e6f6');
+        root.style.setProperty('--text', '#000000');
+        root.style.setProperty('--text-soft', '#1a1a1a');
+        root.style.setProperty('--border', '#ddd');
         root.style.setProperty('--shadow', '0 4px 20px rgba(255, 140, 66, 0.12)');
         root.style.setProperty('--shadow-lg', '0 20px 40px rgba(255, 140, 66, 0.15)');
-        if (container) container.style.background = '#fff8f3';
+        if (container) container.style.background = '#ffffff';
         if (header) header.style.background = 'linear-gradient(135deg, #ff8c42 0%, #ff6b9d 100%)';
-        document.body.style.background = '#fef5f0';
+        document.body.style.background = '#f8f8f8';
+        // 라이트 모드에서 메시지 박스 색상
+        const messageBox = document.querySelector('.message-box');
+        if (messageBox) messageBox.style.background = '#f5f5f5';
       }
     }
 
@@ -1048,16 +1239,18 @@
         return;
       }
 
+      const rainbowToggle = document.getElementById('rainbowToggleInput').checked;
+
       const profile = {
         name,
         age: document.getElementById('catAge').value || '',
         gender: document.querySelector('[data-gender].active')?.dataset.gender || '',
         personalities: Array.from(document.querySelectorAll('#profile [data-personality].active')).map(c => c.dataset.personality),
-        status: document.querySelector('[data-status].active')?.dataset.status || '건강함',
+        status: rainbowToggle ? '' : (document.querySelector('[data-status].active')?.dataset.status || ''),
         snack: document.querySelector('[data-snack].active')?.dataset.snack || '무관심',
         activity: document.querySelector('[data-activity].active')?.dataset.activity || '중간',
         interaction: document.querySelector('[data-interaction].active')?.dataset.interaction || '중립',
-        rainbow: document.querySelector('[data-rainbow].active')?.dataset.rainbow || '함께',
+        rainbow: rainbowToggle ? '건넘' : '함께',
         info: document.getElementById('catInfo').value,
         photo: document.getElementById('photoPreview').innerHTML || '🐱',
         photoData: document.getElementById('catPhoto').value,
@@ -1069,6 +1262,9 @@
 
       // Update header logo with photo
       updateHeaderLogo(profile);
+
+      // Update profile bar
+      updateProfileBar(profile);
 
       const statusDiv = document.getElementById('profileStatus');
       statusDiv.innerHTML = '<div class="status-message status-success">✓ 프로필이 저장되었습니다!</div>';
@@ -1088,6 +1284,52 @@
       }
     }
 
+    // Update Profile Bar
+    function updateProfileBar(profile) {
+      const profileBar = document.getElementById('profileBar');
+      const profileBarName = document.getElementById('profileBarName');
+      const profileBarGender = document.getElementById('profileBarGender');
+      const profileBarAge = document.getElementById('profileBarAge');
+      const profileBarStatus = document.getElementById('profileBarStatus');
+
+      profileBar.style.display = 'block';
+      profileBarName.textContent = profile.name || '이름 없음';
+      profileBarGender.textContent = profile.gender === 'M' ? '수컷 🐱' : profile.gender === 'F' ? '암컷 🐱' : '성별 미정';
+      profileBarAge.textContent = profile.age ? profile.age + '살' : '나이 미정';
+
+      // 무지개다리 상태 표시
+      if (profile.rainbow === '건넘') {
+        profileBarStatus.textContent = '🌈 무지개다리를 건넴';
+        profileBarStatus.style.color = '#ff8c42';
+      } else {
+        // 상태 표시 (상태가 없으면 표시 안 함)
+        if (profile.status) {
+          const statusEmoji = {
+            '건강함': '😸',
+            '약간아픔': '😿',
+            '많이아픔': '😾',
+            '졸린상태': '😴',
+            '흥분함': '😻',
+            '기분좋음': '😸',
+            '화남': '😾'
+          };
+          const statusText = profile.status === '건강함' ? '건강' :
+                             profile.status === '약간아픔' ? '약간 아파함' :
+                             profile.status === '많이아픔' ? '많이 아파함' :
+                             profile.status === '졸린상태' ? '졸린 상태' :
+                             profile.status === '흥분함' ? '신나함' :
+                             profile.status === '기분좋음' ? '기분 좋음' :
+                             profile.status === '화남' ? '화남' : '상태 미정';
+
+          profileBarStatus.textContent = (statusEmoji[profile.status] || '') + ' ' + statusText;
+          profileBarStatus.style.color = 'white';
+        } else {
+          profileBarStatus.textContent = '상태 미선택';
+          profileBarStatus.style.color = '#a5b4fc';
+        }
+      }
+    }
+
     // Load Profile
     function loadProfile() {
       const saved = localStorage.getItem('catProfile');
@@ -1099,6 +1341,7 @@
         document.getElementById('photoPreview').innerHTML = currentProfile.photo || '';
 
         updateHeaderLogo(currentProfile);
+        updateProfileBar(currentProfile);
 
         if (currentProfile.gender) {
           document.querySelector(`[data-gender="${currentProfile.gender}"]`)?.classList.add('active');
@@ -1110,8 +1353,31 @@
           });
         }
 
-        if (currentProfile.status) {
-          document.querySelector(`[data-status="${currentProfile.status}"]`)?.classList.add('active');
+        // 무지개다리 토글 로드 (중요!)
+        const rainbowToggle = document.getElementById('rainbowToggleInput');
+        if (currentProfile.rainbow === '건넘') {
+          rainbowToggle.checked = true;
+          // 건강상태 칩 비활성화
+          const statusChips = document.querySelectorAll('[data-status]');
+          statusChips.forEach(s => {
+            s.classList.remove('active');
+            s.style.opacity = '0.3';
+            s.style.pointerEvents = 'none';
+            s.style.cursor = 'not-allowed';
+          });
+        } else {
+          rainbowToggle.checked = false;
+          // 무지개다리 "함께"일 때만 건강상태 로드
+          if (currentProfile.status) {
+            document.querySelector(`[data-status="${currentProfile.status}"]`)?.classList.add('active');
+          }
+          // 건강상태 칩 활성화
+          const statusChips = document.querySelectorAll('[data-status]');
+          statusChips.forEach(s => {
+            s.style.opacity = '1';
+            s.style.pointerEvents = 'auto';
+            s.style.cursor = 'pointer';
+          });
         }
 
         if (currentProfile.snack) {
@@ -1125,16 +1391,17 @@
         if (currentProfile.interaction) {
           document.querySelector(`[data-interaction="${currentProfile.interaction}"]`)?.classList.add('active');
         }
-
-        if (currentProfile.rainbow) {
-          document.querySelector(`[data-rainbow="${currentProfile.rainbow}"]`)?.classList.add('active');
-        }
       }
     }
 
     // Update Analyze Tab
     function updateAnalyzeTab() {
-      // 프로필 섹션 제거 - 이제 사진만 표시
+      if (currentProfile) {
+        const analyzeProfileInfo = document.getElementById('analyzeProfileInfo');
+        const analyzeProfileName = document.getElementById('analyzeProfileName');
+        analyzeProfileInfo.style.display = 'block';
+        analyzeProfileName.textContent = currentProfile.name || '고양이';
+      }
     }
 
     // Analyze Photo
@@ -1245,12 +1512,44 @@
       reader.readAsDataURL(file);
     });
 
+    function typeText(element, text, speed = 50) {
+      return new Promise(resolve => {
+        element.textContent = '';
+        let index = 0;
+        const catSounds = catChatModel.catSounds[currentEmotion] || catChatModel.catSounds.happy;
+
+        const type = () => {
+          if (index < text.length) {
+            element.textContent += text[index];
+
+            // 10글자마다 고양이 울음소리 간헐적 재생 (30% 확률)
+            if (index % 10 === 0 && Math.random() < 0.3) {
+              const randomSound = catSounds[Math.floor(Math.random() * catSounds.length)];
+              const utterance = new SpeechSynthesisUtterance(randomSound);
+              utterance.lang = 'ko-KR';
+              utterance.rate = 1.2;
+              utterance.pitch = 1.4;
+              utterance.volume = 0.5;
+              window.speechSynthesis.speak(utterance);
+            }
+
+            index++;
+            setTimeout(type, speed);
+          } else {
+            resolve();
+          }
+        };
+        type();
+      });
+    }
+
     function displayResult(emoji, autoVoice = false) {
       const messageText = lastResponses[0];
 
       document.getElementById('emotionEmoji').textContent = emoji;
-      document.getElementById('messageText').textContent = messageText;
       document.getElementById('resultBox').style.display = 'block';
+
+      typeText(document.getElementById('messageText'), messageText, 30);
 
       currentMode = 'text';
       document.querySelectorAll('.msg-btn').forEach(btn => btn.classList.remove('active'));
@@ -1323,14 +1622,23 @@
     }
 
     function playCatVoice(emotion = 'happy') {
-      // Chat 모델에서 기분에 따른 고양이 울음소리 가져오기
       const sound = catChatModel.getCatSound(emotion);
-
       const utterance = new SpeechSynthesisUtterance(sound);
+
       utterance.lang = 'ko-KR';
-      utterance.rate = 1.1;
-      utterance.pitch = 1.4;
-      utterance.volume = 1;
+
+      // 감정에 따른 음성 특성
+      const voiceSettings = {
+        happy: { rate: 1.3, pitch: 1.5, volume: 1 },
+        anxious: { rate: 0.8, pitch: 0.9, volume: 0.8 },
+        tired: { rate: 0.7, pitch: 0.8, volume: 0.7 },
+        angry: { rate: 1.2, pitch: 1.6, volume: 1 }
+      };
+
+      const settings = voiceSettings[emotion] || voiceSettings.happy;
+      utterance.rate = settings.rate;
+      utterance.pitch = settings.pitch;
+      utterance.volume = settings.volume;
 
       window.speechSynthesis.cancel();
       window.speechSynthesis.speak(utterance);
@@ -1407,7 +1715,14 @@
       document.querySelectorAll(`[data-theme="${savedTheme}"]`).forEach(c => c.classList.add('active'));
       document.querySelectorAll(`[data-theme]:not([data-theme="${savedTheme}"])`).forEach(c => c.classList.remove('active'));
 
+      // 기본값: 무지개다리 "함께"로 초기화
+      const togetherChip = document.querySelector('[data-rainbow="함께"]');
+      if (togetherChip && !document.querySelector('[data-rainbow].active')) {
+        togetherChip.classList.add('active');
+      }
+
       loadProfile();
+      initializeChipStates(); // 칩 상태 초기화
       const saved = localStorage.getItem('analysisHistory');
       if (saved) analysisHistory = JSON.parse(saved);
     });
