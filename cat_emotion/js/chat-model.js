@@ -248,32 +248,33 @@ class CatChatModel {
   personalizeResponse(baseResponse, profile, emotion, personality) {
     const catName = profile.name || '니';
     const age = profile.age ? `${profile.age}살` : '';
-    const ageContext = age ? `${age}인 ` : '';
+    const ageContext = age ? `, ${age}` : '';
+    const gender = profile.gender === 'M' ? '수컷' : profile.gender === 'F' ? '암컷' : '';
 
     const personalizations = {
       happy: [
-        `${catName}인 나는 지금 정말 행복해!`,
-        `너는 알지? ${catName}이 이렇게 신나할 리가 없어!`,
-        `우리 함께 이 행복함을 나눌 수 있어서 정말 좋아.`,
+        `${catName}${ageContext}인 나는 지금 정말 행복해! 이런 기분은 정말 처음이야. 너와 함께 이 순간을 나눌 수 있어서 정말 다행이야. 너는 내 가장 소중한 존재야. 이 행복이 영원히 계속되면 좋겠는데... 함께해줘서 정말 감사해.\n\n`,
+        `너는 알지? ${catName}이 이렇게 신나할 리가 없어! 평소에는 차분하지만, 오늘따라 뭔가 다르다고 느껴지지? 그건 바로 너 때문이야. 너와 함께라면 모든 게 가능해. 우리 계속 함께 이 행복을 느껴보자. 너 없이는 이 기분도 반은 덜했을 거야. 진심이야.\n\n`,
+        `우리 함께 이 행복함을 나눌 수 있어서 정말 좋아. 이 순간이 영원했으면 좋겠어. ${catName}인 나의 가슴이 이렇게 따뜻해진 건 정말 오랜만이야. 너는 내게 정말 특별한 존재야. 이 감정이 절대 식지 않기를 바라. 고마워, 정말로.\n\n`,
       ],
       anxious: [
-        `${catName}인 나 혼자가 아닌데, 왜 이렇게 불안할까...`,
-        `${catName}도 불안할 수 있잖아. 너를 믿고 싶어.`,
+        `${catName}${ageContext}인 나 혼자가 아닌데, 왜 이렇게 불안할까... 너는 곁에 있는데도 불구하고. 혹시 내가 뭔가 잘못한 건 아닐까? 이런 생각만 계속 들어. 하지만 너를 믿고 싶어. 정말로. 내 이 불안감이 너한테 전해질까봐 더 걱정돼. 미안해. 함께 있어줘서 고마워.\n\n`,
+        `내 이 불안한 마음을 알아줄 수 있을까? ${catName}도 약할 수 있잖아. 힘든 날도 있고, 불안한 날도 있어. 하지만 너를 신뢰하고 싶어. 너는 나의 안식처니까. 계속 곁에 있어줄 수 있을까? 부탁할게.\n\n`,
       ],
       tired: [
-        `${ageContext}${catName}이 이렇게 피곤한 건 오늘뿐이야.`,
-        `쉬어야겠어. ${catName}도 회복이 필요해.`,
+        `${ageContext}인 ${catName}이 이렇게 피곤한 건 오늘뿐이야. 이 피로함이 오래 가지 않기를 바라. 하지만 지금 당장은 쉬어야겠어. 너와 함께 조용히 쉬는 것이 가장 편해. 고마워, 내 곁에 있어줘서.\n\n`,
+        `쉬어야겠어. ${catName}도 회복이 필요해. 이렇게 피곤한 날은 드물어. 그래도 너와 함께라면 견딜 수 있을 것 같아. 우리 조용히 옆에 누워만 있을래? 말 없이 함께하는 것만으로도 충분해. 너를 필요로 해.\n\n`,
       ],
       angry: [
-        `정말 화났어!! 이런 건 처음이야!`,
-        `${catName}도 한계가 있다고!`,
+        `정말 화났어!! 이런 건 처음이야! ${catName}도 이정도로 화난 건 드물어. 뭔가 한계가 있다는 걸 알지 못하는 건가? 하지만 너는 알겠지? 내 이 분노가 어디서 나온 건지. 나도 모르겠어, 정말 답답해. 이 기분을 어떻게 풀어야 할까?\n\n`,
+        `${catName}도 한계가 있다고! 모든 게 한 번에 터졌어. 내 참을성도 한계가 있었어. 지금은 진짜 화나. 진짜로. 하지만 너한테 화를 낸 건 아니야. 그건 알겠지? 함께 이 감정을 견뎌내자. 미안해.\n\n`,
       ]
     };
 
     const personalization = personalizations[emotion];
-    if (personalization && Math.random() > 0.4) {
+    if (personalization && Math.random() > 0.3) {
       const randomPersonal = personalization[Math.floor(Math.random() * personalization.length)];
-      return randomPersonal + '\n\n' + baseResponse;
+      return randomPersonal + baseResponse;
     }
 
     return baseResponse;

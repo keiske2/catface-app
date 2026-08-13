@@ -1502,17 +1502,24 @@
             const detectionResult = await yoloDetector.detectCat(img);
             const selectedPersonality = currentProfile.personalities?.[0] || '활발함';
 
+            console.log('선택된 성격:', selectedPersonality);
+            console.log('현재 프로필:', currentProfile);
+
             let responseText = '';
 
             // 고양이가 아니면 화를 냄
             if (!detectionResult.hasCat) {
               currentEmotion = 'angry';
               responseText = catChatModel.generateNonCatResponse(selectedPersonality);
+              console.log('고양이 없음 응답:', responseText);
             } else {
               // 감정에 따른 응답 생성 (Chat 모델 사용)
               const emotionAnalysis = yoloDetector.analyzeEmotion(detectionResult, selectedPersonality);
               currentEmotion = emotionAnalysis.emotion || 'happy';
+              console.log('분석된 감정:', currentEmotion);
               responseText = catChatModel.getResponse(selectedPersonality, currentEmotion, currentProfile);
+              console.log('생성된 응답 길이:', responseText.length);
+              console.log('생성된 응답:', responseText.substring(0, 200) + '...');
             }
 
             // 무지개 다리 상태 확인 (memorial mode)
