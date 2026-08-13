@@ -1482,7 +1482,7 @@
             }
 
             // 무지개 다리 상태 확인 (memorial mode)
-            if (currentProfile?.status === '무지개다리') {
+            if (currentProfile?.rainbow === '건넘') {
               const personality = currentProfile.personalities?.[0] || '느긋함';
               const memorialMsg = catChatModel.generateMemorialResponse(personality, currentEmotion, currentProfile.name);
               responseText = memorialMsg;

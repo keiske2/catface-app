@@ -121,10 +121,12 @@ class YOLODetector {
       '느긋함': { happy: 1.2, anxious: 0.5, tired: 1.3, angry: 0.6 },
       '장난스러움': { happy: 1.4, anxious: 1.0, tired: 0.4, angry: 1.1 },
       '사려깊음': { happy: 0.9, anxious: 0.9, tired: 0.8, angry: 0.5 },
-      '겁많음': { happy: 0.6, anxious: 1.5, tired: 1.1, angry: 0.4 },
-      '다정함': { happy: 1.3, anxious: 0.6, tired: 0.9, angry: 0.3 },
+      '겁쟁이': { happy: 0.6, anxious: 1.5, tired: 1.1, angry: 0.4 },
+      '냉정함': { happy: 0.7, anxious: 0.6, tired: 1.0, angry: 1.2 },
       '고집쟁이': { happy: 1.0, anxious: 0.7, tired: 0.6, angry: 1.4 },
-      '쾌활함': { happy: 1.6, anxious: 0.4, tired: 0.5, angry: 0.5 }
+      '그루밍광': { happy: 1.2, anxious: 0.4, tired: 0.8, angry: 0.3 },
+      '사귀기좋은': { happy: 1.3, anxious: 0.5, tired: 0.7, angry: 0.2 },
+      '신비로움': { happy: 0.9, anxious: 0.7, tired: 0.9, angry: 0.8 }
     };
 
     const bias = personalityBias[personalityType] || personalityBias['느긋함'];
