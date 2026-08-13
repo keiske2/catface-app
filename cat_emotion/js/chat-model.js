@@ -226,7 +226,7 @@ class CatChatModel {
     return randomSound + ' ' + randomSound;
   }
 
-  getResponse(personality, emotion) {
+  getResponse(personality, emotion, profile = null) {
     const personalityResponses = this.responses.ko[personality];
     if (!personalityResponses) return '뭐하는 거야?';
 
@@ -235,7 +235,48 @@ class CatChatModel {
 
     // 매번 다른 답변 반환 (8가지 버전)
     const randomIndex = Math.floor(Math.random() * emotionResponses.length);
-    return emotionResponses[randomIndex];
+    let response = emotionResponses[randomIndex];
+
+    // 프로필 정보를 반영한 개인화 답변 추가
+    if (profile?.name) {
+      response = this.personalizeResponse(response, profile, emotion, personality);
+    }
+
+    return response;
+  }
+
+  personalizeResponse(baseResponse, profile, emotion, personality) {
+    const catName = profile.name || '니';
+    const age = profile.age ? `${profile.age}살` : '';
+    const ageContext = age ? `${age}인 ` : '';
+
+    const personalizations = {
+      happy: [
+        `${catName}인 나는 지금 정말 행복해!`,
+        `너는 알지? ${catName}이 이렇게 신나할 리가 없어!`,
+        `우리 함께 이 행복함을 나눌 수 있어서 정말 좋아.`,
+      ],
+      anxious: [
+        `${catName}인 나 혼자가 아닌데, 왜 이렇게 불안할까...`,
+        `${catName}도 불안할 수 있잖아. 너를 믿고 싶어.`,
+      ],
+      tired: [
+        `${ageContext}${catName}이 이렇게 피곤한 건 오늘뿐이야.`,
+        `쉬어야겠어. ${catName}도 회복이 필요해.`,
+      ],
+      angry: [
+        `정말 화났어!! 이런 건 처음이야!`,
+        `${catName}도 한계가 있다고!`,
+      ]
+    };
+
+    const personalization = personalizations[emotion];
+    if (personalization && Math.random() > 0.4) {
+      const randomPersonal = personalization[Math.floor(Math.random() * personalization.length)];
+      return randomPersonal + '\n\n' + baseResponse;
+    }
+
+    return baseResponse;
   }
 
   getNonCatResponse(personality) {

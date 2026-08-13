@@ -3,6 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#00d9ff">
+  <meta name="description" content="고양이의 감정을 분석하고 상호작용하는 AI 앱">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Cat Emotion">
+  <link rel="manifest" href="./manifest.json">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect fill='%23000' width='192' height='192'/><text x='50%' y='50%' font-size='120' text-anchor='middle' dominant-baseline='middle' fill='%2300d9ff'>🐱</text></svg>">
   <title>Cat Emotion - 고양이 감정 분석 AI</title>
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
@@ -216,6 +223,8 @@
       overflow-y: auto;
       overflow-x: hidden;
       padding: 16px;
+      min-height: 0;
+      max-height: 100%;
     }
 
     @keyframes fadeIn {
@@ -231,6 +240,12 @@
       margin-bottom: 20px;
       box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
       transition: all 0.3s;
+      color: #000000;
+    }
+
+    :root[data-theme="dark"] .card {
+      background: #151b3d;
+      color: white;
     }
 
     .card:hover {
@@ -247,6 +262,10 @@
     .card p {
       color: var(--text-soft);
       margin-bottom: 16px;
+    }
+
+    :root[data-theme="light"] .card p {
+      color: #666666;
     }
 
     /* Forms */
@@ -470,6 +489,12 @@
       border-radius: 16px;
       padding: 20px;
       margin: 20px 0;
+      color: white;
+    }
+
+    :root[data-theme="light"] .message-box {
+      background: #f5f5f5;
+      color: #000000;
     }
 
     .message-controls {
@@ -909,6 +934,15 @@
   <script src="js/chat-model.js"></script>
   <script src="js/profile-manager.js"></script>
   <script src="js/yolo-detector.js"></script>
+  <script src="js/cat-voice.js"></script>
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./sw.js')
+        .then(registration => console.log('Service Worker registered'))
+        .catch(error => console.log('Service Worker registration failed:', error));
+    }
+  </script>
 
   <script>
     let currentProfile = null;
@@ -1478,7 +1512,7 @@
               // 감정에 따른 응답 생성 (Chat 모델 사용)
               const emotionAnalysis = yoloDetector.analyzeEmotion(detectionResult, selectedPersonality);
               currentEmotion = emotionAnalysis.emotion || 'happy';
-              responseText = catChatModel.getResponse(selectedPersonality, currentEmotion);
+              responseText = catChatModel.getResponse(selectedPersonality, currentEmotion, currentProfile);
             }
 
             // 무지개 다리 상태 확인 (memorial mode)
@@ -1651,10 +1685,16 @@
         return;
       }
 
-      // 먼저 기분에 맞는 고양이 울음소리 재생
-      playCatVoice(currentEmotion);
+      isPlayingVoice = true;
 
-      // 그 다음 텍스트 읽기 (1.2초 후)
+      // 먼저 기분에 맞는 고양이 울음소리 재생 (Web Audio API)
+      if (catVoiceGenerator) {
+        catVoiceGenerator.playMultipleSounds(currentEmotion, 2, 200);
+      } else {
+        playCatVoice(currentEmotion);
+      }
+
+      // 그 다음 텍스트 읽기 (0.8초 후)
       setTimeout(() => {
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.lang = 'ko-KR';
@@ -1672,7 +1712,7 @@
         };
 
         window.speechSynthesis.speak(utterance);
-      }, 1200);
+      }, 800);
     }
 
     // Model Init
