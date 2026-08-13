@@ -575,6 +575,10 @@
       white-space: pre-wrap;
     }
 
+    :root[data-theme="light"] .message-text {
+      color: #000000 !important;
+    }
+
     /* Toggle Switch */
     .toggle-switch {
       position: relative;
@@ -982,6 +986,7 @@
   <script src="js/profile-manager.js"></script>
   <script src="js/yolo-detector.js"></script>
   <script src="js/cat-voice.js"></script>
+  <script src="js/typewriter-sound.js"></script>
 
   <script>
     if ('serviceWorker' in navigator) {
@@ -1634,27 +1639,20 @@
       return new Promise(resolve => {
         element.textContent = '';
         let index = 0;
-        const catSounds = catChatModel.catSounds[currentEmotion] || catChatModel.catSounds.happy;
         const scrollContainer = document.querySelector('.scroll-container');
 
         const type = () => {
           if (index < text.length) {
             element.textContent += text[index];
 
+            // 타자소리 재생 (모음 제외하고 모든 글자마다)
+            if (typewriterSound && index % 2 === 0) {
+              typewriterSound.playKeySound();
+            }
+
             // 자동 스크롤 - 맨 아래로 (매번 즉시)
             if (scrollContainer) {
               scrollContainer.scrollTop = scrollContainer.scrollHeight;
-            }
-
-            // 50글자마다 고양이 울음소리 간헐적 재생 (20% 확률)
-            if (index % 50 === 0 && Math.random() < 0.2) {
-              const randomSound = catSounds[Math.floor(Math.random() * catSounds.length)];
-              const utterance = new SpeechSynthesisUtterance(randomSound);
-              utterance.lang = 'ko-KR';
-              utterance.rate = 1.2;
-              utterance.pitch = 1.4;
-              utterance.volume = 0.5;
-              window.speechSynthesis.speak(utterance);
             }
 
             index++;
