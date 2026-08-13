@@ -1579,6 +1579,11 @@
             lastResponses[0] = responseText;
             lastResponses[1] = responseText;
 
+            console.log('응답 텍스트 길이:', responseText.length);
+            console.log('응답 첫 100자:', responseText.substring(0, 100));
+            console.log('resultBox:', document.getElementById('resultBox'));
+            console.log('messageEl:', document.getElementById('messageText'));
+
             // 결과 표시 (음성 자동 재생 안 함)
             displayResult(detectionResult.hasCat ? '😸' : '😾', false);
 
@@ -1643,11 +1648,21 @@
 
     function displayResult(emoji, autoVoice = false) {
       const messageText = lastResponses[0];
+      console.log('displayResult 호출됨');
+      console.log('emoji:', emoji);
+      console.log('messageText:', messageText ? messageText.substring(0, 50) : '없음');
 
-      document.getElementById('emotionEmoji').textContent = emoji;
-      document.getElementById('resultBox').style.display = 'block';
+      const emotionEmojiEl = document.getElementById('emotionEmoji');
+      const resultBoxEl = document.getElementById('resultBox');
+      const messageTextEl = document.getElementById('messageText');
 
-      typeText(document.getElementById('messageText'), messageText, 30);
+      console.log('emotionEmoji 요소:', emotionEmojiEl);
+      console.log('resultBox 요소:', resultBoxEl);
+      console.log('messageText 요소:', messageTextEl);
+
+      if (emotionEmojiEl) emotionEmojiEl.textContent = emoji;
+      if (resultBoxEl) resultBoxEl.style.display = 'block';
+      if (messageTextEl) typeText(messageTextEl, messageText, 30);
 
       currentMode = 'text';
       document.querySelectorAll('.msg-btn').forEach(btn => btn.classList.remove('active'));
