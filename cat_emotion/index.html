@@ -404,6 +404,25 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .photo-preview img:active {
+      transform: scale(0.95);
+    }
+
+    #analyzeImage {
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    #analyzeImage:hover {
+      opacity: 0.9;
+    }
+
+    #analyzeImage:active {
+      transform: scale(0.98);
     }
 
     /* Upload Box */
@@ -709,7 +728,6 @@
     <div class="tabs">
       <button class="tab-btn active" data-tab="profile">📋 프로필</button>
       <button class="tab-btn" data-tab="analyze">🔍 분석</button>
-      <button class="tab-btn" data-tab="history">📊 히스토리</button>
       <button class="tab-btn" data-tab="settings">⚙️ 설정</button>
     </div>
 
@@ -868,8 +886,9 @@
       </div>
     </div>
 
-    <!-- History Tab -->
-    <div class="content" id="history">
+    <!-- Settings Tab (히스토리 + 설정) -->
+    <div class="content" id="settings">
+      <!-- 히스토리 섹션 -->
       <div class="card">
         <h2>분석 히스토리</h2>
         <p>최근 분석 기록</p>
@@ -895,10 +914,8 @@
 
         <div id="historyList"></div>
       </div>
-    </div>
 
-    <!-- Settings Tab -->
-    <div class="content" id="settings">
+      <!-- 설정 섹션 -->
       <div class="card">
         <h2>설정</h2>
 
@@ -915,8 +932,8 @@
         <div class="form-group">
           <label>🎨 테마</label>
           <div class="chips">
-            <div class="chip" data-theme="light">☀️ 따뜻한 라이트</div>
-            <div class="chip active" data-theme="dark">🌙 신비로운 다크</div>
+            <div class="chip active" data-theme="light">☀️ 따뜻한 라이트</div>
+            <div class="chip" data-theme="dark">🌙 신비로운 다크</div>
           </div>
         </div>
 
@@ -1496,10 +1513,35 @@
             }
           });
 
+          // 마우스 오버: 상호작용 힌트
+          preview.addEventListener('mouseenter', () => {
+            preview.style.opacity = '0.8';
+            preview.style.transform = 'scale(1.02)';
+            preview.title = '더블클릭: 상호작용 | 싱글클릭: 다른사진';
+          });
+
+          preview.addEventListener('mouseleave', () => {
+            preview.style.opacity = '1';
+            preview.style.transform = 'scale(1)';
+          });
+
           // 터치 (쓰다듬기): 상호작용
+          let touchCount = 0;
+          let touchTimer = null;
+
           preview.addEventListener('touchstart', (e) => {
             e.preventDefault();
-            interactWithCat();
+            touchCount++;
+
+            if (touchCount === 1) {
+              touchTimer = setTimeout(() => {
+                touchCount = 0;
+              }, 500);
+            } else if (touchCount === 2) {
+              clearTimeout(touchTimer);
+              interactWithCat();
+              touchCount = 0;
+            }
           });
 
           // 로딩 표시
@@ -1514,24 +1556,17 @@
             const detectionResult = await yoloDetector.detectCat(img);
             const selectedPersonality = currentProfile.personalities?.[0] || '활발함';
 
-            console.log('선택된 성격:', selectedPersonality);
-            console.log('현재 프로필:', currentProfile);
-
             let responseText = '';
 
             // 고양이가 아니면 화를 냄
             if (!detectionResult.hasCat) {
               currentEmotion = 'angry';
               responseText = catChatModel.generateNonCatResponse(selectedPersonality);
-              console.log('고양이 없음 응답:', responseText);
             } else {
               // 감정에 따른 응답 생성 (Chat 모델 사용)
               const emotionAnalysis = yoloDetector.analyzeEmotion(detectionResult, selectedPersonality);
               currentEmotion = emotionAnalysis.emotion || 'happy';
-              console.log('분석된 감정:', currentEmotion);
               responseText = catChatModel.getResponse(selectedPersonality, currentEmotion, currentProfile);
-              console.log('생성된 응답 길이:', responseText.length);
-              console.log('생성된 응답:', responseText.substring(0, 200) + '...');
             }
 
             // 무지개 다리 상태 확인 (memorial mode)
@@ -1565,18 +1600,26 @@
       reader.readAsDataURL(file);
     });
 
-    function typeText(element, text, speed = 50) {
+    function typeText(element, text, speed = 30) {
       return new Promise(resolve => {
         element.textContent = '';
         let index = 0;
         const catSounds = catChatModel.catSounds[currentEmotion] || catChatModel.catSounds.happy;
+        const scrollContainer = document.querySelector('.scroll-container');
 
         const type = () => {
           if (index < text.length) {
             element.textContent += text[index];
 
-            // 10글자마다 고양이 울음소리 간헐적 재생 (30% 확률)
-            if (index % 10 === 0 && Math.random() < 0.3) {
+            // 자동 스크롤 - 맨 아래로
+            if (scrollContainer) {
+              setTimeout(() => {
+                scrollContainer.scrollTop = scrollContainer.scrollHeight;
+              }, 10);
+            }
+
+            // 50글자마다 고양이 울음소리 간헐적 재생 (20% 확률)
+            if (index % 50 === 0 && Math.random() < 0.2) {
               const randomSound = catSounds[Math.floor(Math.random() * catSounds.length)];
               const utterance = new SpeechSynthesisUtterance(randomSound);
               utterance.lang = 'ko-KR';
@@ -1589,6 +1632,8 @@
             index++;
             setTimeout(type, speed);
           } else {
+            // 완료 후 버튼 표시
+            showAnalysisCompleteButtons();
             resolve();
           }
         };
@@ -1623,6 +1668,111 @@
         analyzeImg.addEventListener('click', () => {
           interactWithCat();
         });
+      }
+    }
+
+    function showAnalysisCompleteButtons() {
+      const resultBox = document.getElementById('resultBox');
+      if (!resultBox) return;
+
+      // 기존 버튼이 있으면 제거
+      const existingButtons = resultBox.querySelector('.analysis-buttons');
+      if (existingButtons) {
+        existingButtons.remove();
+      }
+
+      // 새 버튼 컨테이너 생성
+      const buttonContainer = document.createElement('div');
+      buttonContainer.className = 'analysis-buttons';
+      buttonContainer.style.cssText = `
+        display: flex;
+        gap: 12px;
+        margin-top: 24px;
+        flex-wrap: wrap;
+      `;
+
+      // 다시 분석 버튼
+      const retryBtn = document.createElement('button');
+      retryBtn.className = 'btn btn-primary';
+      retryBtn.style.flex = '1';
+      retryBtn.style.minWidth = '120px';
+      retryBtn.textContent = '🔄 다시 분석';
+      retryBtn.onclick = () => {
+        // 현재 이미지로 다시 분석
+        const analyzeImg = document.getElementById('analyzeImage');
+        if (analyzeImg) {
+          const img = new Image();
+          img.src = analyzeImg.src;
+          img.onload = async () => {
+            analyzePhoto(img);
+          };
+        }
+      };
+
+      // 다른 사진 업로드 버튼
+      const newPhotoBtn = document.createElement('button');
+      newPhotoBtn.className = 'btn btn-secondary';
+      newPhotoBtn.style.flex = '1';
+      newPhotoBtn.style.minWidth = '120px';
+      newPhotoBtn.textContent = '📸 다른 사진';
+      newPhotoBtn.onclick = () => {
+        document.getElementById('analyzePhoto').click();
+      };
+
+      buttonContainer.appendChild(retryBtn);
+      buttonContainer.appendChild(newPhotoBtn);
+
+      resultBox.appendChild(buttonContainer);
+
+      // 자동 스크롤
+      const scrollContainer = document.querySelector('.scroll-container');
+      if (scrollContainer) {
+        setTimeout(() => {
+          scrollContainer.scrollTop = scrollContainer.scrollHeight;
+        }, 100);
+      }
+    }
+
+    async function analyzePhoto(img) {
+      const messageEl = document.getElementById('messageText');
+      messageEl.textContent = '🔄 사진을 분석 중입니다...';
+
+      try {
+        const detectionResult = await yoloDetector.detectCat(img);
+        const selectedPersonality = currentProfile.personalities?.[0] || '활발함';
+
+        let responseText = '';
+
+        if (!detectionResult.hasCat) {
+          currentEmotion = 'angry';
+          responseText = catChatModel.generateNonCatResponse(selectedPersonality);
+        } else {
+          const emotionAnalysis = yoloDetector.analyzeEmotion(detectionResult, selectedPersonality);
+          currentEmotion = emotionAnalysis.emotion || 'happy';
+          responseText = catChatModel.getResponse(selectedPersonality, currentEmotion, currentProfile);
+        }
+
+        if (currentProfile?.rainbow === '건넘') {
+          const personality = currentProfile.personalities?.[0] || '느긋함';
+          const memorialMsg = catChatModel.generateMemorialResponse(personality, currentEmotion, currentProfile.name);
+          responseText = memorialMsg;
+        }
+
+        lastResponses[0] = responseText;
+        lastResponses[1] = responseText;
+
+        displayResult(detectionResult.hasCat ? '😸' : '😾', false);
+
+        analysisHistory.unshift({
+          date: new Date(),
+          emotion: responseText.substring(0, 100),
+          catName: currentProfile.name
+        });
+        localStorage.setItem('analysisHistory', JSON.stringify(analysisHistory));
+
+      } catch (error) {
+        console.error('분석 오류:', error);
+        messageEl.textContent = '분석에 실패했습니다. 다시 시도해주세요.';
       }
     }
 
@@ -1768,8 +1918,8 @@
 
     // Load on start
     window.addEventListener('DOMContentLoaded', () => {
-      // Load saved theme or default to dark
-      const savedTheme = localStorage.getItem('selectedTheme') || 'dark';
+      // Load saved theme or default to light (따뜻한 라이트 모드)
+      const savedTheme = localStorage.getItem('selectedTheme') || 'light';
       applyTheme(savedTheme);
       document.querySelectorAll(`[data-theme="${savedTheme}"]`).forEach(c => c.classList.add('active'));
       document.querySelectorAll(`[data-theme]:not([data-theme="${savedTheme}"])`).forEach(c => c.classList.remove('active'));
