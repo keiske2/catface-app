@@ -247,7 +247,7 @@
       background: white;
       border-radius: 16px;
       padding: 24px;
-      margin-bottom: 20px;
+      margin-bottom: 16px;
       box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
       transition: all 0.3s;
       color: #000000;
@@ -256,6 +256,21 @@
     :root[data-theme="dark"] .card {
       background: #151b3d;
       color: white;
+    }
+
+    .card h2 {
+      font-size: 18px;
+      margin-bottom: 16px;
+      color: var(--primary);
+    }
+
+    .card p {
+      color: var(--text-soft);
+      margin-bottom: 16px;
+    }
+
+    :root[data-theme="light"] .card p {
+      color: #666666;
     }
 
     .card:hover {
@@ -911,8 +926,8 @@
     <!-- Settings Tab (히스토리 + 설정) -->
     <div class="content" id="settings">
       <!-- 히스토리 섹션 -->
-      <div class="card">
-        <h2>분석 히스토리</h2>
+      <div class="card" style="margin-top: 0; margin-bottom: 20px;">
+        <h2>📊 분석 히스토리</h2>
         <p>최근 분석 기록</p>
 
         <div class="stats-grid">
@@ -930,7 +945,7 @@
           </div>
         </div>
 
-        <div style="height: 300px; margin: 20px 0;">
+        <div style="height: 250px; margin: 20px 0;">
           <canvas id="emotionChart"></canvas>
         </div>
 
@@ -938,8 +953,8 @@
       </div>
 
       <!-- 설정 섹션 -->
-      <div class="card">
-        <h2>설정</h2>
+      <div class="card" style="margin-bottom: 20px;">
+        <h2>⚙️ 설정</h2>
 
         <div class="form-group">
           <label>🌐 언어</label>
